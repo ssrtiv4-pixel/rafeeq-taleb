@@ -855,9 +855,6 @@ render = function(){
 };
 
 view = 'login';
-render();
-
-<!-- كود الربط بـ Firebase -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -869,7 +866,7 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  document.addEventListener('DOMContentLoaded', () => {
+  window.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.querySelector('form');
     if (loginForm) {
       loginForm.addEventListener('submit', async (e) => {
