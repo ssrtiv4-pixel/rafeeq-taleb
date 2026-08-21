@@ -1741,21 +1741,28 @@ async function renderControlPanel(){
       <div class="admin-scroll" style="margin-top:14px;">${adsRows || '<div class="muted">لا توجد إعلانات حالياً</div>'}</div>`;
   } else if(active==='chat'){
     const isOpen = adminCache.site.groupChatOpen !== false;
-    const msgsHtml = adminCache.groupChat.length ? adminCache.groupChat.map(m => `
+    const msgsHtml = adminCache.groupChat.length ? adminCache.groupChat.map(m => {
+      const isMe = m.username === SUPER_ADMIN_USERNAME;
+      return `
       <div class="admin-ad-item">
         <div class="admin-ad-item-head">
-          <b>${adminEsc(m.username||'')}</b>
+          <b>${isMe ? '👑 الأدمن (أنت)' : adminEsc(m.username||'')}</b>
           <button class="btn admin-mini admin-danger" data-del-groupmsg="${adminEsc(m.id)}">حذف</button>
         </div>
         <div class="admin-ad-item-body">${adminEsc(m.text||'')}</div>
       </div>
-    `).join('') : '<div class="muted">لا توجد رسائل بعد</div>';
+    `;
+    }).join('') : '<div class="muted">لا توجد رسائل بعد</div>';
     content = `<h3 class="admin-section-title">الشات العام لكل الطلاب</h3>
       <div class="admin-chat-status">
         <span>الحالة الحالية: <b>${isOpen ? 'مفتوح 🔓' : 'مقفول 🔒'}</b></span>
         <button class="btn admin-mini ${isOpen?'admin-danger':'admin-secondary'}" id="btn-toggle-group-chat">${isOpen ? '🔒 قفل الشات' : '🔓 فتح الشات'}</button>
       </div>
-      <div class="admin-help">لما تقفل الشات، الطلاب هيقدروا يشوفوا الرسائل القديمة بس مش هيقدروا يبعتوا رسائل جديدة.</div>
+      <div class="admin-help">لما تقفل الشات، الطلاب هيقدروا يشوفوا الرسائل القديمة بس مش هيقدروا يبعتوا رسائل جديدة. إنت كأدمن تقدر تبعت حتى وهو مقفول، وهيظهر اسمك دايماً "👑 الأدمن".</div>
+      <div class="chat-input-row" style="margin-top:14px;">
+        <textarea id="admin-groupchat-ta" placeholder="اكتب رسالة كـ (الأدمن) للطلاب..."></textarea>
+        <button class="chat-send-btn" id="btn-send-groupchat">إرسال</button>
+      </div>
       <div class="admin-scroll" style="margin-top:14px;">${msgsHtml}</div>`;
   } else if(active==='tournaments'){
     const rows=adminCache.tournaments.map(t=>{
@@ -1861,6 +1868,25 @@ async function renderControlPanel(){
     await db.collection('group_chat').doc(b.getAttribute('data-del-groupmsg')).delete();
     await loadAdminData(); renderControlPanel();
   });
+  const sendGroupChatBtn=document.getElementById('btn-send-groupchat');
+  if(sendGroupChatBtn) sendGroupChatBtn.onclick=async()=>{
+    const ta=document.getElementById('admin-groupchat-ta');
+    const text=(ta && ta.value || '').trim();
+    if(!text) return;
+    sendGroupChatBtn.disabled=true;
+    try{
+      await db.collection('group_chat').add({
+        username: SUPER_ADMIN_USERNAME, text,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await loadAdminData(); renderControlPanel();
+    }catch(e){
+      console.error('admin send group chat error', e);
+      alert('تعذر إرسال الرسالة، حاول مرة أخرى');
+    }finally{
+      sendGroupChatBtn.disabled=false;
+    }
+  };
   document.querySelectorAll('[data-close-t]').forEach(b=>b.onclick=async()=>{await db.collection('tournaments').doc(b.getAttribute('data-close-t')).update({status:'closed'});await loadAdminData();renderControlPanel();});
   document.querySelectorAll('[data-open-t]').forEach(b=>b.onclick=async()=>{await db.collection('tournaments').doc(b.getAttribute('data-open-t')).update({status:'registration'});await loadAdminData();renderControlPanel();});
 }
