@@ -488,6 +488,21 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .ad-title{font-family:'Amiri',serif;font-size:16px;color:var(--gold-light);margin-bottom:6px}
   .ad-body{font-size:13.5px;color:var(--text-light);line-height:1.8}
 
+  /* ---- الشات ---- */
+  .chat-lock-note{text-align:center;padding:22px 14px;color:var(--text-dim);font-size:14px;line-height:1.8;border:1px dashed rgba(201,162,92,.35);border-radius:12px;margin-bottom:12px}
+  .chat-messages{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:4px 2px;margin-bottom:12px}
+  .chat-msg{max-width:78%;padding:9px 12px;border-radius:14px;font-size:13.5px;line-height:1.7;word-wrap:break-word}
+  .chat-msg-mine{align-self:flex-start;background:linear-gradient(180deg,rgba(201,162,92,.28),rgba(201,162,92,.14));border:1px solid rgba(201,162,92,.4);color:var(--text-light);border-bottom-left-radius:4px}
+  .chat-msg-other{align-self:flex-end;background:rgba(244,236,216,.06);border:1px solid rgba(244,236,216,.12);color:var(--text-light);border-bottom-right-radius:4px}
+  .chat-msg-admin{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,92,.25) inset}
+  .chat-msg-name{font-size:11px;color:var(--gold-light);font-weight:800;margin-bottom:3px}
+  .chat-msg-empty{text-align:center;color:var(--text-dim);font-size:13px;padding:20px 0}
+  .chat-input-row{display:flex;gap:8px;align-items:flex-end}
+  .chat-input-row textarea{flex:1;min-height:44px;max-height:100px;padding:10px 12px;border-radius:10px;border:1px solid rgba(201,162,92,.35);background:rgba(15,43,40,.55);color:var(--text-light);font-family:'Cairo',sans-serif;resize:none}
+  .chat-send-btn{flex-shrink:0;padding:0 18px;height:44px;border-radius:10px;border:none;background:linear-gradient(180deg, var(--gold-light), var(--gold));color:#1c2b26;font-weight:800;cursor:pointer}
+  .admin-chat-status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(201,162,92,.3);border-radius:10px;margin-bottom:14px;background:rgba(244,236,216,.03)}
+  .admin-chat-status b{color:var(--gold-light)}
+
 </style>
 </head>
 <body>
@@ -872,6 +887,13 @@ let duelSearching = false;
 let tournamentId = null;
 let tournamentUnsub = null;
 let tournamentData = null;
+
+// ---- حالة الشات ----
+let GROUP_CHAT_OPEN = true;      // حالة قفل/فتح الشات العام (يُحدَّث من settings/site)
+let GROUP_CHAT_MSGS = [];
+let groupChatUnsub = null;
+let siteSettingsUnsub = null;
+let chatInputDraft = { group:'' };
 
 /* ==================================================================
    ============ نظام التحدي الثنائي (1v1 Duel) على Firestore ==========
@@ -1492,6 +1514,7 @@ function render(){
   if(view === 'duel'){ renderDuelLobby(); return; }
   if(view === 'duel-match'){ renderDuelMatch(); return; }
   if(view === 'tournament'){ renderTournament(); return; }
+  if(view === 'chat'){ renderChat(); return; }
   if(view === 'control-panel'){ renderControlPanel(); return; }
   renderMain();
 }
@@ -1503,6 +1526,7 @@ function topNavHtml(active){
     { key:'wheel', label:'🎡 عجلة الحظ' },
     { key:'duel', label:'⚔️ تحدي' },
     { key:'tournament', label:'🏅 البطولة' },
+    { key:'chat', label:'💬 الشات' },
     { key:'store', label:'🛒 المتجر' },
     { key:'leaderboard', label:'🏆 السَّابِقُونَ السَّابِقُونَ' }
   ];
@@ -1525,10 +1549,10 @@ function topNavHtml(active){
 
 function bindTopNav(){
   document.getElementById('btn-logout').onclick = logout;
-  document.getElementById('btn-admin-contact').onclick = () => { prevView = view; view = 'admin'; render(); };
+  document.getElementById('btn-admin-contact').onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'admin'; render(); };
   const controlPanelBtn = document.getElementById('btn-control-panel');
   if(controlPanelBtn){
-    controlPanelBtn.onclick = () => { prevView = view; view = 'control-panel'; render(); };
+    controlPanelBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'control-panel'; render(); };
   }
   document.querySelectorAll('[data-nav]').forEach(btn => {
     btn.onclick = () => {
@@ -1536,6 +1560,8 @@ function bindTopNav(){
       if(target === 'quiz'){ ensureQuizDay(); quizAnswered=false; quizSelected=null; quizFeedback=''; quizCurrentIndex=null; }
       if(target === 'leaderboard'){ leaderboardData = null; }
       if(target === 'tournament'){ tournamentData = null; }
+      if(target === 'chat'){ openChatView(); return; }
+      if(view === 'chat' && target !== 'chat'){ closeChatView(); }
       if(view === 'wheel' && target !== 'wheel'){ wheelLastWin = null; }
       view = target; render();
     };
@@ -1582,7 +1608,7 @@ function renderAuth(){
 
 
 let adminTab = 'dashboard';
-let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[] };
+let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[] };
 let ADS_LIST = [];
 
 function listenToAds(){
@@ -1598,12 +1624,13 @@ function adminEsc(v){
 async function loadAdminData(){
   if(!isSuperAdmin()) return;
   try{
-    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap] = await Promise.all([
+    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap] = await Promise.all([
       db.collection('accounts').get(),
       db.collection('question_bank').get(),
       db.collection('tournaments').orderBy('createdAt','desc').limit(20).get().catch(()=>db.collection('tournaments').limit(20).get()),
       db.collection('settings').doc('site').get(),
-      db.collection('ads').orderBy('createdAt','desc').get().catch(()=>db.collection('ads').get())
+      db.collection('ads').orderBy('createdAt','desc').get().catch(()=>db.collection('ads').get()),
+      db.collection('group_chat').orderBy('createdAt','asc').limitToLast(300).get().catch(()=>db.collection('group_chat').get())
     ]);
     adminCache.accounts = accountsSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(questionsSnap.empty && Array.isArray(RELIGIOUS_QUESTIONS_BANK) && RELIGIOUS_QUESTIONS_BANK.length){
@@ -1621,6 +1648,7 @@ async function loadAdminData(){
     adminCache.tournaments = tournamentsSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.site = siteSnap.exists ? siteSnap.data() : {};
     adminCache.ads = adsSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.groupChat = groupChatSnap.docs.map(d=>({id:d.id,...d.data()}));
   }catch(e){
     console.error('admin load error',e);
   }
@@ -1634,7 +1662,8 @@ async function renderControlPanel(){
   const active = adminTab;
   const tabs = [
     ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['questions','❓ بنك الأسئلة'],
-    ['announcements','📢 الإعلانات'],['tournaments','🏅 البطولات']
+    ['announcements','📢 الإعلانات'],['tournaments','🏅 البطولات'],
+    ['chat','💬 الشات العام']
   ];
   const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
   let content = '';
@@ -1710,6 +1739,24 @@ async function renderControlPanel(){
       <button class="btn" id="btn-add-ad">➕ إضافة إعلان</button>
       <div class="admin-help" id="admin-ad-upload-status"></div>
       <div class="admin-scroll" style="margin-top:14px;">${adsRows || '<div class="muted">لا توجد إعلانات حالياً</div>'}</div>`;
+  } else if(active==='chat'){
+    const isOpen = adminCache.site.groupChatOpen !== false;
+    const msgsHtml = adminCache.groupChat.length ? adminCache.groupChat.map(m => `
+      <div class="admin-ad-item">
+        <div class="admin-ad-item-head">
+          <b>${adminEsc(m.username||'')}</b>
+          <button class="btn admin-mini admin-danger" data-del-groupmsg="${adminEsc(m.id)}">حذف</button>
+        </div>
+        <div class="admin-ad-item-body">${adminEsc(m.text||'')}</div>
+      </div>
+    `).join('') : '<div class="muted">لا توجد رسائل بعد</div>';
+    content = `<h3 class="admin-section-title">الشات العام لكل الطلاب</h3>
+      <div class="admin-chat-status">
+        <span>الحالة الحالية: <b>${isOpen ? 'مفتوح 🔓' : 'مقفول 🔒'}</b></span>
+        <button class="btn admin-mini ${isOpen?'admin-danger':'admin-secondary'}" id="btn-toggle-group-chat">${isOpen ? '🔒 قفل الشات' : '🔓 فتح الشات'}</button>
+      </div>
+      <div class="admin-help">لما تقفل الشات، الطلاب هيقدروا يشوفوا الرسائل القديمة بس مش هيقدروا يبعتوا رسائل جديدة.</div>
+      <div class="admin-scroll" style="margin-top:14px;">${msgsHtml}</div>`;
   } else if(active==='tournaments'){
     const rows=adminCache.tournaments.map(t=>{
       const status=t.status||'unknown';
@@ -1801,6 +1848,17 @@ async function renderControlPanel(){
   document.querySelectorAll('[data-del-ad]').forEach(b=>b.onclick=async()=>{
     if(!confirm('حذف هذا الإعلان نهائياً؟')) return;
     await db.collection('ads').doc(b.getAttribute('data-del-ad')).delete();
+    await loadAdminData(); renderControlPanel();
+  });
+  const toggleChatBtn=document.getElementById('btn-toggle-group-chat');
+  if(toggleChatBtn) toggleChatBtn.onclick=async()=>{
+    const isOpen = adminCache.site.groupChatOpen !== false;
+    await db.collection('settings').doc('site').set({ groupChatOpen: !isOpen },{merge:true});
+    await loadAdminData(); renderControlPanel();
+  };
+  document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('حذف هذه الرسالة من الشات العام؟')) return;
+    await db.collection('group_chat').doc(b.getAttribute('data-del-groupmsg')).delete();
     await loadAdminData(); renderControlPanel();
   });
   document.querySelectorAll('[data-close-t]').forEach(b=>b.onclick=async()=>{await db.collection('tournaments').doc(b.getAttribute('data-close-t')).update({status:'closed'});await loadAdminData();renderControlPanel();});
@@ -1975,6 +2033,7 @@ function enterMain(){
 
 function logout(){
   if(tickInterval) clearInterval(tickInterval);
+  closeChatView();
   leaveDuelCleanup();
   if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
   if(tournamentUnsub){ tournamentUnsub(); tournamentUnsub = null; }
@@ -2042,6 +2101,112 @@ function renderAdsSection(){
       `).join('')}
     </div>
   `;
+}
+
+// ================= الشات (الطالب) =================
+
+function openChatView(){
+  listenToSiteSettingsForChat();
+  listenToGroupChatMsgs();
+  view = 'chat';
+  render();
+}
+
+function closeChatView(){
+  if(groupChatUnsub){ groupChatUnsub(); groupChatUnsub = null; }
+  if(siteSettingsUnsub){ siteSettingsUnsub(); siteSettingsUnsub = null; }
+}
+
+function listenToSiteSettingsForChat(){
+  if(siteSettingsUnsub) return;
+  siteSettingsUnsub = db.collection('settings').doc('site').onSnapshot(snap => {
+    const d = snap.exists ? snap.data() : {};
+    GROUP_CHAT_OPEN = d.groupChatOpen !== false; // مفتوح افتراضياً
+    if(view === 'chat') render();
+  }, e => console.warn('site settings listen error', e));
+}
+
+function listenToGroupChatMsgs(){
+  if(groupChatUnsub) return;
+  groupChatUnsub = db.collection('group_chat').orderBy('createdAt','asc').limitToLast(200)
+    .onSnapshot(snap => {
+      GROUP_CHAT_MSGS = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      if(view === 'chat') renderChatMessagesOnly();
+    }, e => console.warn('group chat listen error', e));
+}
+
+function chatBubblesHtml(list){
+  if(!list.length) return `<div class="chat-msg-empty">لا توجد رسائل بعد، ابدأ الحديث 👋</div>`;
+  return list.map(m => {
+    const isAdminMsg = m.username === SUPER_ADMIN_USERNAME;
+    const isMine = m.username === currentUser;
+    const name = isAdminMsg ? '👑 الأدمن' : adminEsc(m.username||'');
+    return `
+      <div class="chat-msg ${isMine ? 'chat-msg-mine' : 'chat-msg-other'} ${isAdminMsg ? 'chat-msg-admin' : ''}">
+        <div class="chat-msg-name">${name}</div>
+        <div>${adminEsc(m.text||'')}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderChatMessagesOnly(){
+  const box = document.getElementById('chat-messages-box');
+  if(!box) return;
+  box.innerHTML = chatBubblesHtml(GROUP_CHAT_MSGS);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function sendChatMessage(){
+  const ta = document.getElementById('chat-input-ta');
+  if(!ta) return;
+  const text = ta.value.trim();
+  if(!text || !GROUP_CHAT_OPEN) return;
+  const sendBtn = document.getElementById('chat-send-btn');
+  if(sendBtn) sendBtn.disabled = true;
+  try{
+    await db.collection('group_chat').add({
+      username: currentUser, text,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    ta.value = ''; chatInputDraft.group = '';
+  }catch(e){
+    console.error('send chat error', e);
+    alert('تعذر إرسال الرسالة، تأكد من الإنترنت وحاول مرة أخرى');
+  }finally{
+    if(sendBtn) sendBtn.disabled = false;
+    ta.focus();
+  }
+}
+
+function renderChat(){
+  const inputHtml = GROUP_CHAT_OPEN ? `
+      <div class="chat-input-row">
+        <textarea id="chat-input-ta" placeholder="اكتب رسالتك...">${chatInputDraft.group}</textarea>
+        <button class="chat-send-btn" id="chat-send-btn">إرسال</button>
+      </div>` : `
+      <div class="chat-lock-note">🔒 الشات مقفول حالياً من الإدارة<br>تقدر تشوف الرسائل القديمة لكن مش هتقدر ترسل دلوقتي.</div>`;
+
+  root.innerHTML = `
+    ${topNavHtml('chat')}
+    <div class="card">
+      <h2>💬 الشات العام</h2>
+      <div class="chat-messages" id="chat-messages-box">${chatBubblesHtml(GROUP_CHAT_MSGS)}</div>
+      ${inputHtml}
+    </div>
+  `;
+  updateSyncBadge();
+  bindTopNav();
+
+  const box = document.getElementById('chat-messages-box');
+  if(box) box.scrollTop = box.scrollHeight;
+
+  const ta = document.getElementById('chat-input-ta');
+  if(ta){
+    ta.oninput = () => { chatInputDraft.group = ta.value; };
+    ta.onkeydown = (e) => { if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); sendChatMessage(); } };
+  }
+  const sendBtn = document.getElementById('chat-send-btn');
+  if(sendBtn) sendBtn.onclick = sendChatMessage;
 }
 
 function renderMain(){
