@@ -453,6 +453,23 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .welcome-modal p{ font-size:14.5px; color:var(--text-light); line-height:2; margin:0 0 20px; }
   .welcome-modal .btn{ margin-top:0; }
 
+
+  .level-card{background:linear-gradient(135deg,rgba(201,162,92,.18),rgba(127,174,134,.08));border:1px solid rgba(201,162,92,.4);border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+  .level-title{font-family:'Amiri',serif;font-size:22px;color:var(--gold-light)}
+  .level-xp{font-size:12px;color:var(--text-dim);margin:5px 0 9px}
+  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-stat{padding:14px;border:1px solid rgba(201,162,92,.2);border-radius:12px;background:rgba(244,236,216,.03);text-align:center}.profile-stat b{display:block;font-size:22px;color:var(--gold-light)}.profile-stat span{font-size:11px;color:var(--text-dim)}
+  .topbar .user-profile{display:inline-flex;align-items:center;gap:7px;color:var(--gold-light);font-weight:700;cursor:pointer;border-radius:20px;padding:3px 7px}
+  .topbar .top-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:var(--bg-deep2)}
+  .profile-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px}
+  .profile-avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);background:var(--bg-deep2)}
+  .profile-avatar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .profile-avatar-actions .btn{width:auto;margin-top:0;padding:9px 14px;font-size:13px}
+  .profile-avatar-hint{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.7}
+  .profile-name{font-family:'Amiri',serif;font-size:22px;color:var(--gold-light);margin:0 0 12px;text-align:center}
+  .suggest-card{border:1px solid rgba(201,162,92,.22);border-radius:12px;padding:13px;margin-bottom:9px;background:rgba(244,236,216,.03)}
+  .suggest-card p{margin:6px 0;color:var(--text-light);line-height:1.8}.suggest-meta{font-size:11px;color:var(--text-dim)}
+  .friend-row{display:flex;gap:8px}.friend-row input{flex:1}.friend-row .btn{width:auto;white-space:nowrap;margin-top:0}
+
   /* ===== لوحة تحكم الأدمن ===== */
   .admin-grid{display:grid;gap:12px}
   .admin-stat{padding:14px;border:1px solid rgba(201,162,92,.22);border-radius:12px;background:rgba(244,236,216,.03)}
@@ -502,6 +519,44 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .chat-send-btn{flex-shrink:0;padding:0 18px;height:44px;border-radius:10px;border:none;background:linear-gradient(180deg, var(--gold-light), var(--gold));color:#1c2b26;font-weight:800;cursor:pointer}
   .admin-chat-status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(201,162,92,.3);border-radius:10px;margin-bottom:14px;background:rgba(244,236,216,.03)}
   .admin-chat-status b{color:var(--gold-light)}
+
+
+
+  /* ===== تحدي 1v1 محلي عبر LocalStorage ===== */
+  .local-duel-card{border-color:rgba(201,162,92,.45)}
+  .local-duel-opponent{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid rgba(201,162,92,.22);border-radius:14px;background:rgba(244,236,216,.03);margin:14px 0}
+  .local-duel-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:var(--bg-deep2);flex-shrink:0}
+  .local-duel-name{font-weight:800;color:var(--gold-light);font-size:17px}
+  .local-duel-status{font-size:12px;color:var(--text-dim);margin-top:4px}
+  .local-duel-status.active{color:var(--ok);font-weight:800}
+  .local-duel-status.inactive{color:var(--danger)}
+  .local-duel-score{display:flex;justify-content:space-between;gap:8px;margin:12px 0;font-size:13px;color:var(--text-dim)}
+  .local-duel-score b{color:var(--gold-light)}
+  .local-duel-matchup{position:relative;display:grid;grid-template-columns:1fr 74px 1fr;align-items:center;gap:8px;margin:18px 0 20px;padding:18px 10px;border:1px solid rgba(201,162,92,.34);border-radius:22px;background:linear-gradient(180deg,rgba(201,162,92,.10),rgba(244,236,216,.025));box-shadow:0 10px 30px rgba(0,0,0,.12),inset 0 0 24px rgba(201,162,92,.035);overflow:hidden}
+  .local-duel-matchup:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(201,162,92,.10),transparent 42%);pointer-events:none}
+  .local-duel-player{position:relative;z-index:1;text-align:center;min-width:0}
+  .local-duel-player-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 9px;border:3px solid var(--gold-light);background:var(--bg-deep2);box-shadow:0 0 0 5px rgba(201,162,92,.10),0 8px 20px rgba(0,0,0,.24)}
+  .local-duel-player-name{font-weight:900;color:var(--text-light);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
+  .local-duel-player-score{font-size:13px;color:var(--gold-light);font-weight:800;margin-top:5px}
+  .local-duel-vs{position:relative;z-index:2;width:70px;height:70px;margin:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#fff8d6 0%,var(--gold-light) 18%,var(--gold) 52%,#9b6b20 100%);color:#17352f;font-family:'Amiri',serif;font-size:20px;font-weight:900;letter-spacing:.5px;border:3px solid #f7dda0;box-shadow:0 0 0 2px rgba(201,162,92,.85),0 0 0 7px rgba(201,162,92,.10),0 0 28px rgba(201,162,92,.28),0 10px 25px rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(255,255,255,.35)}
+  .local-duel-vs::before,.local-duel-vs::after{content:'';position:absolute;top:50%;width:34px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-light));box-shadow:0 0 8px rgba(201,162,92,.35)}
+  .local-duel-vs::before{right:100%;transform:translateY(-50%) rotate(0deg);transform-origin:right center}
+  .local-duel-vs::after{left:100%;transform:translateY(-50%) rotate(180deg);transform-origin:left center}
+  .local-duel-vs{animation:luxuryVsGlow 2.8s ease-in-out infinite}
+  @keyframes luxuryVsGlow{0%,100%{box-shadow:0 0 0 2px rgba(201,162,92,.85),0 0 0 7px rgba(201,162,92,.10),0 0 22px rgba(201,162,92,.22),0 10px 25px rgba(0,0,0,.28)}50%{box-shadow:0 0 0 2px rgba(201,162,92,1),0 0 0 8px rgba(201,162,92,.14),0 0 38px rgba(255,214,115,.38),0 10px 25px rgba(0,0,0,.28)}}
+  .local-duel-player.me .local-duel-player-avatar{border-color:var(--gold-light);box-shadow:0 0 0 5px rgba(201,162,92,.13),0 8px 20px rgba(0,0,0,.24)}
+  .local-duel-player.winner .local-duel-player-avatar{border-color:#ffe39a;box-shadow:0 0 0 5px rgba(255,214,115,.22),0 0 28px rgba(255,214,115,.45),0 8px 20px rgba(0,0,0,.24)}
+  .local-duel-crown{position:absolute;left:50%;top:-24px;transform:translateX(-50%) rotate(-8deg);font-size:31px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35));animation:crownFloat 1.8s ease-in-out infinite;z-index:4}
+  .local-duel-winner-badge{display:inline-block;margin-top:7px;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,220,130,.65);background:rgba(201,162,92,.12);color:#ffe39a;font-size:10px;font-weight:900}
+  @keyframes crownFloat{0%,100%{transform:translateX(-50%) rotate(-8deg) translateY(0)}50%{transform:translateX(-50%) rotate(-8deg) translateY(-4px)}}
+  @media(max-width:420px){.local-duel-matchup{grid-template-columns:1fr 62px 1fr;padding:16px 4px}.local-duel-player-avatar{width:76px;height:76px}.local-duel-vs{width:52px;height:52px;font-size:17px}.local-duel-vs::before,.local-duel-vs::after{width:24px}.local-duel-player-name{font-size:13px}}
+  .local-duel-result{text-align:center;padding:16px 6px}
+  .local-duel-result .big{font-size:48px}
+  .local-duel-result h3{font-family:'Amiri',serif;color:var(--gold-light);font-size:24px;margin:8px 0}
+  .local-duel-note{font-size:12px;color:var(--text-dim);line-height:1.9;text-align:center}
+  .local-duel-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .local-duel-admin-grid .btn{margin-top:0}
+  @media(max-width:420px){.local-duel-admin-grid{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -770,7 +825,13 @@ function freshState(){
     tipRevealedAt: null,
     nextAvailableAt: null,
     points: 0,
+    xp: 0,
     correctAnswers: 0,
+    profileImageUrl: '',
+    wheelWins: 0,
+    duelWins: 0,
+    duelLosses: 0,
+    suggestionsSubmitted: 0,
     unlockedTips: {},
     quizDate: null,
     quizAnsweredToday: [],
@@ -780,7 +841,13 @@ function freshState(){
 function ensureStateShape(s){
   if(!s) return freshState();
   if(typeof s.points !== 'number') s.points = 0;
+  if(typeof s.xp !== 'number') s.xp = s.points;
   if(typeof s.correctAnswers !== 'number') s.correctAnswers = 0;
+  if(typeof s.profileImageUrl !== 'string') s.profileImageUrl = '';
+  if(typeof s.wheelWins !== 'number') s.wheelWins = 0;
+  if(typeof s.duelWins !== 'number') s.duelWins = 0;
+  if(typeof s.duelLosses !== 'number') s.duelLosses = 0;
+  if(typeof s.suggestionsSubmitted !== 'number') s.suggestionsSubmitted = 0;
   if(!s.unlockedTips || typeof s.unlockedTips !== 'object') s.unlockedTips = {};
   if(typeof s.quizDate !== 'number') s.quizDate = null;
   if(!Array.isArray(s.quizAnsweredToday)) s.quizAnsweredToday = [];
@@ -805,14 +872,64 @@ function fmtCountdown(ms){
 }
 function allDhikrDone(){ return state.dhikrCounts.every(c => c >= REPS_PER_DHIKR); }
 
+
+function getLevelInfo(xp){
+  xp = Math.max(0, Number(xp)||0);
+  const levels = [
+    {min:0,name:'مبتدئ',icon:'🌱',next:100},
+    {min:100,name:'متقدم',icon:'⚡',next:300},
+    {min:300,name:'محترف',icon:'🔥',next:700},
+    {min:700,name:'خبير',icon:'🏆',next:1500},
+    {min:1500,name:'أسطورة',icon:'👑',next:null}
+  ];
+  let cur=levels[0];
+  for(const l of levels) if(xp>=l.min) cur=l;
+  const progress = cur.next ? Math.min(100, Math.round(((xp-cur.min)/(cur.next-cur.min))*100)) : 100;
+  return {...cur, progress};
+}
+function addXP(amount){
+  const n=Math.max(0,Number(amount)||0);
+  state.xp=(Number(state.xp)||0)+n;
+  state.points=(Number(state.points)||0)+n;
+}
+
 function docId(u){ return u.trim().toLowerCase(); }
+
+function defaultAvatarData(){
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17423c"/><stop offset="1" stop-color="#123832"/></linearGradient></defs>
+    <circle cx="100" cy="100" r="100" fill="url(#g)"/>
+    <circle cx="100" cy="78" r="34" fill="#e6c98a"/>
+    <path d="M42 174c8-35 31-52 58-52s50 17 58 52" fill="#c9a25c"/>
+  </svg>`;
+  return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+}
+function getProfileImage(){ return (state && state.profileImageUrl) || defaultAvatarData(); }
+async function saveProfileImage(url){
+  await db.collection('accounts').doc(docId(currentUser)).update({profileImageUrl:url});
+}
+async function uploadProfileImage(file){
+  if(!file) return;
+  if(!file.type.startsWith('image/')) throw new Error('الملف المختار ليس صورة.');
+  if(file.size > 5 * 1024 * 1024) throw new Error('حجم الصورة يجب ألا يتجاوز 5 ميجابايت.');
+  const ref = storage.ref().child(`profile_pictures/${docId(currentUser)}`);
+  await ref.put(file, {contentType:file.type});
+  const url = await ref.getDownloadURL();
+  await saveProfileImage(url);
+  state.profileImageUrl = url;
+}
+async function removeProfileImage(){
+  try{ await storage.ref().child(`profile_pictures/${docId(currentUser)}`).delete(); }catch(e){}
+  await saveProfileImage('');
+  state.profileImageUrl = '';
+}
 
 async function fetchAccount(username){
   const snap = await db.collection('accounts').doc(docId(username)).get();
   return snap.exists ? snap.data() : null;
 }
 async function createAccount(username, password){
-  const data = { username: username.trim(), password, state: freshState() };
+  const data = { username: username.trim(), password, profileImageUrl: '', state: freshState() };
   await db.collection('accounts').doc(docId(username)).set(data);
   return data;
 }
@@ -990,6 +1107,7 @@ function listenToQueueForMatch(){
       const d = snap.data();
       if(d.status === 'matched' && d.duelId){
         if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
+  if(friendInviteUnsub){friendInviteUnsub();friendInviteUnsub=null;}
         duelSearching = false;
         await enterDuel(d.duelId);
       }
@@ -999,6 +1117,7 @@ function listenToQueueForMatch(){
 async function cancelDuelSearch(){
   duelSearching = false;
   if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
+  if(friendInviteUnsub){friendInviteUnsub();friendInviteUnsub=null;}
   try{ await db.collection('duel_queue').doc(docId(currentUser)).delete(); }catch(e){}
   view = 'duel';
   render();
@@ -1217,7 +1336,11 @@ async function maybeSettleDuel(){
         const myKey = docId(currentUser);
         if(fd.result.winnerKey === myKey){
           await awardDuelWinPoints(myKey);
+          state.duelWins=(state.duelWins||0)+1; state.xp=(state.xp||0)+DUEL_WIN_POINTS;
+          await saveState(currentUser,state).catch(()=>{});
           await ref.update({ 'result.pointsAwarded': true }).catch(()=>{});
+        } else if(fd.result.winnerKey && fd.result.winnerKey !== myKey){
+          state.duelLosses=(state.duelLosses||0)+1; await saveState(currentUser,state).catch(()=>{});
         }
       }
       // مباراة داخل بطولة → قدّم الفائز للدور التالي (بدون نقاط فوز عادية، الجوائز بالمراكز فقط)
@@ -1262,7 +1385,7 @@ function exitDuelToLobby(){
 async function refreshMyState(){
   try{
     const acc = await fetchAccount(currentUser);
-    if(acc){ state = ensureStateShape(acc.state || freshState()); }
+    if(acc){ state = ensureStateShape(acc.state || freshState()); state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || ''; }
   }catch(e){}
 }
 
@@ -1510,8 +1633,11 @@ function render(){
   if(view === 'store'){ renderStore(); return; }
   if(view === 'quiz'){ renderQuiz(); return; }
   if(view === 'leaderboard'){ renderLeaderboard(); return; }
+  if(view === 'profile'){ renderProfile(); return; }
+  if(view === 'suggest'){ renderSuggest(); return; }
   if(view === 'wheel'){ renderWheel(); return; }
   if(view === 'duel'){ renderDuelLobby(); return; }
+  if(view === 'local-duel'){ renderLocal1v1Lobby(); return; }
   if(view === 'duel-match'){ renderDuelMatch(); return; }
   if(view === 'tournament'){ renderTournament(); return; }
   if(view === 'chat'){ renderChat(); return; }
@@ -1524,15 +1650,20 @@ function topNavHtml(active){
     { key:'main', label:'🏠 الرئيسية' },
     { key:'quiz', label:'❓ المسابقات' },
     { key:'wheel', label:'🎡 عجلة الحظ' },
-    { key:'duel', label:'⚔️ تحدي' },
+    { key:'duel', label:'👥 دعوة صديق' },
+    { key:'local-duel', label:'⚔️ بطولة التحدي' },
     { key:'tournament', label:'🏅 البطولة' },
     { key:'chat', label:'💬 الشات' },
     { key:'store', label:'🛒 المتجر' },
-    { key:'leaderboard', label:'🏆 السَّابِقُونَ السَّابِقُونَ' }
+    { key:'leaderboard', label:'🏆 المتصدرون' },
+    { key:'suggest', label:'💡 ساهم بسؤالك' }
   ];
   return `
     <div class="topbar">
-      <span class="user">👤 ${currentUser}</span>
+      <span class="user-profile" id="btn-profile" title="فتح الملف الشخصي">
+        <img class="top-avatar" src="${getProfileImage()}" alt="صورة ${currentUser}">
+        <span>${currentUser}</span>
+      </span>
       <span>
         ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
@@ -1540,7 +1671,7 @@ function topNavHtml(active){
       </span>
     </div>
     <div class="sync-badge" id="sync-badge"></div>
-    <div class="points-badge">✨ رصيدك: ${state.points} نقطة &nbsp;|&nbsp; ✅ إجابات صحيحة: ${state.correctAnswers}</div>
+    <div class="points-badge">✨ XP: ${state.xp} &nbsp;|&nbsp; ${getLevelInfo(state.xp).icon} ${getLevelInfo(state.xp).name} &nbsp;|&nbsp; ✅ ${state.correctAnswers}</div>
     <div class="nav-row">
       ${items.map(it => `<button class="nav-btn ${it.key===active?'active':''}" data-nav="${it.key}">${it.label}</button>`).join('')}
     </div>
@@ -1549,6 +1680,8 @@ function topNavHtml(active){
 
 function bindTopNav(){
   document.getElementById('btn-logout').onclick = logout;
+  const profileBtn = document.getElementById('btn-profile');
+  if(profileBtn) profileBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'profile'; render(); };
   document.getElementById('btn-admin-contact').onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'admin'; render(); };
   const controlPanelBtn = document.getElementById('btn-control-panel');
   if(controlPanelBtn){
@@ -1608,7 +1741,7 @@ function renderAuth(){
 
 
 let adminTab = 'dashboard';
-let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[] };
+let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[] };
 let ADS_LIST = [];
 
 function listenToAds(){
@@ -1624,13 +1757,15 @@ function adminEsc(v){
 async function loadAdminData(){
   if(!isSuperAdmin()) return;
   try{
-    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap] = await Promise.all([
+    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap] = await Promise.all([
       db.collection('accounts').get(),
       db.collection('question_bank').get(),
       db.collection('tournaments').orderBy('createdAt','desc').limit(20).get().catch(()=>db.collection('tournaments').limit(20).get()),
       db.collection('settings').doc('site').get(),
       db.collection('ads').orderBy('createdAt','desc').get().catch(()=>db.collection('ads').get()),
-      db.collection('group_chat').orderBy('createdAt','asc').limitToLast(300).get().catch(()=>db.collection('group_chat').get())
+      db.collection('group_chat').orderBy('createdAt','asc').limitToLast(300).get().catch(()=>db.collection('group_chat').get()),
+      db.collection('question_suggestions').orderBy('createdAt','desc').limit(100).get().catch(()=>db.collection('question_suggestions').limit(100).get()),
+      db.collection('local_1v1_matches').limit(100).get().catch(()=>({docs:[]}))
     ]);
     adminCache.accounts = accountsSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(questionsSnap.empty && Array.isArray(RELIGIOUS_QUESTIONS_BANK) && RELIGIOUS_QUESTIONS_BANK.length){
@@ -1649,6 +1784,8 @@ async function loadAdminData(){
     adminCache.site = siteSnap.exists ? siteSnap.data() : {};
     adminCache.ads = adsSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.groupChat = groupChatSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.suggestions = suggestionsSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.localDuels = localDuelSnap && localDuelSnap.docs ? localDuelSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))) : [];
   }catch(e){
     console.error('admin load error',e);
   }
@@ -1662,8 +1799,8 @@ async function renderControlPanel(){
   const active = adminTab;
   const tabs = [
     ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['questions','❓ بنك الأسئلة'],
-    ['announcements','📢 الإعلانات'],['tournaments','🏅 البطولات'],
-    ['chat','💬 الشات العام']
+    ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
+    ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب']
   ];
   const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
   let content = '';
@@ -1691,6 +1828,38 @@ async function renderControlPanel(){
     }).join('');
     content = `<h3 class="admin-section-title">إدارة المستخدمين والمتصدرين</h3>
       <div class="admin-scroll"><table class="admin-table"><thead><tr><th>الطالب</th><th>النقاط</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>`;
+  } else if(active==='local-duel'){
+    const matches = Array.isArray(adminCache.localDuels) ? adminCache.localDuels : [];
+    const students = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME && !a.banned);
+    const matchRows = matches.map((m,i)=>{
+      const status = m.completed ? 'منتهية' : (m.startAt ? 'جارية' : ((m.presence&&Object.keys(m.presence).length>=2) ? 'جاهزة للدخول' : 'بانتظار اللاعبين'));
+      const badge = m.completed ? 'bad' : (m.startAt ? 'ok' : '');
+      return `<div class="admin-ad-item">
+        <div class="admin-ad-item-head">
+          <b>⚔️ ${adminEsc(m.roundName||('مباراة '+(i+1)))}</b>
+          <span class="admin-badge ${badge}">${status}</span>
+        </div>
+        <div class="admin-ad-item-body">
+          <b>${adminEsc(m.player1||'—')}</b> ⚔️ <b>${adminEsc(m.player2||'—')}</b>
+          <br>بحث: ${Object.keys(m.presence||{}).length}/2 • دخول: ${Object.keys(m.entered||{}).length}/2
+        </div>
+        <div class="admin-actions">
+          <button class="btn admin-mini admin-danger" data-delete-local-duel="${adminEsc(m.id)}">🗑️ حذف المباراة</button>
+        </div>
+      </div>`;
+    }).join('');
+    content = `<h3 class="admin-section-title">⚔️ بطولة التحدي — إنشاء مباريات متعددة</h3>
+      <div class="admin-help">اكتب اسم الجولة مثل <b>الجولة الأولى</b>، ثم اختر لاعبين. كل ضغطة على «إضافة المباراة» تنشئ مباراة مستقلة في Firestore، ويمكنك إنشاء عدد غير محدود من المباريات والجولات.</div>
+      <label>اسم الجولة / المباراة</label>
+      <input class="admin-input" id="local-duel-round" placeholder="مثال: الجولة الأولى - المباراة 1">
+      <div class="local-duel-admin-grid">
+        <div><label>اللاعب الأول</label><select class="admin-input" id="local-duel-p1"><option value="">اختر اللاعب الأول</option>${students.map(a=>{const u=a.username||a.id;return `<option value="${adminEsc(u)}">${adminEsc(u)}</option>`}).join('')}</select></div>
+        <div><label>اللاعب الثاني</label><select class="admin-input" id="local-duel-p2"><option value="">اختر اللاعب الثاني</option>${students.map(a=>{const u=a.username||a.id;return `<option value="${adminEsc(u)}">${adminEsc(u)}</option>`}).join('')}</select></div>
+      </div>
+      <button class="btn" id="btn-save-local-duel">➕ إضافة المباراة</button>
+      <div class="success" id="local-duel-admin-status"></div>
+      <h3 class="admin-section-title" style="margin-top:24px;">📋 مباريات بطولة التحدي (${matches.length})</h3>
+      <div class="admin-scroll">${matchRows || '<div class="locked-note">لا توجد مباريات مضافة حتى الآن.</div>'}</div>`;
   } else if(active==='questions'){
     const qs = adminCache.questions.length ? adminCache.questions : DUEL_QUESTION_POOL.map((q,i)=>({...q,id:'static-'+i}));
     const rows = qs.slice(0,200).map((q,i)=>`<tr>
@@ -1764,6 +1933,9 @@ async function renderControlPanel(){
         <button class="chat-send-btn" id="btn-send-groupchat">إرسال</button>
       </div>
       <div class="admin-scroll" style="margin-top:14px;">${msgsHtml}</div>`;
+  } else if(active==='suggestions'){
+    const rows=adminCache.suggestions.map(x=>`<div class="suggest-card"><div class="suggest-meta">👤 ${adminEsc(x.username||'—')} • ${x.status==='approved'?'منشور':'بانتظار المراجعة'}</div><p><b>${adminEsc(x.question||'')}</b></p><div class="suggest-meta">1) ${adminEsc((x.options||[])[0]||'')} &nbsp; 2) ${adminEsc((x.options||[])[1]||'')} &nbsp; 3) ${adminEsc((x.options||[])[2]||'')}<br>الإجابة الصحيحة: ${(Number(x.correct)||0)+1}</div><div class="admin-actions">${x.status!=='approved'?`<button class="btn admin-mini admin-secondary" data-approve-suggest="${adminEsc(x.id)}">✅ موافقة ونشر</button>`:''}<button class="btn admin-mini admin-danger" data-delete-suggest="${adminEsc(x.id)}">حذف</button></div></div>`).join('');
+    content=`<h3 class="admin-section-title">مقترحات الطلاب</h3><div class="admin-help">راجع السؤال ثم وافق عليه ليُضاف تلقائياً إلى بنك الأسئلة ويظهر اسم الطالب كمقترح.</div>${rows||'<div class="muted">لا توجد مقترحات.</div>'}`;
   } else if(active==='tournaments'){
     const rows=adminCache.tournaments.map(t=>{
       const status=t.status||'unknown';
@@ -1788,6 +1960,32 @@ async function renderControlPanel(){
     </div>`;
   document.getElementById('btn-back-from-panel').onclick=()=>{view=prevView||'main';render();};
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.onclick=()=>{adminTab=b.getAttribute('data-admin-tab');renderControlPanel();});
+  const saveLocalBtn=document.getElementById('btn-save-local-duel');
+  if(saveLocalBtn) saveLocalBtn.onclick=async()=>{
+    const round=(document.getElementById('local-duel-round')?.value||'').trim();
+    const p1=(document.getElementById('local-duel-p1')?.value||'').trim();
+    const p2=(document.getElementById('local-duel-p2')?.value||'').trim();
+    const st=document.getElementById('local-duel-admin-status');
+    if(!round){ if(st) st.textContent='اكتب اسم الجولة أو المباراة.'; return; }
+    if(!p1||!p2){ if(st) st.textContent='اختر اللاعب الأول واللاعب الثاني.'; return; }
+    if(docId(p1)===docId(p2)){ if(st) st.textContent='لا يمكن اختيار نفس اللاعب للطرفين.'; return; }
+    try{
+      await db.collection(LOCAL_1V1_COLLECTION).add({
+        version:3, roundName:round, player1:p1, player2:p2, players:[p1,p2],
+        status:'waiting', assignedAt:firebase.firestore.FieldValue.serverTimestamp(), createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        presence:{}, entered:{}, answers:{}, finished:{}, startAt:null, completed:false, completedAt:null
+      });
+      if(st) st.textContent='تمت إضافة المباراة بنجاح ✅';
+      await loadAdminData(); renderControlPanel();
+    }catch(e){ console.error(e); if(st) st.textContent='تعذر إضافة المباراة. تأكد من صلاحيات Firestore.'; }
+  };
+  document.querySelectorAll('[data-delete-local-duel]').forEach(b=>b.onclick=async()=>{
+    const id=b.getAttribute('data-delete-local-duel');
+    if(!id || !confirm('حذف هذه المباراة من بطولة التحدي؟')) return;
+    try{ await db.collection(LOCAL_1V1_COLLECTION).doc(id).delete(); await loadAdminData(); renderControlPanel(); }
+    catch(e){ alert('تعذر حذف المباراة.'); }
+  });
+
   document.querySelectorAll('[data-ban-user]').forEach(b=>b.onclick=async()=>{
     const u=b.getAttribute('data-ban-user'), acc=adminCache.accounts.find(a=>(a.username||a.id)===u);
     if(!acc) return;
@@ -1889,6 +2087,14 @@ async function renderControlPanel(){
   };
   document.querySelectorAll('[data-close-t]').forEach(b=>b.onclick=async()=>{await db.collection('tournaments').doc(b.getAttribute('data-close-t')).update({status:'closed'});await loadAdminData();renderControlPanel();});
   document.querySelectorAll('[data-open-t]').forEach(b=>b.onclick=async()=>{await db.collection('tournaments').doc(b.getAttribute('data-open-t')).update({status:'registration'});await loadAdminData();renderControlPanel();});
+  document.querySelectorAll('[data-approve-suggest]').forEach(b=>b.onclick=async()=>{
+    const id=b.getAttribute('data-approve-suggest'), x=adminCache.suggestions.find(z=>z.id===id); if(!x)return;
+    await db.collection('question_bank').add({q:x.question,options:x.options,correct:Number(x.correct)||0,level:2,suggestedBy:x.username||'',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await db.collection('question_suggestions').doc(id).update({status:'approved',approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    await loadRuntimeQuestionBank(); await loadAdminData(); renderControlPanel();
+  });
+  document.querySelectorAll('[data-delete-suggest]').forEach(b=>b.onclick=async()=>{if(!confirm('حذف المقترح؟'))return;await db.collection('question_suggestions').doc(b.getAttribute('data-delete-suggest')).delete();await loadAdminData();renderControlPanel();});
+
 }
 
 async function adminAddQuestion(){
@@ -2016,6 +2222,7 @@ async function handleLogin(){
     if(acc.banned){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; render(); return; }
     currentUser = acc.username;
     state = ensureStateShape(acc.state || freshState());
+    state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
@@ -2039,7 +2246,8 @@ async function handleRegister(){
     if(existing){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; render(); return; }
     const acc = await createAccount(u, p);
     currentUser = acc.username;
-    state = acc.state;
+    state = ensureStateShape(acc.state);
+    state.profileImageUrl = acc.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
@@ -2062,6 +2270,7 @@ function logout(){
   closeChatView();
   leaveDuelCleanup();
   if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
+  if(friendInviteUnsub){friendInviteUnsub();friendInviteUnsub=null;}
   if(tournamentUnsub){ tournamentUnsub(); tournamentUnsub = null; }
   tournamentId = null; tournamentData = null; duelSearching = false;
   currentUser = null; state = null; view = 'login'; errorMsg = '';
@@ -2483,6 +2692,8 @@ function spinWheel(){
   setTimeout(() => {
     const won = WHEEL_SEGMENTS[idx].value;
     state.points += won;
+    state.xp += won;
+    state.wheelWins = (state.wheelWins || 0) + 1;
     state.wheelNextSpinAt = Date.now() + WHEEL_SPIN_COOLDOWN_MS;
     wheelSpinning = false;
     wheelLastWin = won;
@@ -2554,10 +2765,12 @@ function renderQuiz(){
         quizSelected = i;
         quizAnswered = true;
         state.quizAnsweredToday.push(qIndex);
+        state.xp = (state.xp||0) + 2; // XP للمشاركة
         if(i === question.correct){
           quizFeedback = 'ok';
           state.correctAnswers += 1;
           state.points += POINTS_PER_CORRECT_ANSWER;
+    state.xp += POINTS_PER_CORRECT_ANSWER;
         } else {
           quizFeedback = 'err';
         }
@@ -2633,34 +2846,172 @@ function renderLeaderboard(){
   bindTopNav();
 }
 
+
+function renderProfile(){
+  const li=getLevelInfo(state.xp);
+  root.innerHTML=`${topNavHtml('profile')}
+    <div class="card">
+      <div class="profile-avatar-wrap">
+        <img class="profile-avatar" id="profile-avatar" src="${getProfileImage()}" alt="صورة الملف الشخصي">
+        <div class="profile-name">${currentUser}</div>
+        <div class="profile-avatar-actions">
+          <button class="btn" id="btn-upload-avatar">📷 تغيير الصورة</button>
+          <button class="btn" id="btn-remove-avatar" style="background:transparent;border:1px solid var(--gold);color:var(--gold-light);">🗑️ إزالة الصورة</button>
+        </div>
+        <input type="file" id="profile-avatar-input" accept="image/*" hidden>
+        <div class="profile-avatar-hint">اختر صورة من جهازك، ويمكنك إزالتها في أي وقت للعودة للصورة الافتراضية.</div>
+      </div>
+    </div>
+    <div class="level-card"><div class="level-title">${li.icon} المستوى: ${li.name}</div><div class="level-xp">${state.xp} XP ${li.next?`• التالي عند ${li.next} XP`: '• وصلت لأعلى مستوى!'}</div><div class="progress-bar"><div class="progress-bar-fill" style="width:${li.progress}%"></div></div></div>
+    <div class="card"><h2>👤 إحصائياتي</h2><div class="profile-grid">
+      <div class="profile-stat"><b>${state.xp}</b><span>إجمالي XP</span></div><div class="profile-stat"><b>${state.points}</b><span>النقاط</span></div>
+      <div class="profile-stat"><b>${state.correctAnswers}</b><span>إجابات صحيحة</span></div>
+      <div class="profile-stat"><b>${state.duelWins||0}</b><span>انتصارات التحدي</span></div><div class="profile-stat"><b>${state.duelLosses||0}</b><span>خسائر التحدي</span></div>
+    </div></div>`;
+  updateSyncBadge(); bindTopNav();
+
+  const input=document.getElementById('profile-avatar-input');
+  const uploadBtn=document.getElementById('btn-upload-avatar');
+  const removeBtn=document.getElementById('btn-remove-avatar');
+  uploadBtn.onclick=()=>input.click();
+  input.onchange=async()=>{
+    const file=input.files && input.files[0]; if(!file) return;
+    uploadBtn.disabled=true; removeBtn.disabled=true; uploadBtn.textContent='جارِ رفع الصورة...';
+    try{ await uploadProfileImage(file); render(); }
+    catch(e){ console.error(e); alert(e.message || 'تعذر رفع الصورة. حاول مرة أخرى.'); uploadBtn.disabled=false; removeBtn.disabled=false; uploadBtn.textContent='📷 تغيير الصورة'; }
+    finally{ input.value=''; }
+  };
+  removeBtn.onclick=async()=>{
+    removeBtn.disabled=true; uploadBtn.disabled=true; removeBtn.textContent='جارِ الإزالة...';
+    try{ await removeProfileImage(); render(); }
+    catch(e){ console.error(e); alert('تعذر إزالة الصورة. حاول مرة أخرى.'); removeBtn.disabled=false; uploadBtn.disabled=false; removeBtn.textContent='🗑️ إزالة الصورة'; }
+  };
+}
+function renderSuggest(){
+  root.innerHTML=`${topNavHtml('suggest')}<div class="card"><h2>💡 ساهم بسؤالك</h2><div class="locked-note" style="margin-top:0">اقترح سؤالاً جديداً للمسابقات. سيظهر للأدمن للمراجعة، وإذا تمت الموافقة سيتم نشره مع اسمك كمقترح.</div>
+  <label>السؤال</label><textarea class="admin-input" id="suggest-q" placeholder="اكتب السؤال هنا..."></textarea>
+  <label>الخيار الأول</label><input class="admin-input" id="suggest-a" placeholder="الخيار الأول">
+  <label>الخيار الثاني</label><input class="admin-input" id="suggest-b" placeholder="الخيار الثاني">
+  <label>الخيار الثالث</label><input class="admin-input" id="suggest-c" placeholder="الخيار الثالث">
+  <label>رقم الإجابة الصحيحة</label><select class="admin-input" id="suggest-correct"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select>
+  <button class="btn" id="btn-submit-suggest">📤 إرسال السؤال للأدمن</button><div class="success" id="suggest-status"></div></div>`;
+  updateSyncBadge(); bindTopNav();
+  document.getElementById('btn-submit-suggest').onclick=async()=>{
+    const q=document.getElementById('suggest-q').value.trim(), opts=[document.getElementById('suggest-a').value.trim(),document.getElementById('suggest-b').value.trim(),document.getElementById('suggest-c').value.trim()], correct=Number(document.getElementById('suggest-correct').value);
+    const st=document.getElementById('suggest-status');
+    if(!q||opts.some(x=>!x)){st.textContent='اكتب السؤال والخيارات الثلاثة.';return;}
+    const btn=document.getElementById('btn-submit-suggest');btn.disabled=true;
+    try{await db.collection('question_suggestions').add({question:q,options:opts,correct,username:currentUser,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});state.suggestionsSubmitted=(state.suggestionsSubmitted||0)+1;await persist();st.textContent='تم إرسال سؤالك للأدمن للمراجعة ✅';['suggest-q','suggest-a','suggest-b','suggest-c'].forEach(id=>document.getElementById(id).value='');}
+    catch(e){console.error(e);st.textContent='تعذر الإرسال، حاول مرة أخرى.';}
+    finally{btn.disabled=false;}
+  };
+}
+
+
+let friendInviteUnsub=null;
+async function inviteFriendDuel(){
+  const input=document.getElementById('friend-username'); if(!input)return; const friend=input.value.trim();
+  if(!friend || docId(friend)===docId(currentUser)){alert('اكتب اسم مستخدم صديق صحيح.');return;}
+  const acc=await fetchAccount(friend); if(!acc){alert('المستخدم غير موجود.');return;} if(acc.banned){alert('هذا الحساب محظور.');return;}
+  await db.collection('friend_challenges').add({from:currentUser,to:acc.username,status:'pending',createdAt:firebase.firestore.FieldValue.serverTimestamp()});
+  input.value=''; alert('تم إرسال الدعوة إلى '+acc.username+' ⚔️');
+}
+async function acceptFriendInvite(id,from){
+  const q=pickRandomQuestionIndices(DUEL_QUESTIONS_COUNT), duelRef=db.collection('duels').doc();
+  await db.runTransaction(async tx=>{
+    const invRef=db.collection('friend_challenges').doc(id), snap=await tx.get(invRef); if(!snap.exists||snap.data().status!=='pending')return;
+    tx.set(duelRef,{players:[from,currentUser],questionIndices:q,status:'active',createdAt:firebase.firestore.FieldValue.serverTimestamp(),startAt:firebase.firestore.FieldValue.serverTimestamp(),progress:{[docId(from)]:freshDuelProgress(),[docId(currentUser)]:freshDuelProgress()},names:{[docId(from)]:from,[docId(currentUser)]:currentUser},result:null,friendDuel:true});
+    tx.update(invRef,{status:'accepted',duelId:duelRef.id});
+  });
+  const snap=await db.collection('friend_challenges').doc(id).get(); if(snap.exists&&snap.data().duelId) await enterDuel(snap.data().duelId);
+}
+function listenFriendInvites(){
+  if(friendInviteUnsub||!currentUser)return; friendInviteUnsub=db.collection('friend_challenges').where('to','==',currentUser).where('status','==','pending').onSnapshot(()=>{if(view==='duel')renderDuelLobby();});
+}
+
 function renderDuelLobby(){
   root.innerHTML = `
     ${topNavHtml('duel')}
     <div class="card">
-      <h2>⚔️ تحدي 1v1</h2>
+      <h2>👥 دعوة صديق</h2>
       <div class="locked-note" style="margin-top:0;">
-        10 أسئلة × 5 دقائق. نفس الأسئلة بالضبط لك ولخصمك في نفس اللحظة.<br>
-        الفوز = <b style="color:var(--gold-light)">${DUEL_WIN_POINTS}</b> نقطة. الخروج أثناء المباراة = خصم
-        <b style="color:var(--danger)">${DUEL_CHEAT_PENALTY}</b> نقطة عقوبة.
+        اكتب اسم المستخدم لصديقك وأرسل له دعوة مباشرة للمباراة. لا يوجد بحث عشوائي عن خصم.
       </div>
-      ${duelSearching ? `
-        <div class="queue-spinner">
-          <div class="ring"></div>
-          <div>جارِ البحث عن خصم...</div>
+
+      <div style="margin-top:22px;">
+        <h3 class="admin-section-title">⚔️ إرسال دعوة</h3>
+        <div class="friend-row">
+          <input type="text" id="friend-username" placeholder="اسم المستخدم" autocomplete="off">
+          <button class="btn" id="btn-invite-friend">إرسال الدعوة</button>
         </div>
-        <button class="btn" id="btn-cancel-search" style="background:transparent;border:1px solid var(--gold);color:var(--gold-light);">إلغاء البحث</button>
-      ` : `
-        <button class="btn" id="btn-find-duel">🔎 ابحث عن خصم الآن</button>
-      `}
-      <div class="error">${errorMsg}</div>
+        <div class="muted" style="margin-top:10px;font-size:13px;">
+          سيظهر لصديقك طلب الدعوة ويمكنه قبوله لبدء المباراة.
+        </div>
+      </div>
+
+      <div id="friend-invites-box" style="margin-top:24px;border-top:1px solid rgba(201,162,92,.2);padding-top:18px;"></div>
+      <div class="error" id="duel-error">${errorMsg}</div>
     </div>
   `;
+
   updateSyncBadge();
   bindTopNav();
-  const findBtn = document.getElementById('btn-find-duel');
-  if(findBtn) findBtn.onclick = findOrJoinDuelQueue;
-  const cancelBtn = document.getElementById('btn-cancel-search');
-  if(cancelBtn) cancelBtn.onclick = cancelDuelSearch;
+  listenFriendInvites();
+
+  const inviteBtn = document.getElementById('btn-invite-friend');
+  if(inviteBtn) inviteBtn.onclick = async () => {
+    inviteBtn.disabled = true;
+    try {
+      await inviteFriendDuel();
+    } finally {
+      inviteBtn.disabled = false;
+    }
+  };
+
+  loadPendingFriendInvites();
+}
+
+async function loadPendingFriendInvites(){
+  const box = document.getElementById('friend-invites-box');
+  if(!box || !currentUser) return;
+  try{
+    const snap = await db.collection('friend_challenges')
+      .where('to','==',currentUser)
+      .where('status','==','pending')
+      .get();
+
+    if(!snap.empty && view==='duel'){
+      box.innerHTML = `
+        <h3 class="admin-section-title">📨 الدعوات الواردة</h3>
+        ${snap.docs.map(d=>{
+          const x=d.data();
+          return `<div class="suggest-card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <span><b>${adminEsc(x.from)}</b> أرسل لك دعوة مباراة</span>
+            <button class="btn admin-mini" data-accept-friend="${adminEsc(d.id)}">قبول ⚔️</button>
+          </div>`;
+        }).join('')}
+      `;
+      box.querySelectorAll('[data-accept-friend]').forEach(b=>{
+        b.onclick = async () => {
+          b.disabled = true;
+          try{
+            const id=b.getAttribute('data-accept-friend');
+            const doc=await db.collection('friend_challenges').doc(id).get();
+            if(doc.exists) await acceptFriendInvite(id, doc.data().from);
+          }catch(e){
+            console.error(e);
+            b.disabled=false;
+            const err=document.getElementById('duel-error');
+            if(err) err.textContent='تعذر قبول الدعوة، حاول مرة أخرى.';
+          }
+        };
+      });
+    } else {
+      box.innerHTML='';
+    }
+  }catch(e){
+    console.error('friend invites load error',e);
+  }
 }
 
 function renderDuelMatch(){
@@ -2694,7 +3045,7 @@ function renderDuelMatch(){
           </div>
           ${iWon ? `<div class="points-line">+${DUEL_WIN_POINTS} نقطة فوز 🎉</div>` : ''}
           ${me.disconnected ? `<div class="points-line neg">-${DUEL_CHEAT_PENALTY} نقطة عقوبة خروج</div>` : ''}
-          <button class="btn" id="btn-back-lobby">رجوع لصفحة التحدي</button>
+          <button class="btn" id="btn-back-lobby">رجوع لصفحة دعوة الصديق</button>
         </div>
       </div>
     `;
@@ -2880,6 +3231,195 @@ function renderTournament(){
       enterTournamentMatch(ri, mi);
     };
   });
+}
+
+
+
+/* ==================================================================
+   ============ بطولة التحدي 1v1 المخصصة للأدمن — Firestore =========
+   ==================================================================
+   كل مباراة لها مستند مستقل داخل local_1v1_matches، لذلك يستطيع
+   الأدمن إنشاء عدد كبير من الجولات والمباريات في نفس الوقت.
+*/
+const LOCAL_1V1_STORAGE_KEY = 'rafiq_local_1v1_match_cache_v3';
+const LOCAL_1V1_COLLECTION = 'local_1v1_matches';
+const LOCAL_1V1_TIME_MS = 5 * 60 * 1000;
+const LOCAL_1V1_QUESTIONS = (typeof RELIGIOUS_QUESTIONS_BANK !== 'undefined' && RELIGIOUS_QUESTIONS_BANK.length >= 10)
+  ? RELIGIOUS_QUESTIONS_BANK.slice(0,10).map(q=>({q:q.q,options:q.options.slice(0,3),correct:Number(q.correct)||0}))
+  : DUEL_QUESTION_POOL.slice(0,10).map(q=>({q:q.q,options:q.options.slice(0,3),correct:Number(q.correct)||0}));
+let local1v1TickTimer = null;
+let local1v1AvatarCache = {};
+let local1v1ListUnsub = null;
+let local1v1MatchUnsub = null;
+let local1v1MatchListenerId = null;
+let local1v1Matches = [];
+let local1v1CurrentMatchId = null;
+let local1v1Message = '';
+
+function local1v1Ref(id=local1v1CurrentMatchId){ return db.collection(LOCAL_1V1_COLLECTION).doc(id); }
+function local1v1Key(name){ return docId(name); }
+function local1v1IsPlayer(m){ return !!m && (local1v1Key(m.player1)===local1v1Key(currentUser) || local1v1Key(m.player2)===local1v1Key(currentUser)); }
+function local1v1Opponent(m){ if(!m) return null; return local1v1Key(m.player1)===local1v1Key(currentUser) ? m.player2 : m.player1; }
+function local1v1TimeValue(v){ if(!v) return null; return typeof v.toMillis==='function' ? v.toMillis() : Number(v); }
+function local1v1TimeLeft(m){ const start=local1v1TimeValue(m&&m.startAt); return start ? Math.max(0,LOCAL_1V1_TIME_MS-(Date.now()-start)) : LOCAL_1V1_TIME_MS; }
+function local1v1Fmt(ms){ const sec=Math.ceil(ms/1000), mm=Math.floor(sec/60), ss=sec%60; return String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0'); }
+function local1v1AvatarFor(name){ return local1v1AvatarCache[local1v1Key(name)] || defaultAvatarData(); }
+async function loadLocal1v1Avatar(name){
+  if(!name || local1v1AvatarCache[local1v1Key(name)]) return;
+  try{ const acc=await fetchAccount(name); local1v1AvatarCache[local1v1Key(name)] = (acc && (acc.profileImageUrl || acc.state?.profileImageUrl)) || defaultAvatarData(); if(view==='local-duel') renderLocal1v1Lobby(); }
+  catch(e){}
+}
+function local1v1Sort(a,b){
+  const av=a.createdAt?.seconds||0, bv=b.createdAt?.seconds||0;
+  return bv-av;
+}
+async function loadLocal1v1Matches(){
+  try{
+    const snap=await db.collection(LOCAL_1V1_COLLECTION).where('players','array-contains',currentUser).get();
+    local1v1Matches=snap.docs.map(d=>({id:d.id,...d.data()})).sort(local1v1Sort);
+    return local1v1Matches;
+  }catch(e){
+    console.warn('local 1v1 list:',e);
+    return local1v1Matches;
+  }
+}
+function ensureLocal1v1Listener(){
+  if(local1v1ListUnsub || !currentUser) return;
+  local1v1ListUnsub=db.collection(LOCAL_1V1_COLLECTION).where('players','array-contains',currentUser).onSnapshot(snap=>{
+    local1v1Matches=snap.docs.map(d=>({id:d.id,...d.data()})).sort(local1v1Sort);
+    if(view==='local-duel') renderLocal1v1Lobby();
+  },e=>console.warn('local 1v1 list listener:',e));
+}
+function ensureLocal1v1MatchListener(id){
+  if(!id) return;
+  if(local1v1MatchUnsub && local1v1MatchListenerId===id) return;
+  if(local1v1MatchUnsub) { local1v1MatchUnsub(); local1v1MatchUnsub=null; }
+  local1v1CurrentMatchId=id;
+  local1v1MatchListenerId=id;
+  local1v1MatchUnsub=local1v1Ref(id).onSnapshot(snap=>{
+    if(!snap.exists){ local1v1CurrentMatchId=null; local1v1MatchListenerId=null; view='local-duel'; renderLocal1v1Lobby(); return; }
+    local1v1Cache({id:snap.id,...snap.data()});
+    if(view==='local-duel-match') renderLocal1v1Match();
+    if(view==='local-duel') renderLocal1v1Lobby();
+  },e=>console.warn('local 1v1 match listener:',e));
+}
+function startLocal1v1Ticker(){
+  if(local1v1TickTimer) return;
+  local1v1TickTimer=setInterval(()=>{
+    if(view==='local-duel-match') renderLocal1v1Match();
+    else if(view==='local-duel') renderLocal1v1Lobby();
+    else {clearInterval(local1v1TickTimer);local1v1TickTimer=null;}
+  },1000);
+}
+function local1v1Cache(data){ if(data) localStorage.setItem(LOCAL_1V1_STORAGE_KEY,JSON.stringify(data)); }
+function local1v1Score(m,name){ return ((m.answers||{})[local1v1Key(name)]||[]).reduce((n,a,i)=>n+(Number(a)===LOCAL_1V1_QUESTIONS[i]?.correct?1:0),0); }
+function local1v1Answered(m,name){ return ((m.answers||{})[local1v1Key(name)]||[]).filter(a=>a!==null&&typeof a!=='undefined').length; }
+function local1v1BothSearched(m){
+  const p=m?.presence||{};
+  return !!(p[local1v1Key(m.player1)] && p[local1v1Key(m.player2)]);
+}
+async function local1v1Search(){
+  local1v1Message='';
+  await loadLocal1v1Matches();
+  const matches=local1v1Matches.filter(local1v1IsPlayer);
+  if(!matches.length){ local1v1Message='لا توجد مباريات متاحة حالياً'; renderLocal1v1Lobby(); return; }
+  try{
+    const batch=db.batch();
+    matches.filter(m=>!m.completed).forEach(m=>batch.update(db.collection(LOCAL_1V1_COLLECTION).doc(m.id),{[`presence.${local1v1Key(currentUser)}`]:firebase.firestore.FieldValue.serverTimestamp()}));
+    await batch.commit();
+    local1v1Message='';
+  }catch(e){local1v1Message='تعذر الاتصال ببطولة التحدي حالياً.';}
+  await loadLocal1v1Matches(); renderLocal1v1Lobby();
+}
+async function local1v1EnterMatch(id){
+  local1v1CurrentMatchId=id;
+  const ref=local1v1Ref(id);
+  try{
+    await db.runTransaction(async tx=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists) throw new Error('لا توجد مباراة');
+      const d=snap.data();
+      if(!local1v1IsPlayer(d) || d.completed) throw new Error('المباراة غير متاحة');
+      if(!local1v1BothSearched(d)) throw new Error('بانتظار الطرف الآخر');
+      const key=local1v1Key(currentUser), update={};
+      update[`entered.${key}`]=firebase.firestore.FieldValue.serverTimestamp();
+      update[`answers.${key}`]=Array.isArray((d.answers||{})[key])?(d.answers||{})[key]:[];
+      if(!d.startAt) update.startAt=firebase.firestore.FieldValue.serverTimestamp();
+      tx.update(ref,update);
+    });
+    local1v1Message=''; ensureLocal1v1MatchListener(id); view='local-duel-match'; renderLocal1v1Match(); startLocal1v1Ticker();
+  }catch(e){local1v1Message='تعذر دخول المباراة حالياً.';renderLocal1v1Lobby();}
+}
+async function local1v1Answer(index){
+  const m=await getLocal1v1Match(local1v1CurrentMatchId); if(!m||m.completed||!m.startAt||local1v1TimeLeft(m)<=0) return;
+  const key=local1v1Key(currentUser), arr=Array.isArray((m.answers||{})[key])?(m.answers||{})[key].slice():[];
+  const qIndex=arr.length; if(qIndex>=LOCAL_1V1_QUESTIONS.length) return;
+  arr.push(Number(index));
+  const update={}; update[`answers.${key}`]=arr;
+  if(arr.length>=LOCAL_1V1_QUESTIONS.length) update[`finished.${key}`]=firebase.firestore.FieldValue.serverTimestamp();
+  try{
+    await local1v1Ref(local1v1CurrentMatchId).update(update);
+    const fresh=await getLocal1v1Match(local1v1CurrentMatchId);
+    if(fresh && (local1v1TimeLeft(fresh)<=0 || Object.keys(fresh.finished||{}).length>=2)) await local1v1Ref(local1v1CurrentMatchId).update({completed:true,completedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  }catch(e){console.warn('local 1v1 answer:',e);}
+  renderLocal1v1Match();
+}
+async function getLocal1v1Match(id){
+  if(!id) return null;
+  try{const snap=await local1v1Ref(id).get();return snap.exists?{id:snap.id,...snap.data()}:null;}catch(e){return null;}
+}
+async function local1v1FinishIfNeeded(){
+  const m=await getLocal1v1Match(local1v1CurrentMatchId); if(!m||m.completed) return;
+  if((m.startAt&&local1v1TimeLeft(m)<=0)||Object.keys(m.finished||{}).length>=2){try{await local1v1Ref(local1v1CurrentMatchId).update({completed:true,completedAt:firebase.firestore.FieldValue.serverTimestamp()});}catch(e){}}
+}
+function local1v1MatchStatus(m){
+  if(m.completed) return ['منتهية','bad'];
+  if(m.startAt) return ['جارية','ok'];
+  if(local1v1BothSearched(m)) return ['نشطة — جاهزة للدخول','ok'];
+  return ['غير نشطة — بانتظار الطرف الآخر',''];
+}
+async function renderLocal1v1Lobby(message){
+  ensureLocal1v1Listener(); startLocal1v1Ticker();
+  await loadLocal1v1Matches();
+  const matches=local1v1Matches.filter(local1v1IsPlayer);
+  const cards=matches.map(m=>{
+    const opp=local1v1Opponent(m), both=local1v1BothSearched(m), status=local1v1MatchStatus(m);
+    loadLocal1v1Avatar(opp);
+    return `<div class="admin-ad-item local-duel-match-card">
+      <div class="admin-ad-item-head"><b>⚔️ ${adminEsc(m.roundName||'مباراة بطولة')}</b><span class="admin-badge ${status[1]}">${status[0]}</span></div>
+      <div class="local-duel-opponent"><img class="local-duel-avatar" src="${local1v1AvatarFor(opp)}" alt="صورة الخصم"><div><div class="local-duel-name">${adminEsc(opp)}</div><div class="local-duel-status ${both?'active':'inactive'}">${both?'🟢 الطرفان جاهزان':'🔴 بانتظار الطرف الآخر'}</div></div></div>
+      <div class="local-duel-score"><span>أنت: <b>${local1v1Answered(m,currentUser)}/10</b></span><span>الخصم: <b>${local1v1Answered(m,opp)}/10</b></span></div>
+      ${both&&!m.completed ? `<button class="btn" data-local-enter="${adminEsc(m.id)}">🚪 دخول المباراة</button>` : `<div class="locked-note">${m.completed?'هذه المباراة منتهية.':'اضغط «ابحث عن خصم الآن» ليظهر استعدادك، ثم انتظر الطرف الآخر.'}</div>`}
+    </div>`;
+  }).join('');
+  root.innerHTML=`${topNavHtml('local-duel')}<div class="card local-duel-card"><h2>⚔️ بطولة التحدي 1v1</h2><div class="local-duel-note">الأدمن يحدد الجولة والخصمين مسبقاً. زر البحث يعرض فقط المباريات المخصصة لحسابك، وليس بحثاً عشوائياً عن لاعبين.</div><button class="btn" id="btn-local1v1-search">🔎 ابحث عن تحدياتك</button><div class="error">${adminEsc(message||local1v1Message||'')}</div><div style="margin-top:18px;">${cards||'<div class="locked-note">لا توجد مباريات مخصصة لك حالياً.</div>'}</div></div>`;
+  updateSyncBadge();bindTopNav();
+  document.getElementById('btn-local1v1-search').onclick=local1v1Search;
+  document.querySelectorAll('[data-local-enter]').forEach(b=>b.onclick=()=>local1v1EnterMatch(b.getAttribute('data-local-enter')));
+}
+async function renderLocal1v1Match(){
+  ensureLocal1v1MatchListener(local1v1CurrentMatchId); startLocal1v1Ticker();
+  const m=await getLocal1v1Match(local1v1CurrentMatchId); if(!m||!local1v1IsPlayer(m)){view='local-duel';renderLocal1v1Lobby();return;}
+  const opp=local1v1Opponent(m), key=local1v1Key(currentUser), answers=((m.answers||{})[key]||[]), qIndex=answers.length;
+  await Promise.all([loadLocal1v1Avatar(currentUser), loadLocal1v1Avatar(opp)]);
+  const myAvatar=local1v1AvatarFor(currentUser), oppAvatar=local1v1AvatarFor(opp);
+  const buildMatchupHtml = (winnerSide=null) => `<div class="local-duel-matchup">
+    <div class="local-duel-player me ${winnerSide==='me'?'winner':''}">${winnerSide==='me'?'<div class="local-duel-crown">👑</div>':''}<img class="local-duel-player-avatar" src="${myAvatar}" alt="صورة ${adminEsc(currentUser)}"><div class="local-duel-player-name">${adminEsc(currentUser)}</div>${winnerSide==='me'?'<div class="local-duel-winner-badge">🏆 الفائز</div>':''}</div>
+    <div class="local-duel-vs">VS</div>
+    <div class="local-duel-player ${winnerSide==='opp'?'winner':''}">${winnerSide==='opp'?'<div class="local-duel-crown">👑</div>':''}<img class="local-duel-player-avatar" src="${oppAvatar}" alt="صورة ${adminEsc(opp)}"><div class="local-duel-player-name">${adminEsc(opp)}</div>${winnerSide==='opp'?'<div class="local-duel-winner-badge">🏆 الفائز</div>':''}</div>
+  </div>`;
+  await local1v1FinishIfNeeded(); const fresh=await getLocal1v1Match(local1v1CurrentMatchId) || m;
+  const myScore=local1v1Score(fresh,currentUser), oppScore=local1v1Score(fresh,opp), left=local1v1TimeLeft(fresh);
+  if(fresh.completed || (fresh.startAt&&left<=0)){
+    const winner=myScore===oppScore?'tie':(myScore>oppScore?'me':'opp');
+    root.innerHTML=`<div class="card"><div class="local-duel-result"><div class="big">${winner==='tie'?'🤝':winner==='me'?'🏆':'💔'}</div><h3>${winner==='tie'?'تعادل!':winner==='me'?'مبروك! فزت بالمباراة':'انتهت المباراة — الخصم فاز'}</h3><div class="locked-note"><b>${adminEsc(fresh.roundName||'بطولة التحدي')}</b></div>${buildMatchupHtml(winner)}<div class="local-duel-score"><span>${adminEsc(currentUser)}: <b>${myScore}/10</b></span><span>${adminEsc(opp)}: <b>${oppScore}/10</b></span></div><div class="locked-note">انتهت المباراة. المؤقت المشترك: 5 دقائق.</div><button class="btn" id="btn-local1v1-back">العودة لبطولة التحدي</button></div></div>`;
+    document.getElementById('btn-local1v1-back').onclick=()=>{view='local-duel';render();};return;
+  }
+  if(!fresh.startAt){root.innerHTML=`${topNavHtml('local-duel')}<div class="card local-duel-card"><h2>⚔️ ${adminEsc(fresh.roundName||'المباراة')}</h2><div class="locked-note">في انتظار دخول أول لاعب لبدء مؤقت الـ5 دقائق.</div><button class="btn" id="btn-local1v1-back">العودة</button></div>`;updateSyncBadge();bindTopNav();document.getElementById('btn-local1v1-back').onclick=()=>{view='local-duel';render();};return;}
+  const q=LOCAL_1V1_QUESTIONS[qIndex];
+  if(!q){await local1v1FinishIfNeeded();renderLocal1v1Match();return;}
+  root.innerHTML=`${topNavHtml('local-duel')}<div class="card local-duel-card"><div class="duel-timer ${left<=30000?'low':''}">${local1v1Fmt(left)}</div><h3>${adminEsc(fresh.roundName||'بطولة التحدي')}</h3>${buildMatchupHtml()}<div class="local-duel-score"><span>${adminEsc(currentUser)}: <b>${myScore}/10</b> <small>(${answers.length}/10)</small></span><span>${adminEsc(opp)}: <b>${oppScore}/10</b> <small>(${local1v1Answered(fresh,opp)}/10)</small></span></div><div class="duel-progress">السؤال ${qIndex+1} من 10</div><div class="quiz-q">${adminEsc(q.q)}</div>${q.options.map((o,i)=>`<button class="quiz-opt" data-local-answer="${i}">${adminEsc(o)}</button>`).join('')}</div>`;
+  updateSyncBadge();bindTopNav();document.querySelectorAll('[data-local-answer]').forEach(b=>b.onclick=()=>local1v1Answer(Number(b.getAttribute('data-local-answer'))));
 }
 
 const _render = render;
