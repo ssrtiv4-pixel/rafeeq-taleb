@@ -1630,7 +1630,10 @@ let chatInputDraft = { group:'' };
 
 // ---- حالة قفل المنصة بالكامل (ميزة الأدمن) ----
 let PLATFORM_LOCKED = false;     // لو true، الطلاب (غير الأدمن) يُمنعون من استخدام المنصة
+let PLATFORM_LOCK_REASON = '';   // سبب القفل الذي يظهر للطلاب
+let PLATFORM_LOCK_UNTIL = null;  // الطابع الزمني (ms) المتوقع لفتح المنصة، أو null لو غير محدد
 let platformLockUnsub = null;    // استماع دائم لحالة القفل طول ما فيه مستخدم مسجّل دخول
+let platformLockTickTimer = null; // مؤقت تحديث العد التنازلي في شاشة القفل
 
 /* ==================================================================
    ============ نظام التحدي الثنائي (1v1 Duel) على Firestore ==========
@@ -2521,7 +2524,18 @@ async function renderControlPanel(){
         <span>الحالة الحالية: <b>${platformLocked ? 'مقفولة عن الطلاب 🔒' : 'متاحة للجميع 🔓'}</b></span>
         <button class="btn admin-mini ${platformLocked?'admin-secondary':'admin-danger'}" id="btn-toggle-platform-lock">${platformLocked ? '🔓 فتح المنصة' : '🔒 قفل المنصة'}</button>
       </div>
-      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة.</div>
+      ${platformLocked ? `
+      <div class="admin-help">سبب القفل الحالي: <b>${adminEsc(adminCache.site.platformLockReason || '(بدون سبب مُحدد)')}</b>${adminCache.site.platformLockUntil ? `<br>موعد الفتح المتوقع: <b>${new Date(adminCache.site.platformLockUntil).toLocaleString('ar-EG')}</b>` : ''}</div>
+      ` : ''}
+      <label>سبب القفل (يظهر للطلاب)</label>
+      <textarea id="admin-lock-reason" rows="2" placeholder="مثال: صيانة مجدولة على المنصة...">${adminEsc(adminCache.site.platformLockReason || '')}</textarea>
+      <label>مدة القفل (يظهر للطلاب كمؤقت للعد التنازلي حتى فتح المنصة)</label>
+      <div class="friend-row" style="gap:6px;">
+        <input type="number" min="0" id="admin-lock-hours" placeholder="ساعات" value="0" style="text-align:center;">
+        <input type="number" min="0" max="59" id="admin-lock-minutes" placeholder="دقائق" value="0" style="text-align:center;">
+        <input type="number" min="0" max="59" id="admin-lock-seconds" placeholder="ثواني" value="0" style="text-align:center;">
+      </div>
+      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب.</div>
     `;
   } else if(active==='users'){
     const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
@@ -2774,8 +2788,19 @@ async function renderControlPanel(){
   const togglePlatformLockBtn=document.getElementById('btn-toggle-platform-lock');
   if(togglePlatformLockBtn) togglePlatformLockBtn.onclick=async()=>{
     const isLocked = adminCache.site.platformLocked === true;
-    if(!isLocked && !confirm('هل أنت متأكد من قفل المنصة بالكامل عن كل الطلاب الآن؟')) return;
-    await db.collection('settings').doc('site').set({ platformLocked: !isLocked },{merge:true});
+    if(!isLocked){
+      if(!confirm('هل أنت متأكد من قفل المنصة بالكامل عن كل الطلاب الآن؟')) return;
+      const reasonEl=document.getElementById('admin-lock-reason');
+      const hEl=document.getElementById('admin-lock-hours'), mEl=document.getElementById('admin-lock-minutes'), sEl=document.getElementById('admin-lock-seconds');
+      const reason=(reasonEl && reasonEl.value || '').trim();
+      const h=Math.max(0, parseInt(hEl && hEl.value,10) || 0), m=Math.max(0, parseInt(mEl && mEl.value,10) || 0), s=Math.max(0, parseInt(sEl && sEl.value,10) || 0);
+      const totalSeconds = h*3600 + m*60 + s;
+      const payload = { platformLocked: true, platformLockReason: reason };
+      payload.platformLockUntil = totalSeconds > 0 ? (Date.now() + totalSeconds*1000) : null;
+      await db.collection('settings').doc('site').set(payload,{merge:true});
+    }else{
+      await db.collection('settings').doc('site').set({ platformLocked: false, platformLockReason: '', platformLockUntil: null },{merge:true});
+    }
     await loadAdminData(); renderControlPanel();
   };
   document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
@@ -3108,19 +3133,40 @@ function listenPlatformLock(){
   platformLockUnsub = db.collection('settings').doc('site').onSnapshot(snap => {
     const d = snap.exists ? snap.data() : {};
     PLATFORM_LOCKED = d.platformLocked === true;
+    PLATFORM_LOCK_REASON = d.platformLockReason || '';
+    PLATFORM_LOCK_UNTIL = d.platformLockUntil || null;
     if(!isSuperAdmin()) render(); // لو الطالب داخل، حدّث الشاشة فوراً لو الأدمن قفل/فتح المنصة
   }, e => console.warn('platform lock listen error', e));
 }
 
 function stopPlatformLockListener(){
   if(platformLockUnsub){ platformLockUnsub(); platformLockUnsub = null; }
+  stopPlatformLockTicker();
+}
+
+function startPlatformLockTicker(){
+  stopPlatformLockTicker();
+  platformLockTickTimer = setInterval(updatePlatformLockCountdownOnly, 1000);
+}
+function stopPlatformLockTicker(){
+  if(platformLockTickTimer){ clearInterval(platformLockTickTimer); platformLockTickTimer = null; }
+}
+function updatePlatformLockCountdownOnly(){
+  const el = document.getElementById('platform-lock-countdown');
+  if(!el || !PLATFORM_LOCK_UNTIL){ stopPlatformLockTicker(); return; }
+  const remain = PLATFORM_LOCK_UNTIL - Date.now();
+  if(remain <= 0){ el.textContent = '00:00:00'; stopPlatformLockTicker(); return; }
+  el.textContent = fmtCountdown(remain);
 }
 
 function renderPlatformLocked(){
+  const hasTimer = !!PLATFORM_LOCK_UNTIL && (PLATFORM_LOCK_UNTIL - Date.now()) > 0;
   root.innerHTML = `
     <div class="card" style="text-align:center;">
       <h2>🔒 المنصة مقفولة مؤقتاً</h2>
       <div class="locked-note">تم إيقاف الدخول للمنصة مؤقتاً من قِبل الإدارة.<br>حاول مرة أخرى بعد قليل، أو تواصل مع الأدمن لمزيد من التفاصيل.</div>
+      ${PLATFORM_LOCK_REASON ? `<div class="locked-note" style="margin-top:10px;border:1px dashed rgba(255,138,92,.35);border-radius:12px;padding:12px;"><b>سبب القفل:</b><br>${adminEsc(PLATFORM_LOCK_REASON)}</div>` : ''}
+      ${hasTimer ? `<div style="margin-top:16px;"><div class="locked-note" style="margin-bottom:6px;">الوقت المتبقي حتى فتح المنصة:</div><div class="duel-timer" id="platform-lock-countdown">${fmtCountdown(PLATFORM_LOCK_UNTIL - Date.now())}</div></div>` : ''}
       <div class="admin-actions" style="justify-content:center;margin-top:16px;">
         <button class="btn admin-mini admin-secondary" id="btn-locked-contact-admin">تواصل مع الأدمن</button>
         <button class="btn admin-mini admin-danger" id="btn-locked-logout">تسجيل الخروج</button>
@@ -3130,6 +3176,7 @@ function renderPlatformLocked(){
   if(contactBtn) contactBtn.onclick = () => { view = 'admin'; render(); };
   const logoutBtn = document.getElementById('btn-locked-logout');
   if(logoutBtn) logoutBtn.onclick = () => { stopPlatformLockListener(); logout(); };
+  if(hasTimer) startPlatformLockTicker(); else stopPlatformLockTicker();
 }
 
 function listenToSiteSettingsForChat(){
