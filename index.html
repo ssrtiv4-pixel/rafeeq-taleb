@@ -369,7 +369,7 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .btn-contact svg{ width:20px; height:20px; flex-shrink:0; }
   .contact-footer-note{ margin-top:18px; font-size:12px; color:var(--text-dim); line-height:1.8; }
 
-  .nav-row{ display:flex; flex-direction:row-reverse; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; justify-content:flex-end; }
+  .nav-row{ display:flex; flex-direction:row-reverse; flex-wrap:wrap; gap:8px; margin-bottom:16px; -webkit-overflow-scrolling:touch; touch-action:pan-x; overflow-x:auto; padding-bottom:4px; justify-content:flex-end; }
 
   /* ===== شرائط الأقسام الثلاثة في الصفحة الرئيسية ===== */
   /* ===== زر الرجوع في الصفحات الداخلية ===== */
@@ -2529,13 +2529,16 @@ async function renderControlPanel(){
       ` : ''}
       <label>سبب القفل (يظهر للطلاب)</label>
       <textarea id="admin-lock-reason" rows="2" placeholder="مثال: صيانة مجدولة على المنصة...">${adminEsc(adminCache.site.platformLockReason || '')}</textarea>
-      <label>مدة القفل (يظهر للطلاب كمؤقت للعد التنازلي حتى فتح المنصة)</label>
+      <button class="btn admin-mini admin-secondary" id="btn-save-lock-reason" style="margin-top:6px;">💾 حفظ السبب</button>
+      <label style="margin-top:16px;">مدة القفل (يظهر للطلاب كمؤقت للعد التنازلي حتى فتح المنصة)</label>
       <div class="friend-row" style="gap:6px;">
         <input type="number" min="0" id="admin-lock-hours" placeholder="ساعات" value="0" style="text-align:center;">
         <input type="number" min="0" max="59" id="admin-lock-minutes" placeholder="دقائق" value="0" style="text-align:center;">
         <input type="number" min="0" max="59" id="admin-lock-seconds" placeholder="ثواني" value="0" style="text-align:center;">
       </div>
-      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب.</div>
+      <button class="btn admin-mini admin-secondary" id="btn-save-lock-timer" style="margin-top:6px;">💾 حفظ المؤقت</button>
+      <div class="admin-help" id="admin-lock-save-msg" style="min-height:16px;"></div>
+      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب. زرارَي «حفظ السبب» و«حفظ المؤقت» بيحدّثوا القيم فوراً حتى لو المنصة مقفولة بالفعل، من غير الحاجة لفتحها وقفلها تاني. مدة القفل بتُحسب من لحظة الضغط على «حفظ المؤقت» أو «قفل المنصة».</div>
     `;
   } else if(active==='users'){
     const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
@@ -2802,6 +2805,34 @@ async function renderControlPanel(){
       await db.collection('settings').doc('site').set({ platformLocked: false, platformLockReason: '', platformLockUntil: null },{merge:true});
     }
     await loadAdminData(); renderControlPanel();
+  };
+  const saveLockMsgEl=document.getElementById('admin-lock-save-msg');
+  const flashLockSaveMsg=(txt)=>{ if(saveLockMsgEl){ saveLockMsgEl.textContent=txt; setTimeout(()=>{ if(saveLockMsgEl) saveLockMsgEl.textContent=''; },2500); } };
+  const saveLockReasonBtn=document.getElementById('btn-save-lock-reason');
+  if(saveLockReasonBtn) saveLockReasonBtn.onclick=async()=>{
+    const reasonEl=document.getElementById('admin-lock-reason');
+    const reason=(reasonEl && reasonEl.value || '').trim();
+    saveLockReasonBtn.disabled=true;
+    try{
+      await db.collection('settings').doc('site').set({ platformLockReason: reason },{merge:true});
+      adminCache.site.platformLockReason = reason;
+      flashLockSaveMsg('✅ تم حفظ سبب القفل.');
+    }catch(e){ console.error(e); flashLockSaveMsg('⚠️ تعذر الحفظ، حاول مرة أخرى.'); }
+    saveLockReasonBtn.disabled=false;
+  };
+  const saveLockTimerBtn=document.getElementById('btn-save-lock-timer');
+  if(saveLockTimerBtn) saveLockTimerBtn.onclick=async()=>{
+    const hEl=document.getElementById('admin-lock-hours'), mEl=document.getElementById('admin-lock-minutes'), sEl=document.getElementById('admin-lock-seconds');
+    const h=Math.max(0, parseInt(hEl && hEl.value,10) || 0), m=Math.max(0, parseInt(mEl && mEl.value,10) || 0), s=Math.max(0, parseInt(sEl && sEl.value,10) || 0);
+    const totalSeconds = h*3600 + m*60 + s;
+    const until = totalSeconds > 0 ? (Date.now() + totalSeconds*1000) : null;
+    saveLockTimerBtn.disabled=true;
+    try{
+      await db.collection('settings').doc('site').set({ platformLockUntil: until },{merge:true});
+      adminCache.site.platformLockUntil = until;
+      flashLockSaveMsg(until ? '✅ تم حفظ المؤقت، هيبدأ العد التنازلي عند الطلاب من الآن.' : '✅ تم إلغاء المؤقت، مش هيظهر عد تنازلي للطلاب.');
+    }catch(e){ console.error(e); flashLockSaveMsg('⚠️ تعذر الحفظ، حاول مرة أخرى.'); }
+    saveLockTimerBtn.disabled=false;
   };
   document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
     if(!confirm('حذف هذه الرسالة من الشات العام؟')) return;
