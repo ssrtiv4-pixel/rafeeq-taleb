@@ -243,22 +243,29 @@ const RELIGIOUS_QUESTIONS_BANK = [
 </script>
 <style>
   :root{
-    --bg-deep:#0f2b28;
-    --bg-deep2:#123832;
-    --gold:#c9a25c;
-    --gold-light:#e6c98a;
-    --text-light:#f4ecd8;
-    --text-dim:#a9c2bd;
-    --danger:#c96a4f;
-    --ok:#7fae86;
+    --bg-deep:#1a1035;
+    --bg-deep2:#241750;
+    --gold:#ff9466;
+    --gold-light:#ffc4a8;
+    --text-light:#fdf6f0;
+    --text-dim:#d3c6ee;
+    --danger:#f0596a;
+    --ok:#3fe3a0;
+    --radius-card:28px;
+    --radius-btn:14px;
+    --radius-input:14px;
+    --btn-angle:120deg;
+    --btn-border:transparent;
+    --card-border-w:1px;
   }
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(circle at 15% 10%, #17423c 0%, transparent 45%),
-      radial-gradient(circle at 90% 85%, #17423c 0%, transparent 40%),
-      linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
+      radial-gradient(circle at 12% 8%, #3a1f66 0%, transparent 48%),
+      radial-gradient(circle at 92% 12%, #ff8a5c22 0%, transparent 42%),
+      radial-gradient(circle at 88% 90%, #3ddc9722 0%, transparent 40%),
+      linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
     min-height:100vh;
     font-family:'Cairo',sans-serif;
     color:var(--text-light);
@@ -267,63 +274,67 @@ const RELIGIOUS_QUESTIONS_BANK = [
     padding:24px 14px 60px;
   }
   .app{ width:100%; max-width:480px; }
-  .brand{ text-align:center; margin-bottom:22px; }
-  .brand .beads{ font-size:26px; letter-spacing:6px; color:var(--gold); opacity:.85; }
-  .brand h1{ font-family:'Amiri',serif; font-size:30px; margin:6px 0 2px; color:var(--gold-light); }
+  .brand{ text-align:center; margin-bottom:26px; }
+  .brand .beads{ font-size:26px; letter-spacing:6px; color:var(--gold); opacity:.9; }
+  .brand h1{ font-family:'Amiri',serif; font-size:32px; margin:8px 0 2px; color:var(--gold-light); text-shadow:0 0 22px rgba(255,138,92,0.35); }
   .brand p{ margin:0; color:var(--text-dim); font-size:13px; }
   .card{
-    background:linear-gradient(180deg, rgba(244,236,216,0.05), rgba(244,236,216,0.02));
-    border:1px solid rgba(201,162,92,0.35);
-    border-radius:18px;
-    padding:22px;
-    margin-bottom:16px;
+    background:linear-gradient(160deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015));
+    border:var(--card-border-w) solid rgba(255,138,92,0.28);
+    border-radius:var(--radius-card);
+    padding:24px 22px;
+    margin-bottom:18px;
+    box-shadow:0 14px 34px rgba(10,4,30,0.35);
+    transition:border-radius .25s ease, background .25s ease;
   }
   .card h2{ font-family:'Amiri',serif; font-size:20px; color:var(--gold-light); margin:0 0 14px; text-align:center; }
   label{ display:block; font-size:13px; color:var(--text-dim); margin:12px 0 6px; }
   input[type=text], input[type=password]{
     width:100%;
-    padding:12px 14px;
-    border-radius:10px;
-    border:1px solid rgba(201,162,92,0.4);
-    background:rgba(15,43,40,0.55);
+    padding:13px 18px;
+    border-radius:var(--radius-input);
+    border:1px solid rgba(255,138,92,0.35);
+    background:rgba(36,23,80,0.55);
     color:var(--text-light);
     font-family:'Cairo',sans-serif;
     font-size:15px;
     outline:none;
   }
-  input:focus{ border-color:var(--gold); }
+  input:focus{ border-color:var(--gold); box-shadow:0 0 0 3px rgba(255,138,92,0.18); }
   .btn{
-    width:100%; padding:13px; border-radius:10px; border:none;
-    background:linear-gradient(180deg, var(--gold-light), var(--gold));
-    color:#1c2b26; font-family:'Cairo',sans-serif; font-weight:800; font-size:15px;
-    cursor:pointer; margin-top:16px;
+    width:100%; display:block; margin:18px 0 0;
+    padding:14px; border-radius:var(--radius-btn); border:1.5px solid var(--btn-border);
+    background:linear-gradient(var(--btn-angle), var(--gold), var(--gold-light));
+    color:#1c1030; font-family:'Cairo',sans-serif; font-weight:800; font-size:15px;
+    cursor:pointer; box-shadow:0 10px 24px rgba(255,138,92,0.28);
+    transition:transform .15s ease, box-shadow .15s ease, border-radius .25s ease, background .25s ease;
   }
-  .btn:active{ transform:scale(.97); }
-  .btn:disabled{ background:#3c4a45; color:#7c8d87; cursor:not-allowed; }
+  .btn:active{ transform:scale(.98); box-shadow:0 4px 14px rgba(255,138,92,0.24); }
+  .btn:disabled{ background:#3a3060; color:#8b81a8; cursor:not-allowed; box-shadow:none; }
   .switch-link{ text-align:center; margin-top:14px; font-size:13px; color:var(--text-dim); }
   .switch-link a{ color:var(--gold-light); cursor:pointer; text-decoration:underline; }
   .error{ color:var(--danger); font-size:13px; text-align:center; margin-top:10px; min-height:16px; }
   .success{ color:var(--ok); font-size:13px; text-align:center; margin-top:10px; min-height:16px; }
-  .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; font-size:13px; color:var(--text-dim); }
+  .topbar{ display:flex; flex-direction:row-reverse; justify-content:flex-end; align-items:center; gap:16px; flex-wrap:wrap; margin-bottom:18px; font-size:13px; color:var(--text-dim); padding:8px 14px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,138,92,0.2); border-radius:999px; }
   .topbar .user{ color:var(--gold-light); font-weight:700; }
   .topbar .logout{ cursor:pointer; text-decoration:underline; }
   .progress-wrap{ margin-bottom:6px; }
   .progress-label{ display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:5px; }
-  .progress-bar{ height:8px; border-radius:6px; background:rgba(244,236,216,0.1); overflow:hidden; }
-  .progress-bar-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--gold-light)); transition:width .3s ease; }
-  .day-badge{ display:inline-block; background:rgba(201,162,92,0.15); border:1px solid rgba(201,162,92,0.4); color:var(--gold-light); font-size:12px; padding:4px 12px; border-radius:20px; margin-bottom:10px; }
-  .dhikr-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(244,236,216,0.03); border:1px solid rgba(201,162,92,0.18); margin-bottom:10px; }
-  .dhikr-item.done{ border-color:rgba(127,174,134,0.6); background:rgba(127,174,134,0.08); }
+  .progress-bar{ height:10px; border-radius:999px; background:rgba(255,255,255,0.08); overflow:hidden; }
+  .progress-bar-fill{ height:100%; background:linear-gradient(90deg, var(--gold), var(--ok)); transition:width .3s ease; }
+  .day-badge{ display:inline-block; background:rgba(255,138,92,0.15); border:1px solid rgba(255,138,92,0.4); color:var(--gold-light); font-size:12px; padding:5px 14px; border-radius:20px; margin-bottom:10px; }
+  .dhikr-item{ display:flex; flex-direction:row-reverse; align-items:center; justify-content:space-between; gap:10px; padding:14px 16px; border-radius:20px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,138,92,0.18); margin-bottom:10px; }
+  .dhikr-item.done{ border-color:rgba(61,220,151,0.6); background:rgba(61,220,151,0.08); }
   .dhikr-text{ font-family:'Amiri',serif; font-size:17px; color:var(--text-light); }
   .dhikr-count{ font-size:12px; color:var(--text-dim); margin-top:2px; }
   .tap-btn{
-    width:56px; height:56px; border-radius:50%; border:2px solid var(--gold);
-    background:radial-gradient(circle at 35% 30%, #274d46, #123832);
+    width:58px; height:58px; border-radius:18px; border:2px solid var(--gold);
+    background:radial-gradient(circle at 35% 30%, #3a2a6a, #1a1035);
     color:var(--gold-light); font-size:13px; font-weight:700; cursor:pointer;
     flex-shrink:0; display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.1;
   }
-  .tap-btn:active{ transform:scale(.9); }
-  .tap-btn.done{ background:var(--ok); border-color:var(--ok); color:#0f2b28; }
+  .tap-btn:active{ transform:scale(.9) rotate(-4deg); }
+  .tap-btn.done{ background:var(--ok); border-color:var(--ok); color:#1a1035; }
   .tap-btn:disabled:not(.done){ opacity:.5; cursor:not-allowed; }
   .tip-box{ text-align:center; padding:10px 4px 4px; }
   .tip-box .beads-top{ font-size:20px; color:var(--gold); letter-spacing:5px; margin-bottom:10px; }
@@ -333,12 +344,9 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .locked-note{ text-align:center; color:var(--text-dim); font-size:13px; margin-top:10px; line-height:1.7; }
   .finished-banner{ text-align:center; font-family:'Amiri',serif; font-size:19px; color:var(--gold-light); line-height:1.8; }
   .hint{ font-size:12px; color:var(--text-dim); text-align:center; margin-top:6px; }
-  .khatma-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:8px; margin-top:14px; }
-  .khatma-cell{ aspect-ratio:1; border-radius:10px; border:1px solid rgba(201,162,92,0.35); background:rgba(244,236,216,0.03); color:var(--text-dim); font-family:'Cairo',sans-serif; font-size:13px; cursor:pointer; }
-  .khatma-cell.done{ background:var(--ok); border-color:var(--ok); color:#0f2b28; font-weight:700; }
   .prayer-card{ padding:16px 14px; }
   .prayer-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:6px; }
-  .prayer-item{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; border-radius:10px; background:rgba(244,236,216,0.03); border:1px solid rgba(201,162,92,0.18); font-size:11px; color:var(--text-dim); }
+  .prayer-item{ display:flex; flex-direction:column; align-items:center; gap:4px; padding:8px 4px; border-radius:10px; background:rgba(253,246,240,0.03); border:1px solid rgba(255,138,92,0.18); font-size:11px; color:var(--text-dim); }
   .prayer-item b{ color:var(--gold-light); font-size:13px; }
   .loading{ text-align:center; color:var(--text-dim); padding:40px 0; }
   .sync-badge{ font-size:11px; color:var(--text-dim); text-align:center; margin-top:-8px; margin-bottom:14px; }
@@ -354,52 +362,90 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .contact-name{ font-family:'Amiri',serif; font-size:26px; color:var(--gold-light); margin:0 0 4px; }
   .contact-role{ font-size:13px; color:var(--text-dim); margin-bottom:26px; }
   .contact-role::before{ content:'✦ '; color:var(--gold); }
-  .btn-contact{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:15px; border-radius:14px; text-decoration:none; font-weight:800; font-size:15px; margin-bottom:12px; transition:transform .15s ease; }
+  .btn-contact{ display:flex; flex-direction:row-reverse; align-items:center; justify-content:center; gap:10px; width:100%; padding:15px; border-radius:var(--radius-btn); text-decoration:none; font-weight:800; font-size:15px; margin-bottom:12px; transition:transform .15s ease, border-radius .25s ease; }
   .btn-contact:active{ transform:scale(.97); }
-  .btn-wa{ background:linear-gradient(180deg,#2fe07a,#25d366); color:#0b3320; }
+  .btn-wa{ background:linear-gradient(120deg,#25d366,#2fe07a); color:#0b3320; }
   .btn-call{ background:transparent; border:1.5px solid var(--gold); color:var(--gold-light); }
   .btn-contact svg{ width:20px; height:20px; flex-shrink:0; }
   .contact-footer-note{ margin-top:18px; font-size:12px; color:var(--text-dim); line-height:1.8; }
 
-  .nav-row{ display:flex; gap:8px; margin-bottom:14px; overflow-x:auto; padding-bottom:2px; }
-  .nav-btn{ flex-shrink:0; padding:8px 14px; border-radius:20px; border:1px solid rgba(201,162,92,0.35); background:rgba(244,236,216,0.03); color:var(--text-dim); font-size:12.5px; font-family:'Cairo',sans-serif; cursor:pointer; white-space:nowrap; }
-  .nav-btn.active{ background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#1c2b26; font-weight:800; border-color:transparent; }
-  .points-badge{ display:flex; align-items:center; justify-content:center; gap:6px; background:rgba(201,162,92,0.12); border:1px solid rgba(201,162,92,0.35); color:var(--gold-light); font-weight:800; font-size:13px; padding:7px 10px; border-radius:12px; margin-bottom:14px; }
+  .nav-row{ display:flex; flex-direction:row-reverse; gap:8px; margin-bottom:16px; overflow-x:auto; padding-bottom:4px; justify-content:flex-end; }
+
+  /* ===== شرائط الأقسام الثلاثة في الصفحة الرئيسية ===== */
+  /* ===== زر الرجوع في الصفحات الداخلية ===== */
+  .back-row{ margin-bottom:14px; }
+  .back-btn{
+    display:inline-flex; align-items:center; gap:6px; padding:9px 18px;
+    border:1.5px solid var(--gold); border-radius:var(--radius-btn);
+    background:rgba(255,255,255,0.04); color:var(--gold-light);
+    font-family:'Cairo',sans-serif; font-weight:800; font-size:13.5px; cursor:pointer;
+    transition:transform .15s ease, border-radius .25s ease;
+  }
+  .back-btn:active{ transform:scale(.95); }
+
+  .category-nav{ margin-bottom:16px; }
+  .category-band{
+    display:block; width:100%; text-align:center; padding:18px 16px; margin-bottom:10px;
+    border:none; cursor:pointer; font-family:'Cairo',sans-serif; font-weight:800; font-size:15.5px; color:#fff;
+    transition:transform .15s ease, border-radius .25s ease;
+  }
+  .category-band:active{ transform:scale(.98); }
+  .category-band.cat-learn{ background:linear-gradient(120deg,#2fd6a8,#0b3f38); border-radius:24px 8px 24px 8px; box-shadow:0 10px 24px rgba(47,214,168,.3); }
+  .category-band.cat-social{ background:linear-gradient(120deg,#ff5da2,#3d1030); border-radius:8px 24px 8px 24px; box-shadow:0 10px 24px rgba(255,93,162,.3); }
+  .category-band.cat-account{ background:linear-gradient(120deg,#e6b80a,#7a3d5a); border-radius:999px; box-shadow:0 10px 24px rgba(230,184,10,.3); }
+  .category-band.open{ box-shadow:0 4px 12px rgba(0,0,0,.3) inset; }
+
+  .category-stack{ display:flex; flex-direction:column; gap:10px; margin:-2px 0 16px; }
+  .stack-item{
+    display:block; width:100%; text-align:center; padding:15px; border:none; cursor:pointer;
+    font-family:'Cairo',sans-serif; font-weight:700; font-size:14.5px; transition:transform .12s ease;
+  }
+  .stack-item:active{ transform:scale(.97); }
+  .stack-item:nth-child(6n+1){ border-radius:18px; background:linear-gradient(100deg,#ffd166,#ff9f45); color:#3d2200; }
+  .stack-item:nth-child(6n+2){ border-radius:999px; background:linear-gradient(100deg,#4fb6ff,#9adcff); color:#08243d; }
+  .stack-item:nth-child(6n+3){ border-radius:4px 22px 4px 22px; background:linear-gradient(100deg,#ff5e3a,#ffa26b); color:#3d0f04; }
+  .stack-item:nth-child(6n+4){ border-radius:22px 4px 22px 4px; background:linear-gradient(100deg,#3ddc97,#7cf0cf); color:#04211d; }
+  .stack-item:nth-child(6n+5){ border-radius:14px; background:linear-gradient(100deg,#c86dfa,#f2b3ff); color:#2b0f3d; }
+  .stack-item:nth-child(6n+0){ border-radius:999px 14px 999px 14px; background:linear-gradient(100deg,#ff5da2,#ffa9cf); color:#2a0a1e; }
+  .nav-btn{ flex-shrink:0; padding:9px 16px; border-radius:14px; border:1px solid rgba(255,138,92,0.3); background:rgba(255,255,255,0.03); color:var(--text-dim); font-size:12.5px; font-family:'Cairo',sans-serif; cursor:pointer; white-space:nowrap; }
+  .nav-btn.active{ background:linear-gradient(120deg, var(--gold), var(--gold-light)); color:#1c1030; font-weight:800; border-color:transparent; box-shadow:0 6px 16px rgba(255,138,92,0.3); }
+  .points-badge{ display:flex; flex-direction:row-reverse; align-items:center; justify-content:center; gap:6px; background:rgba(255,138,92,0.12); border:1px solid rgba(255,138,92,0.35); color:var(--gold-light); font-weight:800; font-size:13px; padding:8px 12px; border-radius:16px; margin-bottom:14px; }
 
   .wheel-card{ text-align:center; }
   .wheel-wrap{ position:relative; width:230px; height:230px; margin:10px auto 18px; }
   .wheel-wrap.disabled{ opacity:.55; }
   .wheel-group{ transform-origin:100px 100px; transition: transform 4.2s cubic-bezier(0.12,0.67,0.1,1); }
   .wheel-pointer{ position:absolute; top:-6px; left:50%; transform:translateX(-50%); font-size:22px; color:var(--gold-light); filter:drop-shadow(0 2px 2px rgba(0,0,0,0.4)); }
-  .wheel-win-banner{ background:rgba(127,174,134,0.15); border:1px solid var(--ok); color:var(--ok); font-weight:800; font-size:14px; padding:10px; border-radius:12px; margin-bottom:12px; }
+  .wheel-win-banner{ background:rgba(61,220,151,0.15); border:1px solid var(--ok); color:var(--ok); font-weight:800; font-size:14px; padding:10px; border-radius:12px; margin-bottom:12px; }
   .store-cat-title{ font-family:'Amiri',serif; font-size:16px; color:var(--gold-light); margin:16px 0 8px; text-align:right; }
-  .store-item{ padding:14px; border-radius:12px; border:1px solid rgba(201,162,92,0.18); background:rgba(244,236,216,0.03); margin-bottom:10px; }
-  .store-item.unlocked{ border-color:rgba(127,174,134,0.5); background:rgba(127,174,134,0.06); }
+  .store-item{ padding:14px; border-radius:12px; border:1px solid rgba(255,138,92,0.18); background:rgba(253,246,240,0.03); margin-bottom:10px; }
+  .store-item.unlocked{ border-color:rgba(61,220,151,0.5); background:rgba(61,220,151,0.06); }
   .store-item-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; }
   .store-item-name{ font-size:14px; color:var(--text-light); font-weight:700; display:flex; align-items:center; gap:6px; }
   .store-item-cost{ font-size:12px; color:var(--gold-light); white-space:nowrap; }
-  .btn-buy{ padding:8px 14px; border-radius:9px; border:none; background:linear-gradient(180deg, var(--gold-light), var(--gold)); color:#1c2b26; font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap; }
-  .btn-buy:disabled{ background:#3c4a45; color:#7c8d87; cursor:not-allowed; }
+  .btn-buy{ padding:9px 16px; border-radius:var(--radius-btn); border:none; background:linear-gradient(var(--btn-angle), var(--gold), var(--gold-light)); color:#1c1030; font-weight:800; font-size:12.5px; cursor:pointer; white-space:nowrap; }
+  .btn-buy:disabled{ background:#3a3060; color:#8b81a8; cursor:not-allowed; }
   .store-item-text{ margin-top:10px; font-family:'Amiri',serif; font-size:16px; color:var(--gold-light); line-height:1.8; }
   .lock-icon{ opacity:.8; }
 
   .quiz-q{ font-family:'Amiri',serif; font-size:18px; color:var(--text-light); line-height:1.8; text-align:center; margin:8px 0 16px; }
-  .quiz-opt{ display:block; width:100%; text-align:right; padding:12px 14px; border-radius:10px; border:1px solid rgba(201,162,92,0.3); background:rgba(244,236,216,0.03); color:var(--text-light); font-family:'Cairo',sans-serif; font-size:14px; margin-bottom:10px; cursor:pointer; }
-  .quiz-opt.correct{ border-color:var(--ok); background:rgba(127,174,134,0.15); color:var(--ok); }
-  .quiz-opt.wrong{ border-color:var(--danger); background:rgba(201,106,79,0.15); color:var(--danger); }
+  .quiz-opt{ display:block; width:100%; text-align:right; padding:13px 16px; border-radius:var(--radius-btn); border:1px solid rgba(255,138,92,0.28); background:rgba(255,255,255,0.03); color:var(--text-light); font-family:'Cairo',sans-serif; font-size:14px; margin-bottom:10px; cursor:pointer; transition:transform .12s ease, border-radius .25s ease; }
+  .quiz-opt:active{ transform:scale(.98); }
+  .quiz-opt.correct{ border-color:var(--ok); background:rgba(61,220,151,0.15); color:var(--ok); }
+  .quiz-opt.wrong{ border-color:var(--danger); background:rgba(224,82,96,0.15); color:var(--danger); }
   .quiz-opt:disabled{ cursor:default; }
   .quiz-feedback{ text-align:center; font-size:13px; margin-top:8px; min-height:18px; }
   .quiz-feedback.ok{ color:var(--ok); }
   .quiz-feedback.err{ color:var(--danger); }
 
-  .rank-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(244,236,216,0.03); border:1px solid rgba(201,162,92,0.18); margin-bottom:8px; }
-  .rank-item.me{ border-color:var(--gold); background:rgba(201,162,92,0.1); }
+  .rank-item{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(253,246,240,0.03); border:1px solid rgba(255,138,92,0.18); margin-bottom:8px; }
+  .rank-item.me{ border-color:var(--gold); background:rgba(255,138,92,0.1); }
   .rank-item.rank-medal-1{ border-color:#ffd76a; background:linear-gradient(135deg,rgba(255,215,106,.18),rgba(255,215,106,.04)); }
   .rank-item.rank-medal-2{ border-color:#c9d3dc; background:linear-gradient(135deg,rgba(201,211,220,.16),rgba(201,211,220,.03)); }
   .rank-item.rank-medal-3{ border-color:#d8a06a; background:linear-gradient(135deg,rgba(216,160,106,.16),rgba(216,160,106,.03)); }
   .rank-item.rank-medal-1 .rank-pos, .rank-item.rank-medal-2 .rank-pos, .rank-item.rank-medal-3 .rank-pos{ background:transparent; font-size:20px; }
   .rank-left{ display:flex; align-items:center; gap:10px; }
-  .rank-pos{ width:26px; height:26px; border-radius:50%; background:rgba(201,162,92,0.15); color:var(--gold-light); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .rank-pos{ width:26px; height:26px; border-radius:50%; background:rgba(255,138,92,0.15); color:var(--gold-light); font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .rank-name{ font-size:14px; color:var(--text-light); font-weight:700; }
   .rank-stats{ font-size:11.5px; color:var(--text-dim); text-align:left; }
   .rank-stats b{ color:var(--gold-light); }
@@ -409,7 +455,7 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .duel-timer.low{ color:var(--danger); animation:pulse 1s infinite; }
   @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.45;} }
   .vs-row{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:16px; }
-  .vs-side{ flex:1; text-align:center; padding:10px 6px; border-radius:12px; border:1px solid rgba(201,162,92,0.25); background:rgba(244,236,216,0.03); }
+  .vs-side{ flex:1; text-align:center; padding:10px 6px; border-radius:12px; border:1px solid rgba(255,138,92,0.25); background:rgba(253,246,240,0.03); }
   .vs-side.me{ border-color:var(--gold); }
   .vs-side .name{ font-weight:800; font-size:13px; color:var(--text-light); }
   .vs-side .score{ font-size:20px; color:var(--gold-light); font-weight:800; margin-top:4px; }
@@ -419,26 +465,26 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .vs-mid{ font-family:'Amiri',serif; font-size:18px; color:var(--gold); flex-shrink:0; }
   .duel-progress{ text-align:center; font-size:12px; color:var(--text-dim); margin-bottom:10px; }
   .queue-spinner{ text-align:center; padding:30px 10px; }
-  .queue-spinner .ring{ width:52px; height:52px; margin:0 auto 16px; border-radius:50%; border:3px solid rgba(201,162,92,0.25); border-top-color:var(--gold); animation:spin 1s linear infinite; }
+  .queue-spinner .ring{ width:52px; height:52px; margin:0 auto 16px; border-radius:50%; border:3px solid rgba(255,138,92,0.25); border-top-color:var(--gold); animation:spin 1s linear infinite; }
   @keyframes spin{ to{ transform:rotate(360deg); } }
   .duel-result{ text-align:center; padding:10px 4px; }
   .duel-result .big-emoji{ font-size:44px; margin-bottom:8px; }
   .duel-result h3{ font-family:'Amiri',serif; font-size:22px; color:var(--gold-light); margin:6px 0 10px; }
   .duel-result .points-line{ font-size:14px; color:var(--ok); margin-bottom:4px; }
   .duel-result .points-line.neg{ color:var(--danger); }
-  .duel-history-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; background:rgba(244,236,216,0.03); border:1px solid rgba(201,162,92,0.15); margin-bottom:8px; font-size:13px; }
+  .duel-history-item{ display:flex; justify-content:space-between; align-items:center; padding:10px 12px; border-radius:10px; background:rgba(253,246,240,0.03); border:1px solid rgba(255,138,92,0.15); margin-bottom:8px; font-size:13px; }
   .duel-history-item .res-win{ color:var(--ok); font-weight:800; }
   .duel-history-item .res-lose{ color:var(--danger); font-weight:800; }
   .duel-history-item .res-tie{ color:var(--text-dim); font-weight:800; }
 
   .bracket-round{ margin-bottom:18px; }
   .bracket-round-title{ font-size:13px; color:var(--gold-light); font-family:'Amiri',serif; margin-bottom:8px; text-align:center; }
-  .bracket-match{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-radius:10px; border:1px solid rgba(201,162,92,0.2); background:rgba(244,236,216,0.03); margin-bottom:8px; font-size:13px; }
+  .bracket-match{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,138,92,0.2); background:rgba(253,246,240,0.03); margin-bottom:8px; font-size:13px; }
   .bracket-match .bp{ flex:1; text-align:center; padding:4px; border-radius:6px; }
   .bracket-match .bp.win{ color:var(--ok); font-weight:800; }
   .bracket-match .bp.pending{ color:var(--text-dim); }
   .prize-list{ display:flex; flex-direction:column; gap:8px; margin-top:10px; }
-  .prize-item{ display:flex; justify-content:space-between; padding:8px 12px; border-radius:8px; background:rgba(201,162,92,0.08); border:1px solid rgba(201,162,92,0.2); font-size:13px; }
+  .prize-item{ display:flex; justify-content:space-between; padding:8px 12px; border-radius:8px; background:rgba(255,138,92,0.08); border:1px solid rgba(255,138,92,0.2); font-size:13px; }
   .prize-item b{ color:var(--gold-light); }
 
   /* ===== نافذة الترحيب المنبثقة ===== */
@@ -451,11 +497,11 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .welcome-overlay.hidden{ display:none; }
   .welcome-modal{
     width:100%; max-width:420px;
-    background:linear-gradient(180deg, var(--bg-deep2), var(--bg-deep));
-    border:1px solid rgba(201,162,92,0.5);
-    border-radius:20px;
-    padding:26px 22px;
-    box-shadow:0 10px 40px rgba(0,0,0,0.5);
+    background:linear-gradient(160deg, var(--bg-deep2), var(--bg-deep));
+    border:1px solid rgba(255,138,92,0.5);
+    border-radius:30px;
+    padding:30px 24px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.55), 0 0 40px rgba(255,138,92,0.12);
     text-align:center;
   }
   .welcome-modal .beads-top{ font-size:22px; color:var(--gold); letter-spacing:5px; margin-bottom:6px; }
@@ -464,30 +510,30 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .welcome-modal .btn{ margin-top:0; }
 
 
-  .level-card{background:linear-gradient(135deg,rgba(201,162,92,.18),rgba(127,174,134,.08));border:1px solid rgba(201,162,92,.4);border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
+  .level-card{background:linear-gradient(135deg,rgba(255,138,92,.18),rgba(61,220,151,.08));border:1px solid rgba(255,138,92,.4);border-radius:16px;padding:16px;margin-bottom:14px;text-align:center}
   .level-title{font-family:'Amiri',serif;font-size:22px;color:var(--gold-light)}
   .level-xp{font-size:12px;color:var(--text-dim);margin:5px 0 9px}
-  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-stat{padding:14px;border:1px solid rgba(201,162,92,.2);border-radius:12px;background:rgba(244,236,216,.03);text-align:center}.profile-stat b{display:block;font-size:22px;color:var(--gold-light)}.profile-stat span{font-size:11px;color:var(--text-dim)}
+  .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.profile-stat{padding:14px;border:1px solid rgba(255,138,92,.2);border-radius:12px;background:rgba(253,246,240,.03);text-align:center}.profile-stat b{display:block;font-size:22px;color:var(--gold-light)}.profile-stat span{font-size:11px;color:var(--text-dim)}
   .topbar .user-profile{display:inline-flex;align-items:center;gap:7px;color:var(--gold-light);font-weight:700;cursor:pointer;border-radius:20px;padding:3px 7px}
   .topbar .top-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1.5px solid var(--gold);background:var(--bg-deep2)}
   .profile-avatar-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:16px}
   .profile-avatar{width:112px;height:112px;border-radius:50%;object-fit:cover;border:3px solid var(--gold);background:var(--bg-deep2)}
   .profile-avatar-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-  .profile-avatar-actions .btn{width:auto;margin-top:0;padding:9px 14px;font-size:13px}
+  .profile-avatar-actions .btn{display:inline-block;width:auto;margin:0;padding:9px 16px;font-size:13px}
   .profile-avatar-hint{font-size:11px;color:var(--text-dim);text-align:center;line-height:1.7}
   .profile-name{font-family:'Amiri',serif;font-size:22px;color:var(--gold-light);margin:0 0 12px;text-align:center}
-  .suggest-card{border:1px solid rgba(201,162,92,.22);border-radius:12px;padding:13px;margin-bottom:9px;background:rgba(244,236,216,.03)}
+  .suggest-card{border:1px solid rgba(255,138,92,.22);border-radius:12px;padding:13px;margin-bottom:9px;background:rgba(253,246,240,.03)}
   .suggest-card p{margin:6px 0;color:var(--text-light);line-height:1.8}.suggest-meta{font-size:11px;color:var(--text-dim)}
-  .friend-row{display:flex;gap:8px}.friend-row input{flex:1}.friend-row .btn{width:auto;white-space:nowrap;margin-top:0}
+  .friend-row{display:flex;flex-direction:row-reverse;gap:8px}.friend-row input{flex:1}.friend-row .btn{display:inline-block;width:auto;white-space:nowrap;margin:0}
 
   /* ===== الستريك + الأوسمة + رسم XP ===== */
-  .streak-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(201,162,92,.16),rgba(229,138,112,.08));border:1px solid rgba(201,162,92,.35);border-radius:16px;padding:14px 16px;margin-bottom:14px}
+  .streak-card{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(255,138,92,.16),rgba(229,138,112,.08));border:1px solid rgba(255,138,92,.35);border-radius:16px;padding:14px 16px;margin-bottom:14px}
   .streak-flame{font-size:34px;line-height:1}
   .streak-info{flex:1}
   .streak-count{font-family:'Amiri',serif;font-size:20px;color:var(--gold-light);font-weight:800}
   .streak-sub{font-size:11.5px;color:var(--text-dim);margin-top:2px}
   .badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:4px}
-  .badge-item{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:12px 6px;border-radius:14px;border:1px solid rgba(201,162,92,.3);background:rgba(244,236,216,.04)}
+  .badge-item{display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;padding:12px 6px;border-radius:14px;border:1px solid rgba(255,138,92,.3);background:rgba(253,246,240,.04)}
   .badge-item .badge-icon{font-size:28px}
   .badge-item.locked{opacity:.38}
   .badge-item.locked .badge-icon{filter:grayscale(1)}
@@ -497,59 +543,59 @@ const RELIGIOUS_QUESTIONS_BANK = [
 
   /* ===== لوحة تحكم الأدمن ===== */
   .admin-grid{display:grid;gap:12px}
-  .admin-stat{padding:14px;border:1px solid rgba(201,162,92,.22);border-radius:12px;background:rgba(244,236,216,.03)}
+  .admin-stat{padding:14px;border:1px solid rgba(255,138,92,.22);border-radius:12px;background:rgba(253,246,240,.03)}
   .admin-stat b{display:block;font-size:22px;color:var(--gold-light);margin-bottom:3px}
   .admin-stat span{font-size:12px;color:var(--text-dim)}
   .admin-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-  .admin-mini{width:auto!important;padding:9px 12px!important;margin-top:0!important;font-size:12px!important}
-  .admin-danger{background:linear-gradient(180deg,#e58a70,#c96a4f)!important;color:#fff!important}
-  .admin-secondary{background:rgba(244,236,216,.08)!important;color:var(--gold-light)!important;border:1px solid rgba(201,162,92,.35)!important}
+  .admin-mini{display:inline-block!important;width:auto!important;padding:9px 14px!important;margin:0!important;border-radius:12px!important;font-size:12px!important}
+  .admin-danger{background:linear-gradient(180deg,#e58a70,#e05260)!important;color:#fff!important}
+  .admin-secondary{background:rgba(253,246,240,.08)!important;color:var(--gold-light)!important;border:1px solid rgba(255,138,92,.35)!important}
   .admin-table{width:100%;border-collapse:collapse;font-size:12px}
-  .admin-table th,.admin-table td{padding:9px 6px;border-bottom:1px solid rgba(201,162,92,.13);vertical-align:middle;text-align:right}
+  .admin-table th,.admin-table td{padding:9px 6px;border-bottom:1px solid rgba(255,138,92,.13);vertical-align:middle;text-align:right}
   .admin-table th{color:var(--gold-light);font-weight:800}
   .admin-table td{color:var(--text-light)}
   .admin-table .muted{color:var(--text-dim)}
   .admin-scroll{overflow:auto;max-height:430px}
-  .admin-badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:10px;border:1px solid rgba(201,162,92,.3);color:var(--gold-light)}
-  .admin-badge.ok{border-color:rgba(127,174,134,.55);color:var(--ok)}
+  .admin-badge{display:inline-block;padding:3px 8px;border-radius:12px;font-size:10px;border:1px solid rgba(255,138,92,.3);color:var(--gold-light)}
+  .admin-badge.ok{border-color:rgba(61,220,151,.55);color:var(--ok)}
   .admin-badge.bad{border-color:rgba(201,106,79,.55);color:var(--danger)}
   .admin-help{font-size:11px;color:var(--text-dim);line-height:1.8;margin-top:8px}
   .admin-section-title{font-family:'Amiri',serif;color:var(--gold-light);font-size:18px;margin:0 0 10px}
-  .admin-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(201,162,92,.35);background:rgba(15,43,40,.55);color:var(--text-light);font-family:'Cairo',sans-serif;margin-bottom:9px}
+  .admin-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,138,92,.35);background:rgba(36,23,80,.55);color:var(--text-light);font-family:'Cairo',sans-serif;margin-bottom:9px}
   textarea.admin-input{min-height:100px;resize:vertical}
   select.admin-input{appearance:auto}
-  .admin-ad-item{border:1px solid rgba(201,162,92,.25);border-radius:12px;padding:12px;margin-bottom:10px;background:rgba(244,236,216,.03)}
+  .admin-ad-item{border:1px solid rgba(255,138,92,.25);border-radius:12px;padding:12px;margin-bottom:10px;background:rgba(253,246,240,.03)}
   .admin-ad-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .admin-ad-item-head b{color:var(--gold-light);font-size:14px}
   .admin-ad-item-body{margin-top:6px;font-size:12.5px;color:var(--text-dim);line-height:1.7}
   .admin-ad-item-img{margin-top:6px;font-size:11px;color:var(--text-dim);word-break:break-all}
 
   .ads-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
-  .ad-card{border:1px solid rgba(201,162,92,.4);border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(201,162,92,.14),rgba(201,162,92,.05))}
+  .ad-card{border:1px solid rgba(255,138,92,.4);border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(255,138,92,.14),rgba(255,138,92,.05))}
   .ad-image{width:100%;border-radius:10px;margin-bottom:10px;display:block;max-height:180px;object-fit:cover}
   .ad-title{font-family:'Amiri',serif;font-size:16px;color:var(--gold-light);margin-bottom:6px}
   .ad-body{font-size:13.5px;color:var(--text-light);line-height:1.8}
 
   /* ---- الشات ---- */
-  .chat-lock-note{text-align:center;padding:22px 14px;color:var(--text-dim);font-size:14px;line-height:1.8;border:1px dashed rgba(201,162,92,.35);border-radius:12px;margin-bottom:12px}
+  .chat-lock-note{text-align:center;padding:22px 14px;color:var(--text-dim);font-size:14px;line-height:1.8;border:1px dashed rgba(255,138,92,.35);border-radius:12px;margin-bottom:12px}
   .chat-messages{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:4px 2px;margin-bottom:12px}
   .chat-msg{max-width:78%;padding:9px 12px;border-radius:14px;font-size:13.5px;line-height:1.7;word-wrap:break-word}
-  .chat-msg-mine{align-self:flex-start;background:linear-gradient(180deg,rgba(201,162,92,.28),rgba(201,162,92,.14));border:1px solid rgba(201,162,92,.4);color:var(--text-light);border-bottom-left-radius:4px}
-  .chat-msg-other{align-self:flex-end;background:rgba(244,236,216,.06);border:1px solid rgba(244,236,216,.12);color:var(--text-light);border-bottom-right-radius:4px}
-  .chat-msg-admin{border-color:var(--gold);box-shadow:0 0 0 1px rgba(201,162,92,.25) inset}
+  .chat-msg-mine{align-self:flex-start;background:linear-gradient(180deg,rgba(255,138,92,.28),rgba(255,138,92,.14));border:1px solid rgba(255,138,92,.4);color:var(--text-light);border-bottom-left-radius:4px}
+  .chat-msg-other{align-self:flex-end;background:rgba(253,246,240,.06);border:1px solid rgba(253,246,240,.12);color:var(--text-light);border-bottom-right-radius:4px}
+  .chat-msg-admin{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,138,92,.25) inset}
   .chat-msg-name{font-size:11px;color:var(--gold-light);font-weight:800;margin-bottom:3px}
   .chat-msg-empty{text-align:center;color:var(--text-dim);font-size:13px;padding:20px 0}
-  .chat-input-row{display:flex;gap:8px;align-items:flex-end}
-  .chat-input-row textarea{flex:1;min-height:44px;max-height:100px;padding:10px 12px;border-radius:10px;border:1px solid rgba(201,162,92,.35);background:rgba(15,43,40,.55);color:var(--text-light);font-family:'Cairo',sans-serif;resize:none}
-  .chat-send-btn{flex-shrink:0;padding:0 18px;height:44px;border-radius:10px;border:none;background:linear-gradient(180deg, var(--gold-light), var(--gold));color:#1c2b26;font-weight:800;cursor:pointer}
-  .admin-chat-status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(201,162,92,.3);border-radius:10px;margin-bottom:14px;background:rgba(244,236,216,.03)}
+  .chat-input-row{display:flex;flex-direction:row-reverse;gap:8px;align-items:flex-end}
+  .chat-input-row textarea{flex:1;min-height:46px;max-height:100px;padding:11px 14px;border-radius:16px;border:1px solid rgba(255,138,92,.35);background:rgba(36,23,80,.55);color:var(--text-light);font-family:'Cairo',sans-serif;resize:none}
+  .chat-send-btn{flex-shrink:0;padding:0 20px;height:46px;border-radius:999px;border:none;background:linear-gradient(120deg, var(--gold), var(--gold-light));color:#1c1030;font-weight:800;cursor:pointer;box-shadow:0 6px 16px rgba(255,138,92,.3)}
+  .admin-chat-status{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border:1px solid rgba(255,138,92,.3);border-radius:10px;margin-bottom:14px;background:rgba(253,246,240,.03)}
   .admin-chat-status b{color:var(--gold-light)}
 
 
 
   /* ===== تحدي 1v1 محلي عبر LocalStorage ===== */
-  .local-duel-card{border-color:rgba(201,162,92,.45)}
-  .local-duel-opponent{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid rgba(201,162,92,.22);border-radius:14px;background:rgba(244,236,216,.03);margin:14px 0}
+  .local-duel-card{border-color:rgba(255,138,92,.45)}
+  .local-duel-opponent{display:flex;align-items:center;gap:14px;padding:14px;border:1px solid rgba(255,138,92,.22);border-radius:14px;background:rgba(253,246,240,.03);margin:14px 0}
   .local-duel-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid var(--gold);background:var(--bg-deep2);flex-shrink:0}
   .local-duel-name{font-weight:800;color:var(--gold-light);font-size:17px}
   .local-duel-status{font-size:12px;color:var(--text-dim);margin-top:4px}
@@ -557,22 +603,22 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .local-duel-status.inactive{color:var(--danger)}
   .local-duel-score{display:flex;justify-content:space-between;gap:8px;margin:12px 0;font-size:13px;color:var(--text-dim)}
   .local-duel-score b{color:var(--gold-light)}
-  .local-duel-matchup{position:relative;display:grid;grid-template-columns:1fr 74px 1fr;align-items:center;gap:8px;margin:18px 0 20px;padding:18px 10px;border:1px solid rgba(201,162,92,.34);border-radius:22px;background:linear-gradient(180deg,rgba(201,162,92,.10),rgba(244,236,216,.025));box-shadow:0 10px 30px rgba(0,0,0,.12),inset 0 0 24px rgba(201,162,92,.035);overflow:hidden}
-  .local-duel-matchup:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(201,162,92,.10),transparent 42%);pointer-events:none}
+  .local-duel-matchup{position:relative;display:grid;grid-template-columns:1fr 74px 1fr;align-items:center;gap:8px;margin:18px 0 20px;padding:18px 10px;border:1px solid rgba(255,138,92,.34);border-radius:22px;background:linear-gradient(180deg,rgba(255,138,92,.10),rgba(253,246,240,.025));box-shadow:0 10px 30px rgba(0,0,0,.12),inset 0 0 24px rgba(255,138,92,.035);overflow:hidden}
+  .local-duel-matchup:before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(255,138,92,.10),transparent 42%);pointer-events:none}
   .local-duel-player{position:relative;z-index:1;text-align:center;min-width:0}
-  .local-duel-player-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 9px;border:3px solid var(--gold-light);background:var(--bg-deep2);box-shadow:0 0 0 5px rgba(201,162,92,.10),0 8px 20px rgba(0,0,0,.24)}
+  .local-duel-player-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 9px;border:3px solid var(--gold-light);background:var(--bg-deep2);box-shadow:0 0 0 5px rgba(255,138,92,.10),0 8px 20px rgba(0,0,0,.24)}
   .local-duel-player-name{font-weight:900;color:var(--text-light);font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 4px}
   .local-duel-player-score{font-size:13px;color:var(--gold-light);font-weight:800;margin-top:5px}
-  .local-duel-vs{position:relative;z-index:2;width:70px;height:70px;margin:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#fff8d6 0%,var(--gold-light) 18%,var(--gold) 52%,#9b6b20 100%);color:#17352f;font-family:'Amiri',serif;font-size:20px;font-weight:900;letter-spacing:.5px;border:3px solid #f7dda0;box-shadow:0 0 0 2px rgba(201,162,92,.85),0 0 0 7px rgba(201,162,92,.10),0 0 28px rgba(201,162,92,.28),0 10px 25px rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(255,255,255,.35)}
-  .local-duel-vs::before,.local-duel-vs::after{content:'';position:absolute;top:50%;width:34px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-light));box-shadow:0 0 8px rgba(201,162,92,.35)}
+  .local-duel-vs{position:relative;z-index:2;width:70px;height:70px;margin:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 35% 28%,#fff8d6 0%,var(--gold-light) 18%,var(--gold) 52%,#9b6b20 100%);color:#17352f;font-family:'Amiri',serif;font-size:20px;font-weight:900;letter-spacing:.5px;border:3px solid #f7dda0;box-shadow:0 0 0 2px rgba(255,138,92,.85),0 0 0 7px rgba(255,138,92,.10),0 0 28px rgba(255,138,92,.28),0 10px 25px rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(255,255,255,.35)}
+  .local-duel-vs::before,.local-duel-vs::after{content:'';position:absolute;top:50%;width:34px;height:1px;background:linear-gradient(90deg,transparent,var(--gold-light));box-shadow:0 0 8px rgba(255,138,92,.35)}
   .local-duel-vs::before{right:100%;transform:translateY(-50%) rotate(0deg);transform-origin:right center}
   .local-duel-vs::after{left:100%;transform:translateY(-50%) rotate(180deg);transform-origin:left center}
   .local-duel-vs{animation:luxuryVsGlow 2.8s ease-in-out infinite}
-  @keyframes luxuryVsGlow{0%,100%{box-shadow:0 0 0 2px rgba(201,162,92,.85),0 0 0 7px rgba(201,162,92,.10),0 0 22px rgba(201,162,92,.22),0 10px 25px rgba(0,0,0,.28)}50%{box-shadow:0 0 0 2px rgba(201,162,92,1),0 0 0 8px rgba(201,162,92,.14),0 0 38px rgba(255,214,115,.38),0 10px 25px rgba(0,0,0,.28)}}
-  .local-duel-player.me .local-duel-player-avatar{border-color:var(--gold-light);box-shadow:0 0 0 5px rgba(201,162,92,.13),0 8px 20px rgba(0,0,0,.24)}
+  @keyframes luxuryVsGlow{0%,100%{box-shadow:0 0 0 2px rgba(255,138,92,.85),0 0 0 7px rgba(255,138,92,.10),0 0 22px rgba(255,138,92,.22),0 10px 25px rgba(0,0,0,.28)}50%{box-shadow:0 0 0 2px rgba(255,138,92,1),0 0 0 8px rgba(255,138,92,.14),0 0 38px rgba(255,214,115,.38),0 10px 25px rgba(0,0,0,.28)}}
+  .local-duel-player.me .local-duel-player-avatar{border-color:var(--gold-light);box-shadow:0 0 0 5px rgba(255,138,92,.13),0 8px 20px rgba(0,0,0,.24)}
   .local-duel-player.winner .local-duel-player-avatar{border-color:#ffe39a;box-shadow:0 0 0 5px rgba(255,214,115,.22),0 0 28px rgba(255,214,115,.45),0 8px 20px rgba(0,0,0,.24)}
   .local-duel-crown{position:absolute;left:50%;top:-24px;transform:translateX(-50%) rotate(-8deg);font-size:31px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.35));animation:crownFloat 1.8s ease-in-out infinite;z-index:4}
-  .local-duel-winner-badge{display:inline-block;margin-top:7px;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,220,130,.65);background:rgba(201,162,92,.12);color:#ffe39a;font-size:10px;font-weight:900}
+  .local-duel-winner-badge{display:inline-block;margin-top:7px;padding:3px 10px;border-radius:999px;border:1px solid rgba(255,220,130,.65);background:rgba(255,138,92,.12);color:#ffe39a;font-size:10px;font-weight:900}
   @keyframes crownFloat{0%,100%{transform:translateX(-50%) rotate(-8deg) translateY(0)}50%{transform:translateX(-50%) rotate(-8deg) translateY(-4px)}}
   @media(max-width:420px){.local-duel-matchup{grid-template-columns:1fr 62px 1fr;padding:16px 4px}.local-duel-player-avatar{width:76px;height:76px}.local-duel-vs{width:52px;height:52px;font-size:17px}.local-duel-vs::before,.local-duel-vs::after{width:24px}.local-duel-player-name{font-size:13px}}
   .local-duel-result{text-align:center;padding:16px 6px}
@@ -580,12 +626,127 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .local-duel-result h3{font-family:'Amiri',serif;color:var(--gold-light);font-size:24px;margin:8px 0}
   .local-duel-note{font-size:12px;color:var(--text-dim);line-height:1.9;text-align:center}
   .local-duel-admin-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .local-duel-admin-grid .btn{margin-top:0}
+  .local-duel-admin-grid .btn{width:100%;margin:0}
   @media(max-width:420px){.local-duel-admin-grid{grid-template-columns:1fr}}
+
+  /* ===================================================================
+     ثيم مختلف لكل صفحة: ألوان + شكل مختلف (نصف قطر الحواف + زوايا الأزرار)
+     يعتمد على data-page المضبوطة على body حسب متغير view الحالي
+     =================================================================== */
+
+  /* تسجيل الدخول / التسجيل — بنفسجي-كورال (الافتراضي) */
+  body[data-page="login"], body[data-page="register"], body[data-page="loading"]{
+    --gold:#ff8a5c; --gold-light:#ffb199; --ok:#3ddc97; --danger:#e05260;
+    --bg-deep:#1a1035; --bg-deep2:#241750; --text-dim:#c7b8e0;
+    --radius-card:28px; --radius-btn:999px; --radius-input:16px; --btn-angle:120deg; --btn-border:transparent;
+  }
+
+  /* الرئيسية — أخضر زمردي / تركواز، بطاقات مربّعة الزوايا نسبياً */
+  body[data-page="main"]{
+    --gold:#2fd6a8; --gold-light:#7cf0cf; --ok:#ffd166; --danger:#ff6b6b;
+    --bg-deep:#062b26; --bg-deep2:#0b3f38; --text-dim:#a9d8ce;
+    --radius-card:20px; --radius-btn:12px; --radius-input:12px; --btn-angle:90deg; --btn-border:transparent;
+  }
+
+  /* المسابقات ومراجعة الأخطاء — برتقالي ناري حماسي، زوايا متوسطة */
+  body[data-page="quiz"], body[data-page="review"]{
+    --gold:#ff5e3a; --gold-light:#ffa26b; --ok:#7ee081; --danger:#ff3860;
+    --bg-deep:#2a0f08; --bg-deep2:#3d160b; --text-dim:#e0b8a6;
+    --radius-card:16px; --radius-btn:10px; --radius-input:10px; --btn-angle:60deg; --btn-border:transparent;
+  }
+
+  /* عجلة الحظ والمتجر — أرجواني/ذهبي احتفالي، دائري جداً */
+  body[data-page="wheel"], body[data-page="store"]{
+    --gold:#e6b80a; --gold-light:#ffe27a; --ok:#3ddc97; --danger:#ff5b7a;
+    --bg-deep:#2b0f3d; --bg-deep2:#3d1656; --text-dim:#d8c2e8;
+    --radius-card:34px; --radius-btn:999px; --radius-input:20px; --btn-angle:135deg; --btn-border:transparent;
+  }
+
+  /* المتصدرون / الملف الشخصي / الأصدقاء / الفرق / ساهم بسؤالك — وردي دافئ */
+  body[data-page="leaderboard"], body[data-page="profile"], body[data-page="friends"], body[data-page="team"], body[data-page="suggest"]{
+    --gold:#ff5da2; --gold-light:#ffa9cf; --ok:#3ddc97; --danger:#ff6b6b;
+    --bg-deep:#2a0a1e; --bg-deep2:#3d1030; --text-dim:#e0b8cf;
+    --radius-card:22px; --radius-btn:18px; --radius-input:14px; --btn-angle:100deg; --btn-border:transparent;
+  }
+
+  /* التحديات والبطولات — أحمر/أسود قتالي، زوايا حادة */
+  body[data-page="duel"], body[data-page="local-duel"], body[data-page="duel-match"], body[data-page="tournament"]{
+    --gold:#ff2d55; --gold-light:#ff7a94; --ok:#3ddc97; --danger:#ffce00;
+    --bg-deep:#120608; --bg-deep2:#210b10; --text-dim:#d9a9ae;
+    --radius-card:8px; --radius-btn:6px; --radius-input:6px; --btn-angle:0deg; --btn-border:var(--gold);
+  }
+
+  /* الشات — نعناعي هادئ */
+  body[data-page="chat"]{
+    --gold:#2dd4bf; --gold-light:#7ee8d8; --ok:#a3e635; --danger:#fb7185;
+    --bg-deep:#04211d; --bg-deep2:#08332c; --text-dim:#a6d8cf;
+    --radius-card:20px; --radius-btn:16px; --radius-input:16px; --btn-angle:90deg; --btn-border:transparent;
+  }
+
+  /* لوحات الأدمن — رمادي محايد أنيق، زوايا بسيطة */
+  body[data-page="admin"], body[data-page="control-panel"]{
+    --gold:#8b93a8; --gold-light:#c3c9d6; --ok:#3ddc97; --danger:#ff6b6b;
+    --bg-deep:#12141c; --bg-deep2:#1b1e29; --text-dim:#9aa1b4;
+    --radius-card:12px; --radius-btn:8px; --radius-input:8px; --btn-angle:180deg; --btn-border:transparent;
+  }
+
+  /* ===================================================================
+     الوضع الليلي / النهاري — يعمل فوق ثيمات الصفحات، بيغيّر خلفية عامة
+     وألوان النصوص فقط، ويسيب لون كل صفحة المميز (--gold) زي ما هو
+     =================================================================== */
+  body[data-mode="light"]{
+    --bg-deep:#f7f2ff;
+    --bg-deep2:#ffffff;
+    --text-light:#241750;
+    --text-dim:#6a5c92;
+    background:
+      radial-gradient(circle at 12% 8%, #ffffff 0%, transparent 48%),
+      radial-gradient(circle at 92% 12%, #ff8a5c14 0%, transparent 42%),
+      radial-gradient(circle at 88% 90%, #3ddc9714 0%, transparent 40%),
+      linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
+  }
+  body[data-mode="light"] input[type=text],
+  body[data-mode="light"] input[type=password],
+  body[data-mode="light"] .admin-input,
+  body[data-mode="light"] .chat-input-row textarea{
+    background:rgba(36,23,80,0.05);
+    border-color:rgba(36,23,80,0.2);
+  }
+  body[data-mode="light"] .card,
+  body[data-mode="light"] .dhikr-item,
+  body[data-mode="light"] .prayer-item,
+  body[data-mode="light"] .quiz-opt,
+  body[data-mode="light"] .nav-btn,
+  body[data-mode="light"] .profile-stat,
+  body[data-mode="light"] .chat-msg-other,
+  body[data-mode="light"] .topbar,
+  body[data-mode="light"] .progress-bar{
+    background:rgba(36,23,80,0.05);
+  }
+  body[data-mode="light"] .btn:disabled{
+    background:#e3ddf2; color:#a89ecb;
+  }
+  body[data-mode="light"] .welcome-overlay{
+    background:rgba(36,23,80,0.45);
+  }
+  .mode-toggle-btn{
+    position:fixed; top:16px; left:16px; z-index:999;
+    width:42px; height:42px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,138,92,0.35);
+    color:var(--text-light); font-size:18px; cursor:pointer;
+    box-shadow:0 6px 16px rgba(10,4,30,0.25);
+    transition:transform .15s ease, background .2s ease;
+  }
+  .mode-toggle-btn:active{ transform:scale(.9); }
+  body[data-mode="light"] .mode-toggle-btn{
+    background:rgba(36,23,80,0.06); border-color:rgba(36,23,80,0.2);
+  }
 
 </style>
 </head>
 <body>
+<button class="mode-toggle-btn" id="btn-mode-toggle" title="تبديل الوضع الليلي/النهاري">☀️</button>
 <div class="welcome-overlay" id="welcome-overlay">
   <div class="welcome-modal">
     <div class="beads-top">۞ ۞ ۞</div>
@@ -612,6 +773,40 @@ const ADMIN_AVATAR = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/7QBEUGh
 
 const TOTAL_DAYS = 400;
 const REPS_PER_DHIKR = 33;
+const TOTAL_SURAHS = 114;
+// قائمة سور القرآن الكريم بالترتيب مع عدد آيات كل سورة (رواية حفص) — تُستخدم لاقتراح ورد يومي دقيق بالاسم ونطاق الآيات
+const SURAHS = [
+  {name:'الفاتحة',ayahs:7},{name:'البقرة',ayahs:286},{name:'آل عمران',ayahs:200},{name:'النساء',ayahs:176},
+  {name:'المائدة',ayahs:120},{name:'الأنعام',ayahs:165},{name:'الأعراف',ayahs:206},{name:'الأنفال',ayahs:75},
+  {name:'التوبة',ayahs:129},{name:'يونس',ayahs:109},{name:'هود',ayahs:123},{name:'يوسف',ayahs:111},
+  {name:'الرعد',ayahs:43},{name:'إبراهيم',ayahs:52},{name:'الحجر',ayahs:99},{name:'النحل',ayahs:128},
+  {name:'الإسراء',ayahs:111},{name:'الكهف',ayahs:110},{name:'مريم',ayahs:98},{name:'طه',ayahs:135},
+  {name:'الأنبياء',ayahs:112},{name:'الحج',ayahs:78},{name:'المؤمنون',ayahs:118},{name:'النور',ayahs:64},
+  {name:'الفرقان',ayahs:77},{name:'الشعراء',ayahs:227},{name:'النمل',ayahs:93},{name:'القصص',ayahs:88},
+  {name:'العنكبوت',ayahs:69},{name:'الروم',ayahs:60},{name:'لقمان',ayahs:34},{name:'السجدة',ayahs:30},
+  {name:'الأحزاب',ayahs:73},{name:'سبأ',ayahs:54},{name:'فاطر',ayahs:45},{name:'يس',ayahs:83},
+  {name:'الصافات',ayahs:182},{name:'ص',ayahs:88},{name:'الزمر',ayahs:75},{name:'غافر',ayahs:85},
+  {name:'فصلت',ayahs:54},{name:'الشورى',ayahs:53},{name:'الزخرف',ayahs:89},{name:'الدخان',ayahs:59},
+  {name:'الجاثية',ayahs:37},{name:'الأحقاف',ayahs:35},{name:'محمد',ayahs:38},{name:'الفتح',ayahs:29},
+  {name:'الحجرات',ayahs:18},{name:'ق',ayahs:45},{name:'الذاريات',ayahs:60},{name:'الطور',ayahs:49},
+  {name:'النجم',ayahs:62},{name:'القمر',ayahs:55},{name:'الرحمن',ayahs:78},{name:'الواقعة',ayahs:96},
+  {name:'الحديد',ayahs:29},{name:'المجادلة',ayahs:22},{name:'الحشر',ayahs:24},{name:'الممتحنة',ayahs:13},
+  {name:'الصف',ayahs:14},{name:'الجمعة',ayahs:11},{name:'المنافقون',ayahs:11},{name:'التغابن',ayahs:18},
+  {name:'الطلاق',ayahs:12},{name:'التحريم',ayahs:12},{name:'الملك',ayahs:30},{name:'القلم',ayahs:52},
+  {name:'الحاقة',ayahs:52},{name:'المعارج',ayahs:44},{name:'نوح',ayahs:28},{name:'الجن',ayahs:28},
+  {name:'المزمل',ayahs:20},{name:'المدثر',ayahs:56},{name:'القيامة',ayahs:40},{name:'الإنسان',ayahs:31},
+  {name:'المرسلات',ayahs:50},{name:'النبأ',ayahs:40},{name:'النازعات',ayahs:46},{name:'عبس',ayahs:42},
+  {name:'التكوير',ayahs:29},{name:'الانفطار',ayahs:19},{name:'المطففين',ayahs:36},{name:'الانشقاق',ayahs:25},
+  {name:'البروج',ayahs:22},{name:'الطارق',ayahs:17},{name:'الأعلى',ayahs:19},{name:'الغاشية',ayahs:26},
+  {name:'الفجر',ayahs:30},{name:'البلد',ayahs:20},{name:'الشمس',ayahs:15},{name:'الليل',ayahs:21},
+  {name:'الضحى',ayahs:11},{name:'الشرح',ayahs:8},{name:'التين',ayahs:8},{name:'العلق',ayahs:19},
+  {name:'القدر',ayahs:5},{name:'البينة',ayahs:8},{name:'الزلزلة',ayahs:8},{name:'العاديات',ayahs:11},
+  {name:'القارعة',ayahs:11},{name:'التكاثر',ayahs:8},{name:'العصر',ayahs:3},{name:'الهمزة',ayahs:9},
+  {name:'الفيل',ayahs:5},{name:'قريش',ayahs:4},{name:'الماعون',ayahs:7},{name:'الكوثر',ayahs:3},
+  {name:'الكافرون',ayahs:6},{name:'النصر',ayahs:3},{name:'المسد',ayahs:5},{name:'الإخلاص',ayahs:4},
+  {name:'الفلق',ayahs:5},{name:'الناس',ayahs:6}
+];
+const TOTAL_AYAHS = SURAHS.reduce((sum,s)=>sum+s.ayahs,0); // 6236
 
 const DHIKR_LIST = [
   "سبحان الله","الحمد لله","الله أكبر","لا إله إلا الله","أستغفر الله",
@@ -685,13 +880,13 @@ const TOURNAMENT_PRIZES      = { 1:250, 2:180, 3:100, 4:70 }; // جوائز مر
 const WHEEL_SPIN_COOLDOWN_MS = 12 * 60 * 60 * 1000; // لفة واحدة كل 12 ساعة
 // كل قطعة: قيمة النقاط + وزنها النسبي من إجمالي 1000 (قطعة الـ100 نسبتها 1 من 1000 = 1/1000)
 const WHEEL_SEGMENTS = [
-  { value:1,   weight:300, color:'#123832' },
-  { value:3,   weight:250, color:'#0f2b28' },
-  { value:5,   weight:200, color:'#123832' },
-  { value:10,  weight:130, color:'#0f2b28' },
-  { value:15,  weight:80,  color:'#123832' },
-  { value:25,  weight:39,  color:'#0f2b28' },
-  { value:100, weight:1,   color:'#c96a4f' }
+  { value:1,   weight:300, color:'#241750' },
+  { value:3,   weight:250, color:'#1a1035' },
+  { value:5,   weight:200, color:'#241750' },
+  { value:10,  weight:130, color:'#1a1035' },
+  { value:15,  weight:80,  color:'#241750' },
+  { value:25,  weight:39,  color:'#1a1035' },
+  { value:100, weight:1,   color:'#e05260' }
 ];
 
 const STORE_TIPS = [
@@ -870,8 +1065,9 @@ function freshState(){
     quizDate: null,
     quizAnsweredToday: [],
     wheelNextSpinAt: null,
-    khatmaJuz: new Array(30).fill(false),
     khatmaCompletions: 0,
+    wirdAyahCursor: 0,
+    wirdLastDoneDay: null,
     wrongQuestions: {},
     streak: {count:0, longest:0, lastDay:null},
     xpHistory: [],
@@ -894,8 +1090,19 @@ function ensureStateShape(s){
   if(typeof s.quizDate !== 'number') s.quizDate = null;
   if(!Array.isArray(s.quizAnsweredToday)) s.quizAnsweredToday = [];
   if(typeof s.wheelNextSpinAt !== 'number') s.wheelNextSpinAt = null;
-  if(!Array.isArray(s.khatmaJuz) || s.khatmaJuz.length !== 30) s.khatmaJuz = new Array(30).fill(false);
   if(typeof s.khatmaCompletions !== 'number') s.khatmaCompletions = 0;
+  if(typeof s.wirdAyahCursor !== 'number'){
+    // ترقية من النظام القديم (عدد السور) إلى النظام الجديد (مؤشر آيات) إن وُجد تقدّم سابق
+    if(typeof s.wirdSurahsRead === 'number' && s.wirdSurahsRead > 0){
+      let n = s.wirdSurahsRead % TOTAL_SURAHS, cursor = 0;
+      for(let i=0;i<n;i++) cursor += SURAHS[i].ayahs;
+      s.wirdAyahCursor = cursor;
+    } else {
+      s.wirdAyahCursor = 0;
+    }
+    delete s.wirdSurahsRead;
+  }
+  if(typeof s.wirdLastDoneDay !== 'number') s.wirdLastDoneDay = null;
   if(!s.wrongQuestions || typeof s.wrongQuestions !== 'object') s.wrongQuestions = {};
   if(!s.streak || typeof s.streak !== 'object') s.streak = {count:0, longest:0, lastDay:null};
   if(typeof s.streak.count !== 'number') s.streak.count = 0;
@@ -963,55 +1170,14 @@ function renderXpChartSvg(){
   const range = Math.max(maxXp - minXp, 1);
   const ys = hist.map(p => h - pad - ((p.xp - minXp)/range) * (h-2*pad));
   const points = xs.map((x,i)=>`${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ');
-  const dots = xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.6" fill="#c9a25c"/>`).join('');
+  const dots = xs.map((x,i)=>`<circle cx="${x.toFixed(1)}" cy="${ys[i].toFixed(1)}" r="2.6" fill="#ff8a5c"/>`).join('');
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" style="overflow:visible">
-    <polyline points="${points}" fill="none" stroke="#c9a25c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    <polyline points="${points}" fill="none" stroke="#ff8a5c" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
     ${dots}
   </svg>`;
 }
 
-// ===================== متابعة ختمة القرآن =====================
-function khatmaDoneCount(){ return state.khatmaJuz.filter(Boolean).length; }
-function khatmaPercent(){ return Math.round((khatmaDoneCount()/30)*100); }
-function toggleKhatmaJuz(i){
-  state.khatmaJuz[i] = !state.khatmaJuz[i];
-  if(state.khatmaJuz.every(Boolean)){
-    // ختمة كاملة: نسجّلها ونمنح مكافأة، ثم نعيد الشبكة لبداية ختمة جديدة
-    state.khatmaCompletions = (state.khatmaCompletions||0) + 1;
-    addXP(50);
-    state.khatmaJuz = new Array(30).fill(false);
-    alert('مبارك! أتممت ختمة القرآن الكريم 🎉 (+50 XP) وبدأت ختمة جديدة.');
-  }
-}
-function renderKhatma(){
-  const done = khatmaDoneCount();
-  const pct = khatmaPercent();
-  root.innerHTML = `
-    ${topNavHtml('khatma')}
-    <div class="card">
-      <h2>📖 متابعة ختمة القرآن الكريم</h2>
-      <div class="progress-wrap">
-        <div class="progress-label"><span>الأجزاء المقروءة</span><span>${done} / 30</span></div>
-        <div class="progress-bar"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-      </div>
-      <div class="hint">اضغط على رقم الجزء عند الانتهاء من قراءته لتسجيله ومتابعة نسبة تقدّمك.</div>
-      <div class="khatma-grid">
-        ${state.khatmaJuz.map((done,i)=>`<button class="khatma-cell ${done?'done':''}" data-juz="${i}">${done?'✓':(i+1)}</button>`).join('')}
-      </div>
-      <div class="locked-note">عدد الختمات المكتملة: <b>${state.khatmaCompletions||0}</b></div>
-    </div>
-  `;
-  updateSyncBadge();
-  bindTopNav();
-  document.querySelectorAll('[data-juz]').forEach(btn=>{
-    btn.onclick = () => {
-      const i = parseInt(btn.getAttribute('data-juz'));
-      toggleKhatmaJuz(i);
-      render();
-      persist();
-    };
-  });
-}
+// ===================== إحصائية الختمات المكتملة (تُحدَّث من الورد اليومي) =====================
 
 // ===================== راجع أخطاءك (مراجعة متباعدة) =====================
 // فترات المراجعة المتباعدة بالمللي ثانية حسب "صندوق" لايتنر (Leitner) الذي وصل إليه السؤال
@@ -1129,21 +1295,80 @@ function renderReview(){
 }
 
 // ===================== مواقيت الصلاة حسب الموقع =====================
+// نخزن الموقع (خط الطول والعرض) ومواقيت اليوم في localStorage، عشان المتصفح
+// يسأل عن إذن الموقع مرة واحدة بس، مش في كل زيارة أو كل تحديث للصفحة.
 let prayerTimesData = null; // {Fajr,Dhuhr,Asr,Maghrib,Isha, city}
 let prayerTimesStatus = ''; // '', 'loading', 'ok', 'err', 'denied'
+const PRAYER_LOC_KEY = 'rafeeq_prayer_loc';
+const PRAYER_TIMES_CACHE_KEY = 'rafeeq_prayer_times_cache';
+
+function getSavedPrayerLocation(){
+  try{
+    const raw = localStorage.getItem(PRAYER_LOC_KEY);
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function savePrayerLocation(latitude, longitude){
+  try{ localStorage.setItem(PRAYER_LOC_KEY, JSON.stringify({latitude, longitude})); }catch(e){}
+}
+function getCachedPrayerTimesForToday(){
+  try{
+    const raw = localStorage.getItem(PRAYER_TIMES_CACHE_KEY);
+    if(!raw) return null;
+    const c = JSON.parse(raw);
+    if(c && c.date === getTodayEpochDay()) return c.times;
+    return null;
+  }catch(e){ return null; }
+}
+function cachePrayerTimesForToday(times){
+  try{ localStorage.setItem(PRAYER_TIMES_CACHE_KEY, JSON.stringify({date:getTodayEpochDay(), times})); }catch(e){}
+}
+async function fetchPrayerTimesForCoords(latitude, longitude){
+  const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=4`);
+  const data = await res.json();
+  const t = data && data.data && data.data.timings;
+  if(!t) throw new Error('no timings');
+  return { Fajr:t.Fajr, Dhuhr:t.Dhuhr, Asr:t.Asr, Maghrib:t.Maghrib, Isha:t.Isha };
+}
 async function loadPrayerTimes(){
   if(prayerTimesStatus==='loading' || prayerTimesStatus==='ok') return;
-  if(!navigator.geolocation){ prayerTimesStatus='err'; render(); return; }
   prayerTimesStatus='loading';
+
+  // 1) لو عندنا مواقيت مخزّنة لليوم الحالي، استخدمها فوراً من غير أي طلب شبكة أو إذن موقع
+  const cachedTimes = getCachedPrayerTimesForToday();
+  if(cachedTimes){
+    prayerTimesData = cachedTimes;
+    prayerTimesStatus = 'ok';
+    if(view==='main') render();
+    return;
+  }
+
+  // 2) لو عندنا موقع محفوظ من قبل، استخدمه مباشرة من غير ما نطلب إذن الموقع تاني
+  const savedLoc = getSavedPrayerLocation();
+  if(savedLoc){
+    try{
+      const times = await fetchPrayerTimesForCoords(savedLoc.latitude, savedLoc.longitude);
+      prayerTimesData = times;
+      prayerTimesStatus = 'ok';
+      cachePrayerTimesForToday(times);
+    }catch(e){
+      console.warn('prayer times error', e);
+      prayerTimesStatus = 'err';
+    }
+    if(view==='main') render();
+    return;
+  }
+
+  // 3) أول مرة فقط: نطلب إذن الموقع، ونخزنه عشان ما نطلبوش تاني
+  if(!navigator.geolocation){ prayerTimesStatus='err'; render(); return; }
   navigator.geolocation.getCurrentPosition(async (pos)=>{
     try{
       const {latitude,longitude} = pos.coords;
-      const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${latitude}&longitude=${longitude}&method=4`);
-      const data = await res.json();
-      const t = data && data.data && data.data.timings;
-      if(!t) throw new Error('no timings');
-      prayerTimesData = { Fajr:t.Fajr, Dhuhr:t.Dhuhr, Asr:t.Asr, Maghrib:t.Maghrib, Isha:t.Isha };
+      savePrayerLocation(latitude, longitude);
+      const times = await fetchPrayerTimesForCoords(latitude, longitude);
+      prayerTimesData = times;
       prayerTimesStatus='ok';
+      cachePrayerTimesForToday(times);
     }catch(e){
       console.warn('prayer times error', e);
       prayerTimesStatus='err';
@@ -1221,10 +1446,10 @@ function docId(u){ return u.trim().toLowerCase(); }
 
 function defaultAvatarData(){
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#17423c"/><stop offset="1" stop-color="#123832"/></linearGradient></defs>
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3a2a6a"/><stop offset="1" stop-color="#241750"/></linearGradient></defs>
     <circle cx="100" cy="100" r="100" fill="url(#g)"/>
-    <circle cx="100" cy="78" r="34" fill="#e6c98a"/>
-    <path d="M42 174c8-35 31-52 58-52s50 17 58 52" fill="#c9a25c"/>
+    <circle cx="100" cy="78" r="34" fill="#ffb199"/>
+    <path d="M42 174c8-35 31-52 58-52s50 17 58 52" fill="#ff8a5c"/>
   </svg>`;
   return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
 }
@@ -1348,14 +1573,13 @@ function isSuperAdmin(){
 const root = document.getElementById('app');
 let view = 'loading'; // login | register | main
 let currentUser = null;
-let PLATFORM_CLOSED = false;
-let PLATFORM_CLOSE_REASON = '';
 let state = null;
 let errorMsg = '';
 let tickInterval = null;
 let syncStatus = ''; // '', 'saving', 'ok', 'err'
 let authFields = { user:'', pass:'' };
 let prevView = 'login';
+let mainOpenCategory = null;
 let quizAnswered = false;
 let quizSelected = null;
 let quizFeedback = '';
@@ -1403,6 +1627,10 @@ let GROUP_CHAT_MSGS = [];
 let groupChatUnsub = null;
 let siteSettingsUnsub = null;
 let chatInputDraft = { group:'' };
+
+// ---- حالة قفل المنصة بالكامل (ميزة الأدمن) ----
+let PLATFORM_LOCKED = false;     // لو true، الطلاب (غير الأدمن) يُمنعون من استخدام المنصة
+let platformLockUnsub = null;    // استماع دائم لحالة القفل طول ما فيه مستخدم مسجّل دخول
 
 /* ==================================================================
    ============ نظام التحدي الثنائي (1v1 Duel) على Firestore ==========
@@ -2020,12 +2248,11 @@ async function maybeAwardTournamentPrizes(tId){
 
 function render(){
   if(view === 'loading'){ root.innerHTML = `<div class="loading">جارِ التحميل...</div>`; return; }
-  if(PLATFORM_CLOSED && !isSuperAdmin() && !['login','register','admin'].includes(view)){ renderPlatformClosed(); return; }
+  if(PLATFORM_LOCKED && !isSuperAdmin() && currentUser && view !== 'admin'){ renderPlatformLocked(); return; }
   if(view === 'admin'){ renderAdminContact(); return; }
   if(view === 'login' || view === 'register'){ renderAuth(); return; }
   if(view === 'store'){ renderStore(); return; }
   if(view === 'quiz'){ renderQuiz(); return; }
-  if(view === 'khatma'){ renderKhatma(); return; }
   if(view === 'review'){ renderReview(); return; }
   if(view === 'leaderboard'){ renderLeaderboard(); return; }
   if(view === 'profile'){ renderProfile(); return; }
@@ -2042,37 +2269,61 @@ function render(){
   renderMain();
 }
 
-function renderPlatformClosed(){
-  const reason = (PLATFORM_CLOSE_REASON || '').trim();
-  root.innerHTML = `
-    <div class="card" style="text-align:center;">
-      <h2>🚧 المنصة مغلقة مؤقتاً</h2>
-      <div class="admin-help" style="font-size:15px;line-height:1.9;color:var(--text-light);text-align:center;">
-        ${reason ? adminEsc(reason) : 'المنصة مغلقة حالياً من قبل الإدارة، برجاء المحاولة لاحقاً.'}
-      </div>
-      <div class="auth-admin-link" id="closed-go-admin-contact" style="margin-top:16px;">تواصل مع الأدمن</div>
-    </div>`;
-  const link = document.getElementById('closed-go-admin-contact');
-  if(link) link.onclick = () => { prevView = view; view = 'admin'; render(); };
+function navigateToPage(target){
+  if(target === 'quiz'){ ensureQuizDay(); quizAnswered=false; quizSelected=null; quizFeedback=''; quizCurrentIndex=null; }
+  if(target === 'review'){ reviewAnswered=false; reviewSelected=null; reviewCurrentKey=null; }
+  if(target === 'leaderboard'){ leaderboardData = null; }
+  if(target === 'friends'){ friendsProfilesLoaded = false; }
+  if(target === 'team'){ teamData = null; teamsLeaderboardData = null; teamViewMode = 'main'; }
+  if(target === 'tournament'){ tournamentData = null; }
+  if(target === 'chat'){ prevView = view; openChatView(); return; }
+  if(view === 'chat' && target !== 'chat'){ closeChatView(); }
+  if(view === 'wheel' && target !== 'wheel'){ wheelLastWin = null; }
+  prevView = view;
+  view = target; render();
 }
 
-function topNavHtml(active){
-  const items = [
-    { key:'main', label:'🏠 الرئيسية' },
-    { key:'quiz', label:'❓ المسابقات' },
-    { key:'review', label:'🔁 راجع أخطاءك' },
-    { key:'khatma', label:'📖 ختمة القرآن' },
-    { key:'wheel', label:'🎡 عجلة الحظ' },
-    { key:'friends', label:'🧑‍🤝‍🧑 الأصدقاء' },
-    { key:'team', label:'🏳️ الفرق' },
-    { key:'duel', label:'👥 دعوة صديق' },
-    { key:'local-duel', label:'⚔️ بطولة التحدي' },
-    { key:'tournament', label:'🏅 البطولة' },
-    { key:'chat', label:'💬 الشات' },
-    { key:'store', label:'🛒 المتجر' },
-    { key:'leaderboard', label:'🏆 المتصدرون' },
-    { key:'suggest', label:'💡 ساهم بسؤالك' }
-  ];
+function goBackFromPage(){
+  const target = (prevView && prevView !== view) ? prevView : 'main';
+  if(view === 'chat'){ closeChatView(); }
+  view = target;
+  render();
+}
+
+const MAIN_CATEGORY_GROUPS = [
+  { key:'learn', cls:'cat-learn', label:'📖 التعلّم والعبادة', items:[
+      { key:'quiz', label:'❓ المسابقات' },
+      { key:'review', label:'🔁 راجع أخطاءك' },
+      { key:'wheel', label:'🎡 عجلة الحظ' }
+    ]},
+  { key:'social', cls:'cat-social', label:'🧑‍🤝‍🧑 التواصل والمنافسة', items:[
+      { key:'friends', label:'🧑‍🤝‍🧑 الأصدقاء' },
+      { key:'team', label:'🏳️ الفرق' },
+      { key:'duel', label:'👥 دعوة صديق' },
+      { key:'local-duel', label:'⚔️ بطولة التحدي' },
+      { key:'tournament', label:'🏅 البطولة' },
+      { key:'leaderboard', label:'🏆 المتصدرون' },
+      { key:'chat', label:'💬 الشات' }
+    ]},
+  { key:'account', cls:'cat-account', label:'🛒 الحساب والمتجر', items:[
+      { key:'store', label:'🛒 المتجر' },
+      { key:'profile', label:'👤 ملفي الشخصي' },
+      { key:'suggest', label:'💡 ساهم بسؤالك' }
+    ]}
+];
+
+function mainCategoryNavHtml(){
+  const bandsHtml = MAIN_CATEGORY_GROUPS.map(g => {
+    const open = mainOpenCategory === g.key;
+    const stackHtml = open ? `
+      <div class="category-stack">
+        ${g.items.map(it => `<button class="stack-item" data-nav="${it.key}">${it.label}</button>`).join('')}
+      </div>` : '';
+    return `
+      <button class="category-band ${g.cls} ${open?'open':''}" data-cat="${g.key}">${g.label} ${open?'▲':'▼'}</button>
+      ${stackHtml}
+    `;
+  }).join('');
   return `
     <div class="topbar">
       <span class="user-profile" id="btn-profile" title="فتح الملف الشخصي">
@@ -2087,14 +2338,56 @@ function topNavHtml(active){
     </div>
     <div class="sync-badge" id="sync-badge"></div>
     <div class="points-badge">✨ XP: ${state.xp} &nbsp;|&nbsp; ${getLevelInfo(state.xp).icon} ${getLevelInfo(state.xp).name} &nbsp;|&nbsp; ✅ ${state.correctAnswers}</div>
-    <div class="nav-row">
-      ${items.map(it => `<button class="nav-btn ${it.key===active?'active':''}" data-nav="${it.key}">${it.label}</button>`).join('')}
+    <div class="category-nav">${bandsHtml}</div>
+  `;
+}
+
+function bindMainCategoryNav(){
+  document.getElementById('btn-logout').onclick = logout;
+  const profileBtn = document.getElementById('btn-profile');
+  if(profileBtn) profileBtn.onclick = () => { prevView = view; view = 'profile'; render(); };
+  document.getElementById('btn-admin-contact').onclick = () => { prevView = view; view = 'admin'; render(); };
+  const controlPanelBtn = document.getElementById('btn-control-panel');
+  if(controlPanelBtn){
+    controlPanelBtn.onclick = () => { prevView = view; view = 'control-panel'; render(); };
+  }
+  document.querySelectorAll('[data-cat]').forEach(btn => {
+    btn.onclick = () => {
+      const key = btn.getAttribute('data-cat');
+      mainOpenCategory = (mainOpenCategory === key) ? null : key;
+      render();
+    };
+  });
+  document.querySelectorAll('[data-nav]').forEach(btn => {
+    btn.onclick = () => navigateToPage(btn.getAttribute('data-nav'));
+  });
+}
+
+function topNavHtml(active){
+  return `
+    <div class="back-row">
+      <button class="back-btn" id="btn-back">→ رجوع</button>
     </div>
+    <div class="topbar">
+      <span class="user-profile" id="btn-profile" title="فتح الملف الشخصي">
+        <img class="top-avatar" src="${getProfileImage()}" alt="صورة ${currentUser}">
+        <span>${currentUser}</span>
+      </span>
+      <span>
+        ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
+        <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
+        <span class="logout" id="btn-logout">تسجيل الخروج</span>
+      </span>
+    </div>
+    <div class="sync-badge" id="sync-badge"></div>
+    <div class="points-badge">✨ XP: ${state.xp} &nbsp;|&nbsp; ${getLevelInfo(state.xp).icon} ${getLevelInfo(state.xp).name} &nbsp;|&nbsp; ✅ ${state.correctAnswers}</div>
   `;
 }
 
 function bindTopNav(){
   document.getElementById('btn-logout').onclick = logout;
+  const backBtn = document.getElementById('btn-back');
+  if(backBtn) backBtn.onclick = goBackFromPage;
   const profileBtn = document.getElementById('btn-profile');
   if(profileBtn) profileBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'profile'; render(); };
   document.getElementById('btn-admin-contact').onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'admin'; render(); };
@@ -2103,19 +2396,7 @@ function bindTopNav(){
     controlPanelBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'control-panel'; render(); };
   }
   document.querySelectorAll('[data-nav]').forEach(btn => {
-    btn.onclick = () => {
-      const target = btn.getAttribute('data-nav');
-      if(target === 'quiz'){ ensureQuizDay(); quizAnswered=false; quizSelected=null; quizFeedback=''; quizCurrentIndex=null; }
-      if(target === 'review'){ reviewAnswered=false; reviewSelected=null; reviewCurrentKey=null; }
-      if(target === 'leaderboard'){ leaderboardData = null; }
-      if(target === 'friends'){ friendsProfilesLoaded = false; }
-      if(target === 'team'){ teamData = null; teamsLeaderboardData = null; teamViewMode = 'main'; }
-      if(target === 'tournament'){ tournamentData = null; }
-      if(target === 'chat'){ openChatView(); return; }
-      if(view === 'chat' && target !== 'chat'){ closeChatView(); }
-      if(view === 'wheel' && target !== 'wheel'){ wheelLastWin = null; }
-      view = target; render();
-    };
+    btn.onclick = () => navigateToPage(btn.getAttribute('data-nav'));
   });
 }
 
@@ -2225,6 +2506,7 @@ async function renderControlPanel(){
   if(active==='dashboard'){
     const banned = adminCache.accounts.filter(a=>a.banned).length;
     const openT = adminCache.tournaments.filter(t=>['registration','ongoing'].includes(t.status)).length;
+    const platformLocked = adminCache.site.platformLocked === true;
     content = `
       <div class="admin-grid">
         <div class="admin-stat"><b>${adminCache.accounts.length}</b><span>إجمالي حسابات الطلاب</span></div>
@@ -2234,15 +2516,12 @@ async function renderControlPanel(){
       </div>
       <div class="admin-help">أنت داخل لوحة المشرف الخاصة بالحساب <b>${adminEsc(currentUser)}</b>. أي حذف أو حظر هنا ينعكس على قاعدة البيانات.</div>
 
-      <h3 class="admin-section-title" style="margin-top:26px;">🚧 إغلاق المنصة</h3>
+      <h3 class="admin-section-title" style="margin-top:24px;">🔒 قفل المنصة بالكامل</h3>
       <div class="admin-chat-status">
-        <span>الحالة الحالية: <b>${adminCache.site.platformClosed ? 'مقفولة 🔒' : 'تعمل بشكل طبيعي 🔓'}</b></span>
-        <button class="btn admin-mini ${adminCache.site.platformClosed ? 'admin-secondary' : 'admin-danger'}" id="btn-toggle-platform-closed">${adminCache.site.platformClosed ? '🔓 فتح المنصة' : '🔒 قفل المنصة'}</button>
+        <span>الحالة الحالية: <b>${platformLocked ? 'مقفولة عن الطلاب 🔒' : 'متاحة للجميع 🔓'}</b></span>
+        <button class="btn admin-mini ${platformLocked?'admin-secondary':'admin-danger'}" id="btn-toggle-platform-lock">${platformLocked ? '🔓 فتح المنصة' : '🔒 قفل المنصة'}</button>
       </div>
-      <label>سبب الإغلاق (يظهر لكل الطلاب أثناء إغلاق المنصة)</label>
-      <textarea class="admin-input" id="admin-platform-close-reason" placeholder="مثال: صيانة مؤقتة، نعود قريباً بإذن الله.">${adminEsc(adminCache.site.platformCloseReason || '')}</textarea>
-      <button class="btn admin-mini admin-secondary" id="btn-save-platform-close-reason">💾 حفظ السبب</button>
-      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير المسجلين كأدمن) هيشوفوا شاشة الإغلاق مع السبب اللي كتبته، ولن يقدروا يدخلوا أي قسم من التطبيق إلا بعد ما تفتحها من هنا. أنت كأدمن تقدر تدخل عادي دايماً.</div>
+      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة.</div>
     `;
   } else if(active==='users'){
     const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
@@ -2486,24 +2765,17 @@ async function renderControlPanel(){
     await db.collection('ads').doc(b.getAttribute('data-del-ad')).delete();
     await loadAdminData(); renderControlPanel();
   });
-  const togglePlatformBtn=document.getElementById('btn-toggle-platform-closed');
-  if(togglePlatformBtn) togglePlatformBtn.onclick=async()=>{
-    const isClosed = !!adminCache.site.platformClosed;
-    if(!isClosed && !confirm('هل أنت متأكد أنك تريد إغلاق المنصة عن جميع الطلاب؟')) return;
-    await db.collection('settings').doc('site').set({ platformClosed: !isClosed },{merge:true});
-    await loadAdminData(); renderControlPanel();
-  };
-  const saveCloseReasonBtn=document.getElementById('btn-save-platform-close-reason');
-  if(saveCloseReasonBtn) saveCloseReasonBtn.onclick=async()=>{
-    const reason=(document.getElementById('admin-platform-close-reason').value||'').trim();
-    await db.collection('settings').doc('site').set({ platformCloseReason: reason },{merge:true});
-    alert('تم حفظ سبب الإغلاق');
-    await loadAdminData(); renderControlPanel();
-  };
   const toggleChatBtn=document.getElementById('btn-toggle-group-chat');
   if(toggleChatBtn) toggleChatBtn.onclick=async()=>{
     const isOpen = adminCache.site.groupChatOpen !== false;
     await db.collection('settings').doc('site').set({ groupChatOpen: !isOpen },{merge:true});
+    await loadAdminData(); renderControlPanel();
+  };
+  const togglePlatformLockBtn=document.getElementById('btn-toggle-platform-lock');
+  if(togglePlatformLockBtn) togglePlatformLockBtn.onclick=async()=>{
+    const isLocked = adminCache.site.platformLocked === true;
+    if(!isLocked && !confirm('هل أنت متأكد من قفل المنصة بالكامل عن كل الطلاب الآن؟')) return;
+    await db.collection('settings').doc('site').set({ platformLocked: !isLocked },{merge:true});
     await loadAdminData(); renderControlPanel();
   };
   document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
@@ -2732,10 +3004,12 @@ function enterMain(){
   if(tickInterval) clearInterval(tickInterval);
   tickInterval = setInterval(() => { if(view === 'main') updateTimerOnly(); if(view === 'wheel') updateWheelTimerOnly(); }, 1000);
   listenFriendRequests();
+  listenPlatformLock();
 }
 
 function logout(){
   if(tickInterval) clearInterval(tickInterval);
+  stopPlatformLockListener();
   closeChatView();
   leaveDuelCleanup();
   if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
@@ -2827,6 +3101,35 @@ function openChatView(){
 function closeChatView(){
   if(groupChatUnsub){ groupChatUnsub(); groupChatUnsub = null; }
   if(siteSettingsUnsub){ siteSettingsUnsub(); siteSettingsUnsub = null; }
+}
+
+function listenPlatformLock(){
+  if(platformLockUnsub) return;
+  platformLockUnsub = db.collection('settings').doc('site').onSnapshot(snap => {
+    const d = snap.exists ? snap.data() : {};
+    PLATFORM_LOCKED = d.platformLocked === true;
+    if(!isSuperAdmin()) render(); // لو الطالب داخل، حدّث الشاشة فوراً لو الأدمن قفل/فتح المنصة
+  }, e => console.warn('platform lock listen error', e));
+}
+
+function stopPlatformLockListener(){
+  if(platformLockUnsub){ platformLockUnsub(); platformLockUnsub = null; }
+}
+
+function renderPlatformLocked(){
+  root.innerHTML = `
+    <div class="card" style="text-align:center;">
+      <h2>🔒 المنصة مقفولة مؤقتاً</h2>
+      <div class="locked-note">تم إيقاف الدخول للمنصة مؤقتاً من قِبل الإدارة.<br>حاول مرة أخرى بعد قليل، أو تواصل مع الأدمن لمزيد من التفاصيل.</div>
+      <div class="admin-actions" style="justify-content:center;margin-top:16px;">
+        <button class="btn admin-mini admin-secondary" id="btn-locked-contact-admin">تواصل مع الأدمن</button>
+        <button class="btn admin-mini admin-danger" id="btn-locked-logout">تسجيل الخروج</button>
+      </div>
+    </div>`;
+  const contactBtn = document.getElementById('btn-locked-contact-admin');
+  if(contactBtn) contactBtn.onclick = () => { view = 'admin'; render(); };
+  const logoutBtn = document.getElementById('btn-locked-logout');
+  if(logoutBtn) logoutBtn.onclick = () => { stopPlatformLockListener(); logout(); };
 }
 
 function listenToSiteSettingsForChat(){
@@ -2921,6 +3224,51 @@ function renderChat(){
   if(sendBtn) sendBtn.onclick = sendChatMessage;
 }
 
+// ===================== الورد اليومي (سور بالاسم، ونطاق آيات للسور الطويلة) =====================
+function dailyWirdSegments(){
+  // بيحدد كمية آيات مقترحة لليوم (بتتغيّر حسب يوم المستخدم عشان الورد يبقى متنوع)،
+  // وبيترجمها لسور بالاسم مع نطاق آيات دقيق (خصوصاً للسور الطويلة اللي مش هتتقرأ كاملة في يوم واحد)
+  const pace = [15,20,30,20,40,15,25];
+  const target = pace[(state.day - 1) % pace.length];
+  const cursor = state.wirdAyahCursor % TOTAL_AYAHS;
+  const toConsume = Math.min(target, TOTAL_AYAHS - cursor);
+  const segments = [];
+  let pos = cursor, left = toConsume;
+  while(left > 0){
+    let acc = 0, idx = 0;
+    for(idx = 0; idx < SURAHS.length; idx++){
+      if(pos < acc + SURAHS[idx].ayahs) break;
+      acc += SURAHS[idx].ayahs;
+    }
+    const surah = SURAHS[idx];
+    const fromAyah = pos - acc + 1;
+    const availableInSurah = surah.ayahs - (fromAyah - 1);
+    const take = Math.min(left, availableInSurah);
+    const toAyah = fromAyah + take - 1;
+    segments.push({name: surah.name, from: fromAyah, to: toAyah, fullLength: surah.ayahs});
+    pos += take;
+    left -= take;
+  }
+  return {segments, consumed: toConsume};
+}
+function dailyWirdSegmentLabel(seg){
+  if(seg.from === 1 && seg.to === seg.fullLength) return `سورة ${seg.name} كاملة`;
+  return `سورة ${seg.name} من الآية ${seg.from} إلى الآية ${seg.to}`;
+}
+function dailyWirdWidgetHtml(){
+  const {segments} = dailyWirdSegments();
+  const done = state.wirdLastDoneDay === state.day;
+  const cursor = state.wirdAyahCursor % TOTAL_AYAHS;
+  const pct = Math.round((cursor / TOTAL_AYAHS) * 100);
+  const listHtml = segments.map(seg => `<li>${dailyWirdSegmentLabel(seg)}</li>`).join('');
+  return `<div class="card prayer-card">
+    <h2>📖 وردك اليومي</h2>
+    <div class="hint" style="margin:0 0 10px;">ورد اليوم المقترح:</div>
+    <ul style="margin:0 0 10px;padding-inline-start:20px;color:var(--gold-light);font-weight:700;text-align:right;">${listHtml}</ul>
+    <div class="hint" style="margin:0 0 10px;">تقدّمك في الختمة الحالية: ${cursor} / ${TOTAL_AYAHS} آية (${pct}%)</div>
+    <button class="btn" id="btn-wird-done" style="margin:0;${done?'background:transparent;border:1px solid var(--ok);color:var(--ok);':''}" ${done?'disabled':''}>${done ? '✓ تمت قراءته' : 'قرأته الحمد لله ✅'}</button>
+  </div>`;
+}
 function renderMain(){
   const dayIdx = state.day - 1;
   const finished = state.day > TOTAL_DAYS;
@@ -2954,6 +3302,12 @@ function renderMain(){
   } else {
     const doneCount = state.dhikrCounts.filter(c => c >= REPS_PER_DHIKR).length;
     const allDone = allDhikrDone();
+    // نعرض ذكراً واحداً بس في كل مرة: أول ذكر لسه ما اتكملش. لو كلهم خلصوا،
+    // نفضل نعرض آخر ذكر (بحالة مكتملة) عشان الشاشة ما تفضلش فاضية.
+    let currentIdx = state.dhikrCounts.findIndex(c => c < REPS_PER_DHIKR);
+    if(currentIdx === -1) currentIdx = DHIKR_LIST.length - 1;
+    const curCount = state.dhikrCounts[currentIdx];
+    const curDone = curCount >= REPS_PER_DHIKR;
     inner = `
       <div class="card">
         <span class="day-badge">اليوم ${state.day} من ${TOTAL_DAYS}</span>
@@ -2962,44 +3316,59 @@ function renderMain(){
           <div class="progress-label"><span>الأذكار المكتملة</span><span>${doneCount} / ${DHIKR_LIST.length}</span></div>
           <div class="progress-bar"><div class="progress-bar-fill" style="width:${(doneCount/DHIKR_LIST.length)*100}%"></div></div>
         </div>
-        ${DHIKR_LIST.map((d,i) => {
-          const c = state.dhikrCounts[i];
-          const done = c >= REPS_PER_DHIKR;
-          return `
-          <div class="dhikr-item ${done?'done':''}">
-            <div>
-              <div class="dhikr-text">${d}</div>
-              <div class="dhikr-count">${c} / ${REPS_PER_DHIKR}</div>
-            </div>
-            <button class="tap-btn ${done?'done':''}" data-idx="${i}" ${done?'disabled':''}>${done ? '✓' : (c+'/'+REPS_PER_DHIKR)}</button>
-          </div>`;
-        }).join('')}
+        <div class="dhikr-item ${curDone?'done':''}">
+          <div>
+            <div class="dhikr-text">${DHIKR_LIST[currentIdx]}</div>
+            <div class="dhikr-count">${curCount} / ${REPS_PER_DHIKR}</div>
+          </div>
+          <button class="tap-btn ${curDone?'done':''}" id="btn-tap-dhikr" data-idx="${currentIdx}" ${curDone?'disabled':''}>${curDone ? '✓' : (curCount+'/'+REPS_PER_DHIKR)}</button>
+        </div>
         <button class="btn" id="btn-reveal" ${allDone ? '' : 'disabled'}>اكشف نصيحة اليوم 🌙</button>
-        ${!allDone ? `<div class="hint">أكمل كل ذكر 33 مرة ليُفتح لك زر النصيحة</div>` : ''}
+        ${!allDone ? `<div class="hint">أكمل كل ذكر 33 مرة ليُفتح لك زر النصيحة، وهيظهرلك الذكر اللي بعده تلقائياً</div>` : ''}
       </div>
     `;
   }
 
   root.innerHTML = `
-    ${topNavHtml('main')}
+    ${mainCategoryNavHtml()}
     ${renderAdsSection()}
     ${prayerTimesWidgetHtml()}
+    ${dailyWirdWidgetHtml()}
     ${inner}
   `;
   updateSyncBadge();
-  bindTopNav();
+  bindMainCategoryNav();
+  const wirdBtn = document.getElementById('btn-wird-done');
+  if(wirdBtn){
+    wirdBtn.onclick = () => {
+      const {consumed} = dailyWirdSegments();
+      const newCursor = (state.wirdAyahCursor % TOTAL_AYAHS) + consumed;
+      state.wirdLastDoneDay = state.day;
+      if(newCursor >= TOTAL_AYAHS){
+        state.khatmaCompletions = (state.khatmaCompletions||0) + 1;
+        addXP(50);
+        state.wirdAyahCursor = 0;
+        alert('مبارك! أتممت ختمة القرآن الكريم 🎉 (+50 XP) وبدأت ختمة جديدة.');
+      } else {
+        state.wirdAyahCursor = newCursor;
+      }
+      render();
+      persist();
+    };
+  }
 
   if(!finished && !(state.nextAvailableAt && Date.now() < state.nextAvailableAt)){
-    document.querySelectorAll('.tap-btn').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.getAttribute('data-idx'));
+    const tapBtn = document.getElementById('btn-tap-dhikr');
+    if(tapBtn){
+      tapBtn.onclick = () => {
+        const idx = parseInt(tapBtn.getAttribute('data-idx'));
         if(state.dhikrCounts[idx] < REPS_PER_DHIKR){
           state.dhikrCounts[idx]++;
           render();
           persist();
         }
       };
-    });
+    }
     const revealBtn = document.getElementById('btn-reveal');
     if(revealBtn){
       revealBtn.onclick = () => {
@@ -3075,14 +3444,14 @@ function buildWheelSVG(){
     const [x2,y2] = toXY(endA, r);
     const [tx,ty] = toXY(midA, 64);
     const textRot = (midA > 90 && midA < 270) ? midA + 180 : midA;
-    paths += `<path d="M ${cx},${cy} L ${x1.toFixed(2)},${y1.toFixed(2)} A ${r},${r} 0 0,1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${s.color}" stroke="#f4ecd8" stroke-width="1" stroke-opacity="0.15"/>`;
-    paths += `<text x="${tx.toFixed(2)}" y="${ty.toFixed(2)}" fill="${s.value===100?'#f4ecd8':'#e6c98a'}" font-size="${s.value===100?'16':'13'}" font-weight="800" text-anchor="middle" dominant-baseline="middle" font-family="Cairo, sans-serif" transform="rotate(${textRot.toFixed(2)},${tx.toFixed(2)},${ty.toFixed(2)})">${s.value}</text>`;
+    paths += `<path d="M ${cx},${cy} L ${x1.toFixed(2)},${y1.toFixed(2)} A ${r},${r} 0 0,1 ${x2.toFixed(2)},${y2.toFixed(2)} Z" fill="${s.color}" stroke="#fdf6f0" stroke-width="1" stroke-opacity="0.15"/>`;
+    paths += `<text x="${tx.toFixed(2)}" y="${ty.toFixed(2)}" fill="${s.value===100?'#fdf6f0':'#ffb199'}" font-size="${s.value===100?'16':'13'}" font-weight="800" text-anchor="middle" dominant-baseline="middle" font-family="Cairo, sans-serif" transform="rotate(${textRot.toFixed(2)},${tx.toFixed(2)},${ty.toFixed(2)})">${s.value}</text>`;
   });
   return `
     <svg viewBox="0 0 200 200" width="230" height="230">
-      <circle cx="100" cy="100" r="97" fill="none" stroke="#c9a25c" stroke-width="3"/>
+      <circle cx="100" cy="100" r="97" fill="none" stroke="#ff8a5c" stroke-width="3"/>
       <g id="wheel-group" class="wheel-group">${paths}</g>
-      <circle cx="100" cy="100" r="11" fill="#c9a25c" stroke="#f4ecd8" stroke-width="2"/>
+      <circle cx="100" cy="100" r="11" fill="#ff8a5c" stroke="#fdf6f0" stroke-width="2"/>
     </svg>
   `;
 }
@@ -3371,16 +3740,16 @@ async function generateAchievementCardBlob(){
   const ctx = canvas.getContext('2d');
 
   const bg = ctx.createLinearGradient(0,0,0,h);
-  bg.addColorStop(0,'#0f2b28'); bg.addColorStop(1,'#123832');
+  bg.addColorStop(0,'#1a1035'); bg.addColorStop(1,'#241750');
   ctx.fillStyle = bg; ctx.fillRect(0,0,w,h);
 
-  ctx.strokeStyle = '#c9a25c'; ctx.lineWidth = 5;
+  ctx.strokeStyle = '#ff8a5c'; ctx.lineWidth = 5;
   roundRectPath(ctx, 24, 24, w-48, h-48, 26); ctx.stroke();
-  ctx.strokeStyle = 'rgba(201,162,92,0.35)'; ctx.lineWidth = 1.5;
+  ctx.strokeStyle = 'rgba(255,138,92,0.35)'; ctx.lineWidth = 1.5;
   roundRectPath(ctx, 38, 38, w-76, h-76, 20); ctx.stroke();
 
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#c9a25c';
+  ctx.fillStyle = '#ff8a5c';
   ctx.font = '26px Cairo, sans-serif';
   ctx.fillText('۞ رفيق طالب ۞', w/2, 95);
 
@@ -3391,15 +3760,15 @@ async function generateAchievementCardBlob(){
     ctx.drawImage(avatarImg, w/2-100, 250-100, 200, 200);
     ctx.restore();
   }catch(e){}
-  ctx.strokeStyle = '#c9a25c'; ctx.lineWidth = 5;
+  ctx.strokeStyle = '#ff8a5c'; ctx.lineWidth = 5;
   ctx.beginPath(); ctx.arc(w/2, 250, 100, 0, Math.PI*2); ctx.stroke();
 
-  ctx.fillStyle = '#e6c98a';
+  ctx.fillStyle = '#ffb199';
   ctx.font = 'bold 38px Cairo, sans-serif';
   ctx.fillText(currentUser, w/2, 400);
 
   const li = getLevelInfo(state.xp);
-  ctx.fillStyle = '#c9a25c';
+  ctx.fillStyle = '#ff8a5c';
   ctx.font = '28px Cairo, sans-serif';
   ctx.fillText(`${li.icon} المستوى: ${li.name}`, w/2, 445);
 
@@ -3411,19 +3780,19 @@ async function generateAchievementCardBlob(){
   const boxW = 210, boxH = 130, gap = 20, startX = (w - (boxW*3+gap*2))/2, boxY = 500;
   stats.forEach((s,i) => {
     const x = startX + i*(boxW+gap);
-    ctx.strokeStyle = 'rgba(201,162,92,0.4)'; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,138,92,0.4)'; ctx.lineWidth = 1.5;
     roundRectPath(ctx, x, boxY, boxW, boxH, 16); ctx.stroke();
-    ctx.fillStyle = 'rgba(244,236,216,0.04)'; roundRectPath(ctx, x, boxY, boxW, boxH, 16); ctx.fill();
-    ctx.font = '34px Cairo, sans-serif'; ctx.fillStyle = '#e6c98a';
+    ctx.fillStyle = 'rgba(253,246,240,0.04)'; roundRectPath(ctx, x, boxY, boxW, boxH, 16); ctx.fill();
+    ctx.font = '34px Cairo, sans-serif'; ctx.fillStyle = '#ffb199';
     ctx.fillText(s[0], x+boxW/2, boxY+48);
     ctx.font = 'bold 30px Cairo, sans-serif';
     ctx.fillText(s[1], x+boxW/2, boxY+84);
-    ctx.font = '15px Cairo, sans-serif'; ctx.fillStyle = '#a9c2bd';
+    ctx.font = '15px Cairo, sans-serif'; ctx.fillStyle = '#c7b8e0';
     ctx.fillText(s[2], x+boxW/2, boxY+110);
   });
 
   const earnedBadges = BADGE_DEFS.filter(b => state.badges && state.badges[b.id]);
-  ctx.fillStyle = '#c9a25c'; ctx.font = '20px Cairo, sans-serif';
+  ctx.fillStyle = '#ff8a5c'; ctx.font = '20px Cairo, sans-serif';
   ctx.fillText(`🎖️ الأوسمة المكتسبة: ${earnedBadges.length} / ${BADGE_DEFS.length}`, w/2, 690);
   if(earnedBadges.length){
     const iconsRow = earnedBadges.slice(0,7).map(b=>b.icon).join('   ');
@@ -3431,7 +3800,7 @@ async function generateAchievementCardBlob(){
     ctx.fillText(iconsRow, w/2, 745);
   }
 
-  ctx.fillStyle = '#a9c2bd'; ctx.font = '16px Cairo, sans-serif';
+  ctx.fillStyle = '#c7b8e0'; ctx.font = '16px Cairo, sans-serif';
   ctx.fillText('انضم إليّ في رحلة القرآن والعلم النافع 🌙', w/2, h-70);
 
   return new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
@@ -3919,7 +4288,7 @@ function renderDuelLobby(){
         </div>
       </div>
 
-      <div id="friend-invites-box" style="margin-top:24px;border-top:1px solid rgba(201,162,92,.2);padding-top:18px;"></div>
+      <div id="friend-invites-box" style="margin-top:24px;border-top:1px solid rgba(255,138,92,.2);padding-top:18px;"></div>
       <div class="error" id="duel-error">${errorMsg}</div>
     </div>
   `;
@@ -4395,6 +4764,7 @@ async function renderLocal1v1Match(){
 const _render = render;
 render = function(){
   if(state && view === 'main') maybeAdvanceDay();
+  document.body.setAttribute('data-page', view || 'login');
   _render();
 };
 
@@ -4417,18 +4787,30 @@ render = function(){
   }
 })();
 
+// ===================== الوضع الليلي / النهاري =====================
+const UI_MODE_KEY = 'ui_mode';
+function getSavedMode(){
+  try{ return localStorage.getItem(UI_MODE_KEY) === 'light' ? 'light' : 'dark'; }
+  catch(e){ return 'dark'; }
+}
+function applyUiMode(mode){
+  document.body.setAttribute('data-mode', mode);
+  const btn = document.getElementById('btn-mode-toggle');
+  if(btn) btn.textContent = mode === 'light' ? '🌙' : '☀️';
+  try{ localStorage.setItem(UI_MODE_KEY, mode); }catch(e){}
+}
+function toggleUiMode(){
+  const current = document.body.getAttribute('data-mode') === 'light' ? 'light' : 'dark';
+  applyUiMode(current === 'light' ? 'dark' : 'light');
+}
+applyUiMode(getSavedMode());
+const modeToggleBtn = document.getElementById('btn-mode-toggle');
+if(modeToggleBtn) modeToggleBtn.onclick = toggleUiMode;
+
 view = 'login';
 render(); // نعرض شاشة الدخول فوراً، بدل ما ننتظر تحميل بنك الأسئلة من الإنترنت
 loadRuntimeQuestionBank(); // يشتغل في الخلفية، مش شرط لعرض الواجهة
 listenToAds();
-
-// مراقبة حالة إغلاق المنصة بشكل دائم ومستقل عن الشاشة الحالية
-db.collection('settings').doc('site').onSnapshot(snap => {
-  const d = snap.exists ? snap.data() : {};
-  PLATFORM_CLOSED = !!d.platformClosed;
-  PLATFORM_CLOSE_REASON = d.platformCloseReason || '';
-  render();
-}, e => console.warn('platform status listen error', e));
 </script>
 </body>
 </html>
