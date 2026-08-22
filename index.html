@@ -1348,6 +1348,8 @@ function isSuperAdmin(){
 const root = document.getElementById('app');
 let view = 'loading'; // login | register | main
 let currentUser = null;
+let PLATFORM_CLOSED = false;
+let PLATFORM_CLOSE_REASON = '';
 let state = null;
 let errorMsg = '';
 let tickInterval = null;
@@ -2018,6 +2020,7 @@ async function maybeAwardTournamentPrizes(tId){
 
 function render(){
   if(view === 'loading'){ root.innerHTML = `<div class="loading">جارِ التحميل...</div>`; return; }
+  if(PLATFORM_CLOSED && !isSuperAdmin() && !['login','register','admin'].includes(view)){ renderPlatformClosed(); return; }
   if(view === 'admin'){ renderAdminContact(); return; }
   if(view === 'login' || view === 'register'){ renderAuth(); return; }
   if(view === 'store'){ renderStore(); return; }
@@ -2037,6 +2040,20 @@ function render(){
   if(view === 'chat'){ renderChat(); return; }
   if(view === 'control-panel'){ renderControlPanel(); return; }
   renderMain();
+}
+
+function renderPlatformClosed(){
+  const reason = (PLATFORM_CLOSE_REASON || '').trim();
+  root.innerHTML = `
+    <div class="card" style="text-align:center;">
+      <h2>🚧 المنصة مغلقة مؤقتاً</h2>
+      <div class="admin-help" style="font-size:15px;line-height:1.9;color:var(--text-light);text-align:center;">
+        ${reason ? adminEsc(reason) : 'المنصة مغلقة حالياً من قبل الإدارة، برجاء المحاولة لاحقاً.'}
+      </div>
+      <div class="auth-admin-link" id="closed-go-admin-contact" style="margin-top:16px;">تواصل مع الأدمن</div>
+    </div>`;
+  const link = document.getElementById('closed-go-admin-contact');
+  if(link) link.onclick = () => { prevView = view; view = 'admin'; render(); };
 }
 
 function topNavHtml(active){
@@ -2216,6 +2233,16 @@ async function renderControlPanel(){
         <div class="admin-stat"><b>${openT}</b><span>بطولات مفتوحة/جارية</span></div>
       </div>
       <div class="admin-help">أنت داخل لوحة المشرف الخاصة بالحساب <b>${adminEsc(currentUser)}</b>. أي حذف أو حظر هنا ينعكس على قاعدة البيانات.</div>
+
+      <h3 class="admin-section-title" style="margin-top:26px;">🚧 إغلاق المنصة</h3>
+      <div class="admin-chat-status">
+        <span>الحالة الحالية: <b>${adminCache.site.platformClosed ? 'مقفولة 🔒' : 'تعمل بشكل طبيعي 🔓'}</b></span>
+        <button class="btn admin-mini ${adminCache.site.platformClosed ? 'admin-secondary' : 'admin-danger'}" id="btn-toggle-platform-closed">${adminCache.site.platformClosed ? '🔓 فتح المنصة' : '🔒 قفل المنصة'}</button>
+      </div>
+      <label>سبب الإغلاق (يظهر لكل الطلاب أثناء إغلاق المنصة)</label>
+      <textarea class="admin-input" id="admin-platform-close-reason" placeholder="مثال: صيانة مؤقتة، نعود قريباً بإذن الله.">${adminEsc(adminCache.site.platformCloseReason || '')}</textarea>
+      <button class="btn admin-mini admin-secondary" id="btn-save-platform-close-reason">💾 حفظ السبب</button>
+      <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير المسجلين كأدمن) هيشوفوا شاشة الإغلاق مع السبب اللي كتبته، ولن يقدروا يدخلوا أي قسم من التطبيق إلا بعد ما تفتحها من هنا. أنت كأدمن تقدر تدخل عادي دايماً.</div>
     `;
   } else if(active==='users'){
     const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
@@ -2459,6 +2486,20 @@ async function renderControlPanel(){
     await db.collection('ads').doc(b.getAttribute('data-del-ad')).delete();
     await loadAdminData(); renderControlPanel();
   });
+  const togglePlatformBtn=document.getElementById('btn-toggle-platform-closed');
+  if(togglePlatformBtn) togglePlatformBtn.onclick=async()=>{
+    const isClosed = !!adminCache.site.platformClosed;
+    if(!isClosed && !confirm('هل أنت متأكد أنك تريد إغلاق المنصة عن جميع الطلاب؟')) return;
+    await db.collection('settings').doc('site').set({ platformClosed: !isClosed },{merge:true});
+    await loadAdminData(); renderControlPanel();
+  };
+  const saveCloseReasonBtn=document.getElementById('btn-save-platform-close-reason');
+  if(saveCloseReasonBtn) saveCloseReasonBtn.onclick=async()=>{
+    const reason=(document.getElementById('admin-platform-close-reason').value||'').trim();
+    await db.collection('settings').doc('site').set({ platformCloseReason: reason },{merge:true});
+    alert('تم حفظ سبب الإغلاق');
+    await loadAdminData(); renderControlPanel();
+  };
   const toggleChatBtn=document.getElementById('btn-toggle-group-chat');
   if(toggleChatBtn) toggleChatBtn.onclick=async()=>{
     const isOpen = adminCache.site.groupChatOpen !== false;
@@ -4380,6 +4421,14 @@ view = 'login';
 render(); // نعرض شاشة الدخول فوراً، بدل ما ننتظر تحميل بنك الأسئلة من الإنترنت
 loadRuntimeQuestionBank(); // يشتغل في الخلفية، مش شرط لعرض الواجهة
 listenToAds();
+
+// مراقبة حالة إغلاق المنصة بشكل دائم ومستقل عن الشاشة الحالية
+db.collection('settings').doc('site').onSnapshot(snap => {
+  const d = snap.exists ? snap.data() : {};
+  PLATFORM_CLOSED = !!d.platformClosed;
+  PLATFORM_CLOSE_REASON = d.platformCloseReason || '';
+  render();
+}, e => console.warn('platform status listen error', e));
 </script>
 </body>
 </html>
