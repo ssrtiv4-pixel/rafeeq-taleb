@@ -8,9 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<!-- OneSignal: بيسمح بوصول إشعارات حقيقية (Push) حتى لو التاب/المتصفح مقفول خالص. مجاني بالكامل. -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 // ==========================================================================
 // بنك الأسئلة الدينية — رفيق طالب
@@ -778,10 +775,6 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const fbAuth = firebase.auth();
-// نفس رابط الـ Worker المستخدم للإشعارات، دلوقتي بيستخدم كمان لتسجيل الدخول/الحساب بأمان
-// (لازم يكون معرف قبل استخدامه هنا؛ تعريفه الأصلي أسفل الملف تم نقله هنا أيضاً للتأكد من الترتيب)
-const AUTH_WORKER_URL = 'https://mute-thunder-606c.ssrtiv4.workers.dev';
 
 // إعدادات رفع الملفات الصوتية عبر Cloudinary (رفع مباشر بدون سيرفر)
 const CLOUDINARY_CLOUD_NAME = "xyuye5bm";
@@ -2499,53 +2492,7 @@ function renderAuth(){
       </div>
     </div>
     <div class="auth-admin-link" id="go-admin-contact">تواصل مع الأدمن</div>
-    <div style="text-align:center;margin-top:10px;"><button class="btn" id="btn-debug-worker" style="opacity:0.7;font-size:13px;padding:8px 14px;">🔧 اختبار الاتصال بالسيرفر (تشخيص)</button></div>
-    <div style="text-align:center;margin-top:10px;"><button class="btn" id="btn-debug-register" style="opacity:0.7;font-size:13px;padding:8px 14px;">🧪 اختبار إنشاء حساب تجريبي (تشخيص)</button></div>
   `;
-  const debugRegBtn = document.getElementById('btn-debug-register');
-  if(debugRegBtn){
-    debugRegBtn.onclick = async () => {
-      debugRegBtn.textContent = 'جارِ الاختبار...'; debugRegBtn.disabled = true;
-      const testUser = 'test_diag_' + Date.now();
-      const t0 = Date.now();
-      try{
-        const controller = new AbortController();
-        const timer = setTimeout(()=>controller.abort(), 20000);
-        const res = await fetch(AUTH_WORKER_URL, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ action:'register', username: testUser, password:'test1234' }),
-          signal: controller.signal
-        });
-        clearTimeout(timer);
-        const elapsed = Date.now() - t0;
-        const data = await res.json();
-        console.log('[DEBUG register test]', elapsed, 'ms', data);
-        errorMsg = 'استغرق: ' + elapsed + 'ms | status: ' + res.status + ' | رد: ' + JSON.stringify(data);
-      }catch(e){
-        const elapsed = Date.now() - t0;
-        errorMsg = 'فشل بعد: ' + elapsed + 'ms [DEBUG: ' + (e.name||'') + ' ' + (e.message||e) + ']';
-      }
-      render();
-    };
-  }
-  const debugBtn = document.getElementById('btn-debug-worker');
-  if(debugBtn){
-    debugBtn.onclick = async () => {
-      debugBtn.textContent = 'جارِ الفحص...'; debugBtn.disabled = true;
-      try{
-        const res = await fetch(AUTH_WORKER_URL, {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify({ action: 'debug_test' })
-        });
-        const data = await res.json();
-        console.log('[DEBUG worker test]', data);
-        errorMsg = 'نتيجة الفحص: ' + JSON.stringify(data);
-      }catch(e){
-        errorMsg = 'فشل الاتصال بالـ Worker نفسه [DEBUG: ' + (e.message||e) + ']';
-      }
-      render();
-    };
-  }
   const userInput = document.getElementById('in-user');
   const passInput = document.getElementById('in-pass');
   userInput.oninput = () => authFields.user = userInput.value;
@@ -2646,8 +2593,9 @@ function listenToPersonalMessages(){
       if(view === 'main') render();
     }, e => console.warn('personal messages listen error', e));
 }
-// إشعار برسالة خاصة جديدة من الأدمن وقت ما الموقع مفتوح فعلاً في تبويب عندك (foreground).
-// إشعارات الـ Push الحقيقية (لما التاب يبقى مقفول خالص) بيبعتها OneSignal من السيرفر، مش من هنا — شوف OneSignal REST API تحت.
+// إشعار المتصفح برسالة خاصة جديدة من الأدمن. بيشتغل بس والموقع مفتوح في تبويب (حتى لو مش في الصفحة الرئيسية
+// أو التبويب مش نشط)، ولازم المستخدم يكون وافق على الإشعارات قبل كده. الإشعار مش هيوصل لو الموقع مقفول خالص،
+// لأن ده محتاج Service Worker + إعداد Firebase Cloud Messaging من طرف السيرفر.
 function notifyNewPersonalMessage(m){
   try{
     if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
@@ -2658,77 +2606,17 @@ function notifyNewPersonalMessage(m){
     n.onclick = () => { window.focus(); n.close(); };
   }catch(e){ console.warn('personal message notification error', e); }
 }
-
-// ===================== OneSignal: إشعارات Push حقيقية حتى مع إغلاق التاب =====================
-// عبّي القيمتين دول من حسابك المجاني على onesignal.com (Settings > Keys & IDs) بعد ما تعمل تطبيق Web Push هناك.
-const ONESIGNAL_APP_ID = '75a6c845-ba08-4a39-93cb-257d997dd587';
-// المفتاح السري بقى محمي جوه Cloudflare Worker، مش هنا في كود الموقع، عشان كده الموقع بقى آمن.
-const CLOUDFLARE_WORKER_URL = 'https://mute-thunder-606c.ssrtiv4.workers.dev';
-const APP_SHARED_SECRET = 'rafeeq2026_x9kLm3Q7'; // نفس القيمة المحطوطة في SHARED_SECRET بإعدادات الـ Worker
-
-let oneSignalReady = false;
-(function initOneSignal(){
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal){
-    try{
-      if(!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.includes('ضع_')){ console.warn('OneSignal App ID لسه متعمّلش إعداد.'); return; }
-      await OneSignal.init({
-        appId: ONESIGNAL_APP_ID,
-        allowLocalhostAsSecureOrigin: true,
-        // الموقع شغال جوه مجلد فرعي (rafeeq-taleb) مش في جذر الدومين،
-        // فلازم نقول لـ OneSignal يدور على ملف الـ Service Worker في نفس المجلد ده.
-        serviceWorkerParam: { scope: '/rafeeq-taleb/' },
-        serviceWorkerPath: 'OneSignalSDKWorker.js'
-      });
-      oneSignalReady = true;
-      // لو المستخدم مسجّل دخول بالفعل (فتح تبويب جديد مثلاً) اربط جهازه باسمه فوراً
-      if(currentUser) OneSignal.login(currentUser).catch(e=>console.warn('onesignal login error',e));
-      if(view !== 'login' && view !== 'register') render();
-    }catch(e){ console.warn('onesignal init error', e); }
-  });
-})();
-// اربط الجهاز الحالي باسم المستخدم عشان الأدمن يقدر يبعتله إشعار باسمه (بيتنادى بعد تسجيل الدخول)
-function identifyOneSignalDevice(username){
-  if(!username) return;
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal){
-    try{ await OneSignal.login(username); }catch(e){ console.warn('onesignal login error', e); }
-  });
-}
-function isOneSignalNotifSupported(){
-  return typeof window !== 'undefined' && !!window.OneSignalDeferred;
-}
 // طلب إذن الإشعارات من المستخدم (لازم يتم بضغطة من المستخدم في أغلب المتصفحات)
 function requestNotificationPermission(){
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal){
-    try{
-      await OneSignal.Notifications.requestPermission();
-      if(currentUser) await OneSignal.login(currentUser);
-      if(OneSignal.Notifications.permission){
-        alert('🔔 تم تفعيل الإشعارات! هتوصلك رسالة الأدمن حتى لو الموقع مقفول خالص عندك.');
-      }
-    }catch(e){
-      console.warn('notification permission request error', e);
-      alert('تعذّر تفعيل الإشعارات. تأكد إنك بتفتح الموقع بـ https وإن المتصفح بيدعمها.');
+  if(typeof Notification === 'undefined'){ alert('متصفحك لا يدعم إشعارات المتصفح.'); return; }
+  Notification.requestPermission().then(perm => {
+    if(perm === 'granted'){
+      try{ new Notification('🔔 تم تفعيل الإشعارات', { body:'هتوصلك رسالة كل ما الأدمن يبعتلك رسالة خاصة، طول ما الموقع مفتوح عندك في المتصفح.' }); }catch(e){}
+    } else if(perm === 'denied'){
+      alert('تم رفض إذن الإشعارات. لو غيّرت رأيك، لازم تفعّلها يدوياً من إعدادات المتصفح لهذا الموقع.');
     }
     if(view !== 'login' && view !== 'register') render();
-  });
-}
-// بتتنادى من لوحة تحكم الأدمن بعد ما يبعت رسالة خاصة، عشان تبعت Push حقيقي للطالب حتى لو مقفول الموقع عنده
-// الطلب بيروح لسيرفر Cloudflare Worker الوسيط (مش لـ OneSignal مباشرة)، عشان المفتاح السري يفضل مخفي.
-async function sendOneSignalPushToUser(username, text){
-  if(!CLOUDFLARE_WORKER_URL || !username || !text) return;
-  try{
-    await fetch(CLOUDFLARE_WORKER_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-App-Secret': APP_SHARED_SECRET
-      },
-      body: JSON.stringify({ username, text })
-    });
-  }catch(e){ console.warn('onesignal push send error', e); }
+  }).catch(e => console.warn('notification permission request error', e));
 }
 function renderPersonalMessagesSection(){
   if(!PERSONAL_MESSAGES.length) return '';
@@ -3372,7 +3260,6 @@ async function renderControlPanel(){
         toUsername, text, seen:false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      sendOneSignalPushToUser(toUsername, text); // إشعار Push حقيقي حتى لو الطالب مقفول الموقع عنده
       const ta=document.getElementById('admin-pm-text'); if(ta) ta.value='';
       if(st) st.textContent='تم إرسال الرسالة بنجاح ✅';
       await loadAdminData(); renderControlPanel();
@@ -3624,23 +3511,6 @@ function renderAdminContact(){
   };
 }
 
-// جلب (fetch) بمهلة قصوى: لو السيرفر أو الإنترنت بطيء جداً أو الاتصال اتعلق،
-// بيرمي خطأ واضح بعد المهلة المحددة بدل ما الصفحة تفضل "جارِ الدخول..." معلقة للأبد
-async function fetchWithTimeout(url, options, timeoutMs = 15000){
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try{
-    return await fetch(url, { ...options, signal: controller.signal });
-  }catch(e){
-    if(e && e.name === 'AbortError'){
-      throw new Error('انتهت مهلة الاتصال بالسيرفر، تأكد من قوة اتصالك بالإنترنت وحاول مرة أخرى');
-    }
-    throw e;
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
 async function handleLogin(){
   const u = document.getElementById('in-user').value.trim();
   const p = document.getElementById('in-pass').value;
@@ -3648,34 +3518,18 @@ async function handleLogin(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الدخول...';
   try{
-    const res = await fetchWithTimeout(AUTH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'login', username: u, password: p })
-    });
-    const data = await res.json();
-    console.log('[DEBUG login] worker response status:', res.status, 'body:', data);
-    if(!res.ok){
-      if(data.error === 'banned'){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; }
-      else { errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة [DEBUG: ' + (data.error || res.status) + (data.detail ? ' | ' + data.detail : '') + ']'; }
-      render(); return;
-    }
-    try{
-      await fbAuth.signInWithCustomToken(data.token);
-    }catch(tokenErr){
-      console.error('[DEBUG login] signInWithCustomToken failed:', tokenErr);
-      errorMsg = 'فشل تسجيل الدخول لـ Firebase [DEBUG: ' + (tokenErr.code || '') + ' ' + (tokenErr.message || tokenErr) + ']';
-      render(); return;
-    }
-    currentUser = data.username;
-    state = ensureStateShape(data.state || freshState());
-    state.profileImageUrl = data.profileImageUrl || state.profileImageUrl || '';
+    const acc = await fetchAccount(u);
+    if(!acc || acc.password !== p){ errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة'; render(); return; }
+    if(acc.banned){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; render(); return; }
+    currentUser = acc.username;
+    state = ensureStateShape(acc.state || freshState());
+    state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
-    console.error('[DEBUG login] fetch/network error:', e);
-    errorMsg = 'تعذر الاتصال بقاعدة البيانات [DEBUG: ' + (e.message || e) + ']';
+    console.error(e);
+    errorMsg = 'تعذر الاتصال بقاعدة البيانات، تأكد من اتصالك بالإنترنت وحاول مرة أخرى';
     render();
   }
 }
@@ -3689,34 +3543,18 @@ async function handleRegister(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الإنشاء...';
   try{
-    const res = await fetchWithTimeout(AUTH_WORKER_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'register', username: u, password: p })
-    });
-    const data = await res.json();
-    console.log('[DEBUG register] worker response status:', res.status, 'body:', data);
-    if(!res.ok){
-      if(data.error === 'username_taken'){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; }
-      else { errorMsg = 'تعذر إنشاء الحساب [DEBUG: ' + (data.error || res.status) + (data.detail ? ' | ' + data.detail : '') + ']'; }
-      render(); return;
-    }
-    try{
-      await fbAuth.signInWithCustomToken(data.token);
-    }catch(tokenErr){
-      console.error('[DEBUG register] signInWithCustomToken failed:', tokenErr);
-      errorMsg = 'تم إنشاء الحساب لكن فشل تسجيل الدخول لـ Firebase [DEBUG: ' + (tokenErr.code || '') + ' ' + (tokenErr.message || tokenErr) + ']';
-      render(); return;
-    }
-    currentUser = data.username;
-    state = ensureStateShape(data.state);
-    state.profileImageUrl = data.profileImageUrl || '';
+    const existing = await fetchAccount(u);
+    if(existing){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; render(); return; }
+    const acc = await createAccount(u, p);
+    currentUser = acc.username;
+    state = ensureStateShape(acc.state);
+    state.profileImageUrl = acc.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
-    console.error('[DEBUG register] fetch/network error:', e);
-    errorMsg = 'تعذر إنشاء الحساب [DEBUG: ' + (e.message || e) + ']';
+    console.error(e);
+    errorMsg = 'تعذر إنشاء الحساب، تأكد من اتصالك بالإنترنت وحاول مرة أخرى';
     render();
   }
 }
@@ -3729,11 +3567,9 @@ function enterMain(){
   listenFriendRequests();
   listenPlatformLock();
   listenToPersonalMessages();
-  identifyOneSignalDevice(currentUser);
 }
 
 function logout(){
-  fbAuth.signOut().catch(e=>console.warn('signout error', e));
   if(tickInterval) clearInterval(tickInterval);
   stopPlatformLockListener();
   closeChatView();
