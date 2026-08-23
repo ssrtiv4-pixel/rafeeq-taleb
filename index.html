@@ -8,6 +8,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<!-- OneSignal: بيسمح بوصول إشعارات حقيقية (Push) حتى لو التاب/المتصفح مقفول خالص. مجاني بالكامل. -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
 // ==========================================================================
 // بنك الأسئلة الدينية — رفيق طالب
@@ -2396,6 +2398,7 @@ function mainCategoryNavHtml(){
         <span>${currentUser}</span>
       </span>
       <span>
+        ${(typeof Notification !== 'undefined' && Notification.permission === 'default') ? `<span class="admin-link" id="btn-enable-notifs">🔔 فعّل الإشعارات</span>` : ''}
         ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
@@ -2416,6 +2419,8 @@ function bindMainCategoryNav(){
   if(controlPanelBtn){
     controlPanelBtn.onclick = () => { prevView = view; view = 'control-panel'; render(); };
   }
+  const notifBtn = document.getElementById('btn-enable-notifs');
+  if(notifBtn) notifBtn.onclick = requestNotificationPermission;
   document.querySelectorAll('[data-cat]').forEach(btn => {
     btn.onclick = () => {
       const key = btn.getAttribute('data-cat');
@@ -2439,6 +2444,7 @@ function topNavHtml(active){
         <span>${currentUser}</span>
       </span>
       <span>
+        ${(typeof Notification !== 'undefined' && Notification.permission === 'default') ? `<span class="admin-link" id="btn-enable-notifs">🔔 فعّل الإشعارات</span>` : ''}
         ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
@@ -2460,6 +2466,8 @@ function bindTopNav(){
   if(controlPanelBtn){
     controlPanelBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'control-panel'; render(); };
   }
+  const notifBtn = document.getElementById('btn-enable-notifs');
+  if(notifBtn) notifBtn.onclick = requestNotificationPermission;
   document.querySelectorAll('[data-nav]').forEach(btn => {
     btn.onclick = () => navigateToPage(btn.getAttribute('data-nav'));
   });
@@ -2567,15 +2575,102 @@ function renderSheikhVideo(){
 // ===================== الرسائل الخاصة من الأدمن =====================
 let PERSONAL_MESSAGES = [];
 let personalMessagesUnsub = null;
+let personalMessagesFirstLoad = true;
 function listenToPersonalMessages(){
   if(personalMessagesUnsub || !currentUser) return;
+  personalMessagesFirstLoad = true;
   personalMessagesUnsub = db.collection('personal_messages')
     .where('toUsername','==',currentUser)
     .onSnapshot(snap => {
-      PERSONAL_MESSAGES = snap.docs.map(d => ({ id:d.id, ...d.data() }))
+      const prevIds = new Set(PERSONAL_MESSAGES.map(m => m.id));
+      const updated = snap.docs.map(d => ({ id:d.id, ...d.data() }))
         .sort((a,b) => ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0));
+      // أول تحميل للقائمة (لحظة فتح المستمع) بيجيب كل الرسائل القديمة، فمش هنبعت إشعار عنها؛
+      // الإشعار بيتبعت بس على الرسائل الجديدة اللي توصل بعد كده وإحنا فاتحين الموقع.
+      if(!personalMessagesFirstLoad){
+        updated.filter(m => !prevIds.has(m.id)).forEach(notifyNewPersonalMessage);
+      }
+      personalMessagesFirstLoad = false;
+      PERSONAL_MESSAGES = updated;
       if(view === 'main') render();
     }, e => console.warn('personal messages listen error', e));
+}
+// إشعار برسالة خاصة جديدة من الأدمن وقت ما الموقع مفتوح فعلاً في تبويب عندك (foreground).
+// إشعارات الـ Push الحقيقية (لما التاب يبقى مقفول خالص) بيبعتها OneSignal من السيرفر، مش من هنا — شوف OneSignal REST API تحت.
+function notifyNewPersonalMessage(m){
+  try{
+    if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+    const n = new Notification('📩 رسالة جديدة من الأدمن', {
+      body: (m.text || '').slice(0, 150),
+      tag: 'pm-' + m.id
+    });
+    n.onclick = () => { window.focus(); n.close(); };
+  }catch(e){ console.warn('personal message notification error', e); }
+}
+
+// ===================== OneSignal: إشعارات Push حقيقية حتى مع إغلاق التاب =====================
+// عبّي القيمتين دول من حسابك المجاني على onesignal.com (Settings > Keys & IDs) بعد ما تعمل تطبيق Web Push هناك.
+const ONESIGNAL_APP_ID = '75a6c845-ba08-4a39-93cb-257d997dd587';
+// المفتاح السري بقى محمي جوه Cloudflare Worker، مش هنا في كود الموقع، عشان كده الموقع بقى آمن.
+const CLOUDFLARE_WORKER_URL = 'https://mute-thunder-606c.ssrtiv4.workers.dev';
+const APP_SHARED_SECRET = 'rafeeq2026_x9kLm3Q7'; // نفس القيمة المحطوطة في SHARED_SECRET بإعدادات الـ Worker
+
+let oneSignalReady = false;
+(function initOneSignal(){
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      if(!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.includes('ضع_')){ console.warn('OneSignal App ID لسه متعمّلش إعداد.'); return; }
+      await OneSignal.init({ appId: ONESIGNAL_APP_ID, allowLocalhostAsSecureOrigin: true });
+      oneSignalReady = true;
+      // لو المستخدم مسجّل دخول بالفعل (فتح تبويب جديد مثلاً) اربط جهازه باسمه فوراً
+      if(currentUser) OneSignal.login(currentUser).catch(e=>console.warn('onesignal login error',e));
+      if(view !== 'login' && view !== 'register') render();
+    }catch(e){ console.warn('onesignal init error', e); }
+  });
+})();
+// اربط الجهاز الحالي باسم المستخدم عشان الأدمن يقدر يبعتله إشعار باسمه (بيتنادى بعد تسجيل الدخول)
+function identifyOneSignalDevice(username){
+  if(!username) return;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    try{ await OneSignal.login(username); }catch(e){ console.warn('onesignal login error', e); }
+  });
+}
+function isOneSignalNotifSupported(){
+  return typeof window !== 'undefined' && !!window.OneSignalDeferred;
+}
+// طلب إذن الإشعارات من المستخدم (لازم يتم بضغطة من المستخدم في أغلب المتصفحات)
+function requestNotificationPermission(){
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal){
+    try{
+      await OneSignal.Notifications.requestPermission();
+      if(currentUser) await OneSignal.login(currentUser);
+      if(OneSignal.Notifications.permission){
+        alert('🔔 تم تفعيل الإشعارات! هتوصلك رسالة الأدمن حتى لو الموقع مقفول خالص عندك.');
+      }
+    }catch(e){
+      console.warn('notification permission request error', e);
+      alert('تعذّر تفعيل الإشعارات. تأكد إنك بتفتح الموقع بـ https وإن المتصفح بيدعمها.');
+    }
+    if(view !== 'login' && view !== 'register') render();
+  });
+}
+// بتتنادى من لوحة تحكم الأدمن بعد ما يبعت رسالة خاصة، عشان تبعت Push حقيقي للطالب حتى لو مقفول الموقع عنده
+// الطلب بيروح لسيرفر Cloudflare Worker الوسيط (مش لـ OneSignal مباشرة)، عشان المفتاح السري يفضل مخفي.
+async function sendOneSignalPushToUser(username, text){
+  if(!CLOUDFLARE_WORKER_URL || !username || !text) return;
+  try{
+    await fetch(CLOUDFLARE_WORKER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-App-Secret': APP_SHARED_SECRET
+      },
+      body: JSON.stringify({ username, text })
+    });
+  }catch(e){ console.warn('onesignal push send error', e); }
 }
 function renderPersonalMessagesSection(){
   if(!PERSONAL_MESSAGES.length) return '';
@@ -3219,6 +3314,7 @@ async function renderControlPanel(){
         toUsername, text, seen:false,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
+      sendOneSignalPushToUser(toUsername, text); // إشعار Push حقيقي حتى لو الطالب مقفول الموقع عنده
       const ta=document.getElementById('admin-pm-text'); if(ta) ta.value='';
       if(st) st.textContent='تم إرسال الرسالة بنجاح ✅';
       await loadAdminData(); renderControlPanel();
@@ -3526,6 +3622,7 @@ function enterMain(){
   listenFriendRequests();
   listenPlatformLock();
   listenToPersonalMessages();
+  identifyOneSignalDevice(currentUser);
 }
 
 function logout(){
