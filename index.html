@@ -2396,7 +2396,6 @@ function mainCategoryNavHtml(){
         <span>${currentUser}</span>
       </span>
       <span>
-        ${(typeof Notification !== 'undefined' && Notification.permission === 'default') ? `<span class="admin-link" id="btn-enable-notifs">🔔 فعّل الإشعارات</span>` : ''}
         ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
@@ -2417,8 +2416,6 @@ function bindMainCategoryNav(){
   if(controlPanelBtn){
     controlPanelBtn.onclick = () => { prevView = view; view = 'control-panel'; render(); };
   }
-  const notifBtn = document.getElementById('btn-enable-notifs');
-  if(notifBtn) notifBtn.onclick = requestNotificationPermission;
   document.querySelectorAll('[data-cat]').forEach(btn => {
     btn.onclick = () => {
       const key = btn.getAttribute('data-cat');
@@ -2442,7 +2439,6 @@ function topNavHtml(active){
         <span>${currentUser}</span>
       </span>
       <span>
-        ${(typeof Notification !== 'undefined' && Notification.permission === 'default') ? `<span class="admin-link" id="btn-enable-notifs">🔔 فعّل الإشعارات</span>` : ''}
         ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
@@ -2464,8 +2460,6 @@ function bindTopNav(){
   if(controlPanelBtn){
     controlPanelBtn.onclick = () => { if(view==='chat') closeChatView(); prevView = view; view = 'control-panel'; render(); };
   }
-  const notifBtn = document.getElementById('btn-enable-notifs');
-  if(notifBtn) notifBtn.onclick = requestNotificationPermission;
   document.querySelectorAll('[data-nav]').forEach(btn => {
     btn.onclick = () => navigateToPage(btn.getAttribute('data-nav'));
   });
@@ -2512,6 +2506,7 @@ function renderAuth(){
 
 let adminTab = 'dashboard';
 let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[], sheikhVideos:[], personalMessages:[], usernameRequests:[] };
+let adminSelectedUsers = new Set(); // أسماء الطلاب المحددين حالياً في تبويب المستخدمين للحذف الجماعي
 let adminPmPresetUser = ''; // اسم مقترح يُملأ تلقائياً في خانة "إرسال رسالة خاصة" لما الأدمن يضغط زر المراسلة من جدول المستخدمين
 let ADS_LIST = [];
 
@@ -2573,50 +2568,15 @@ function renderSheikhVideo(){
 // ===================== الرسائل الخاصة من الأدمن =====================
 let PERSONAL_MESSAGES = [];
 let personalMessagesUnsub = null;
-let personalMessagesFirstLoad = true;
 function listenToPersonalMessages(){
   if(personalMessagesUnsub || !currentUser) return;
-  personalMessagesFirstLoad = true;
   personalMessagesUnsub = db.collection('personal_messages')
     .where('toUsername','==',currentUser)
     .onSnapshot(snap => {
-      const prevIds = new Set(PERSONAL_MESSAGES.map(m => m.id));
-      const updated = snap.docs.map(d => ({ id:d.id, ...d.data() }))
+      PERSONAL_MESSAGES = snap.docs.map(d => ({ id:d.id, ...d.data() }))
         .sort((a,b) => ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0));
-      // أول تحميل للقائمة (لحظة فتح المستمع) بيجيب كل الرسائل القديمة، فمش هنبعت إشعار عنها؛
-      // الإشعار بيتبعت بس على الرسائل الجديدة اللي توصل بعد كده وإحنا فاتحين الموقع.
-      if(!personalMessagesFirstLoad){
-        updated.filter(m => !prevIds.has(m.id)).forEach(notifyNewPersonalMessage);
-      }
-      personalMessagesFirstLoad = false;
-      PERSONAL_MESSAGES = updated;
       if(view === 'main') render();
     }, e => console.warn('personal messages listen error', e));
-}
-// إشعار المتصفح برسالة خاصة جديدة من الأدمن. بيشتغل بس والموقع مفتوح في تبويب (حتى لو مش في الصفحة الرئيسية
-// أو التبويب مش نشط)، ولازم المستخدم يكون وافق على الإشعارات قبل كده. الإشعار مش هيوصل لو الموقع مقفول خالص،
-// لأن ده محتاج Service Worker + إعداد Firebase Cloud Messaging من طرف السيرفر.
-function notifyNewPersonalMessage(m){
-  try{
-    if(typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
-    const n = new Notification('📩 رسالة جديدة من الأدمن', {
-      body: (m.text || '').slice(0, 150),
-      tag: 'pm-' + m.id
-    });
-    n.onclick = () => { window.focus(); n.close(); };
-  }catch(e){ console.warn('personal message notification error', e); }
-}
-// طلب إذن الإشعارات من المستخدم (لازم يتم بضغطة من المستخدم في أغلب المتصفحات)
-function requestNotificationPermission(){
-  if(typeof Notification === 'undefined'){ alert('متصفحك لا يدعم إشعارات المتصفح.'); return; }
-  Notification.requestPermission().then(perm => {
-    if(perm === 'granted'){
-      try{ new Notification('🔔 تم تفعيل الإشعارات', { body:'هتوصلك رسالة كل ما الأدمن يبعتلك رسالة خاصة، طول ما الموقع مفتوح عندك في المتصفح.' }); }catch(e){}
-    } else if(perm === 'denied'){
-      alert('تم رفض إذن الإشعارات. لو غيّرت رأيك، لازم تفعّلها يدوياً من إعدادات المتصفح لهذا الموقع.');
-    }
-    if(view !== 'login' && view !== 'register') render();
-  }).catch(e => console.warn('notification permission request error', e));
 }
 function renderPersonalMessagesSection(){
   if(!PERSONAL_MESSAGES.length) return '';
@@ -2772,9 +2732,15 @@ async function renderControlPanel(){
       <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب. زرارَي «حفظ السبب» و«حفظ المؤقت» بيحدّثوا القيم فوراً حتى لو المنصة مقفولة بالفعل، من غير الحاجة لفتحها وقفلها تاني. مدة القفل بتُحسب من لحظة الضغط على «حفظ المؤقت» أو «قفل المنصة».</div>
     `;
   } else if(active==='users'){
-    const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
+    const nonAdminUsers = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
+    // بيشيل من مجموعة التحديد أي اسم مستخدم مبقاش موجود في القائمة الحالية (مثلاً بعد حذف/تعديل الاسم)
+    const currentUsernames = new Set(nonAdminUsers.map(a=>a.username||a.id));
+    Array.from(adminSelectedUsers).forEach(u=>{ if(!currentUsernames.has(u)) adminSelectedUsers.delete(u); });
+    const allSelected = nonAdminUsers.length>0 && nonAdminUsers.every(a=>adminSelectedUsers.has(a.username||a.id));
+    const rows = nonAdminUsers.map(a=>{
       const u=a.username||a.id, st=a.state||{}, uid=adminEsc(a.id);
       return `<tr>
+        <td><input type="checkbox" class="admin-user-checkbox" data-user-checkbox="${adminEsc(u)}" ${adminSelectedUsers.has(u)?'checked':''}></td>
         <td><b>${adminEsc(u)}</b></td>
         <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-points-${uid}" value="${Number(st.points)||0}"></td>
         <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-xp-${uid}" value="${Number(st.xp)||0}"></td>
@@ -2787,8 +2753,12 @@ async function renderControlPanel(){
         </div></td></tr>`;
     }).join('');
     content = `<h3 class="admin-section-title">إدارة المستخدمين والمتصدرين</h3>
-      <div class="admin-help">تقدر تعدّل النقاط أو الـ XP أو عدد الإجابات الصحيحة لأي طالب يدوياً (مثلاً لو حصلت مشكلة تقنية أثرت على درجاته)، اكتب القيمة الجديدة واضغط «💾 حفظ» بجنب اسمه.</div>
-      <div class="admin-scroll"><table class="admin-table"><thead><tr><th>الطالب</th><th>النقاط</th><th>XP</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>
+      <div class="admin-help">تقدر تعدّل النقاط أو الـ XP أو عدد الإجابات الصحيحة لأي طالب يدوياً (مثلاً لو حصلت مشكلة تقنية أثرت على درجاته)، اكتب القيمة الجديدة واضغط «💾 حفظ» بجنب اسمه. تقدر كمان تحدد أكتر من طالب بعلامة ✔️ وتحذفهم كلهم مرة واحدة.</div>
+      <div class="admin-actions" style="margin-bottom:10px;">
+        <button class="btn admin-mini admin-danger" id="admin-bulk-delete-users" ${adminSelectedUsers.size===0?'disabled':''}>🗑️ حذف المحددين (${adminSelectedUsers.size})</button>
+        ${adminSelectedUsers.size>0 ? `<button class="btn admin-mini admin-secondary" id="admin-clear-selection-users">إلغاء التحديد</button>` : ''}
+      </div>
+      <div class="admin-scroll"><table class="admin-table"><thead><tr><th><input type="checkbox" id="admin-select-all-users" ${allSelected?'checked':''}></th><th>الطالب</th><th>النقاط</th><th>XP</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>
       <div class="admin-help" id="admin-score-status" style="min-height:16px;"></div>`;
   } else if(active==='user-tracking'){
     const todayStr = todayDateKey();
@@ -3113,8 +3083,45 @@ async function renderControlPanel(){
     if(!confirm(`حذف الحساب ${u} نهائياً؟`)) return;
     const acc=adminCache.accounts.find(a=>(a.username||a.id)===u);
     if(acc) await db.collection('accounts').doc(acc.id).delete();
+    adminSelectedUsers.delete(u);
     await loadAdminData(); renderControlPanel();
   });
+  document.querySelectorAll('[data-user-checkbox]').forEach(cb=>cb.onchange=()=>{
+    const u=cb.getAttribute('data-user-checkbox');
+    if(cb.checked) adminSelectedUsers.add(u); else adminSelectedUsers.delete(u);
+    renderControlPanel();
+  });
+  const selectAllUsersCb=document.getElementById('admin-select-all-users');
+  if(selectAllUsersCb) selectAllUsersCb.onchange=()=>{
+    const nonAdminUsers = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
+    if(selectAllUsersCb.checked) nonAdminUsers.forEach(a=>adminSelectedUsers.add(a.username||a.id));
+    else nonAdminUsers.forEach(a=>adminSelectedUsers.delete(a.username||a.id));
+    renderControlPanel();
+  };
+  const clearSelectionUsersBtn=document.getElementById('admin-clear-selection-users');
+  if(clearSelectionUsersBtn) clearSelectionUsersBtn.onclick=()=>{ adminSelectedUsers.clear(); renderControlPanel(); };
+  const bulkDeleteUsersBtn=document.getElementById('admin-bulk-delete-users');
+  if(bulkDeleteUsersBtn) bulkDeleteUsersBtn.onclick=async()=>{
+    const selected = Array.from(adminSelectedUsers);
+    if(selected.length===0) return;
+    if(!confirm(`حذف ${selected.length} حساب نهائياً؟ الإجراء ده مينفعش يترجع.`)) return;
+    bulkDeleteUsersBtn.disabled = true;
+    try{
+      const batch = db.batch();
+      let opCount = 0;
+      for(const u of selected){
+        const acc = adminCache.accounts.find(a=>(a.username||a.id)===u);
+        if(acc){ batch.delete(db.collection('accounts').doc(acc.id)); opCount++; }
+      }
+      if(opCount>0) await batch.commit();
+      adminSelectedUsers.clear();
+      await loadAdminData(); renderControlPanel();
+    }catch(e){
+      console.error('bulk delete users error', e);
+      alert('حصل خطأ أثناء الحذف الجماعي، حاول مرة أخرى.');
+      await loadAdminData(); renderControlPanel();
+    }
+  };
   const addQ=document.getElementById('btn-add-question');
   if(addQ) addQ.onclick=adminAddQuestion;
   const deleteAllQBtn=document.getElementById('btn-delete-all-questions');
