@@ -2499,8 +2499,6 @@ function renderAuth(){
       </div>
     </div>
     <div class="auth-admin-link" id="go-admin-contact">تواصل مع الأدمن</div>
-    <button class="btn" id="btn-debug-test" style="margin-top:12px;background:#555;">🔧 اختبار الاتصال بالسيرفر (مؤقت)</button>
-    <div class="error" id="debug-test-result" style="white-space:pre-wrap;font-size:12px;text-align:left;direction:ltr;"></div>
   `;
   const userInput = document.getElementById('in-user');
   const passInput = document.getElementById('in-pass');
@@ -2512,21 +2510,6 @@ function renderAuth(){
   userInput.onkeydown = (e) => { if(e.key === 'Enter') passInput.focus(); };
   document.getElementById(isLogin ? 'go-register' : 'go-login').onclick = () => {
     errorMsg=''; view = isLogin ? 'register' : 'login'; render();
-  };
-  document.getElementById('btn-debug-test').onclick = async () => {
-    const out = document.getElementById('debug-test-result');
-    out.textContent = 'جارِ الاختبار...';
-    try{
-      const res = await fetch(AUTH_WORKER_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'debug_test' })
-      });
-      const data = await res.json();
-      out.textContent = JSON.stringify(data, null, 2);
-    }catch(e){
-      out.textContent = 'فشل الاتصال بالسيرفر: ' + e.message;
-    }
   };
   document.getElementById('go-admin-contact').onclick = () => {
     prevView = view; view = 'admin'; render();
