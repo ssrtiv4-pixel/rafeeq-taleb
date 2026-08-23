@@ -1604,6 +1604,15 @@ async function logLoginEvent(username){
   }catch(e){
     console.error('login log error:', e);
   }
+  try{
+    // بيزوّد عداد "مرات الدخول" على حساب المستخدم عشان الأدمن يشوفه في لوحة التحكم من غير ما يحتاج يعدّ سجلات الدخول يدوياً
+    await db.collection('accounts').doc(docId(username)).update({
+      loginCount: firebase.firestore.FieldValue.increment(1),
+      lastLoginAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }catch(e){
+    console.error('login count update error:', e);
+  }
 }
 
 // حساب المشرف الأعلى: صاحب هذا الاسم فقط يرى زر/لوحة الحذف. ملاحظة أمان: هذا فحص من جهة العميل فقط
@@ -1632,6 +1641,10 @@ let leaderboardData = null;
 let leaderboardLoading = false;
 let profileAccountCache = {};
 let profileAccountCacheUser = null;
+let usernameChangeCache = null;
+let usernameChangeCacheUser = null;
+let usernameChangeSubmitError = '';
+let usernameChangeSubmitting = false;
 let friendRequestsIncoming = [];
 let friendRequestsUnsub = null;
 let friendsProfilesLoaded = false;
@@ -2492,7 +2505,8 @@ function renderAuth(){
 
 
 let adminTab = 'dashboard';
-let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[], sheikhVideos:[], personalMessages:[] };
+let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[], sheikhVideos:[], personalMessages:[], usernameRequests:[] };
+let adminPmPresetUser = ''; // اسم مقترح يُملأ تلقائياً في خانة "إرسال رسالة خاصة" لما الأدمن يضغط زر المراسلة من جدول المستخدمين
 let ADS_LIST = [];
 
 function listenToAds(){
@@ -2584,7 +2598,7 @@ function adminEsc(v){
 async function loadAdminData(){
   if(!isSuperAdmin()) return;
   try{
-    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap, sheikhAudiosSnap, sheikhVideosSnap, personalMessagesSnap] = await Promise.all([
+    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap, sheikhAudiosSnap, sheikhVideosSnap, personalMessagesSnap, usernameRequestsSnap] = await Promise.all([
       db.collection('accounts').get(),
       db.collection('question_bank').get(),
       db.collection('tournaments').orderBy('createdAt','desc').limit(20).get().catch(()=>db.collection('tournaments').limit(20).get()),
@@ -2595,7 +2609,8 @@ async function loadAdminData(){
       db.collection('local_1v1_matches').limit(100).get().catch(()=>({docs:[]})),
       db.collection('sheikh_audios').orderBy('createdAt','desc').get().catch(()=>db.collection('sheikh_audios').get()),
       db.collection('sheikh_videos').orderBy('createdAt','desc').get().catch(()=>db.collection('sheikh_videos').get()),
-      db.collection('personal_messages').orderBy('createdAt','desc').limit(200).get().catch(()=>db.collection('personal_messages').limit(200).get())
+      db.collection('personal_messages').orderBy('createdAt','desc').limit(200).get().catch(()=>db.collection('personal_messages').limit(200).get()),
+      db.collection('username_change_requests').orderBy('createdAt','desc').limit(100).get().catch(()=>db.collection('username_change_requests').limit(100).get())
     ]);
     adminCache.accounts = accountsSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(questionsSnap.empty && Array.isArray(RELIGIOUS_QUESTIONS_BANK) && RELIGIOUS_QUESTIONS_BANK.length){
@@ -2619,8 +2634,50 @@ async function loadAdminData(){
     adminCache.sheikhAudios = sheikhAudiosSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.sheikhVideos = sheikhVideosSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.personalMessages = personalMessagesSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.usernameRequests = usernameRequestsSnap.docs.map(d=>({id:d.id,...d.data()}));
   }catch(e){
     console.error('admin load error',e);
+  }
+}
+
+async function adminApproveUsernameRequest(reqId){
+  const req = (adminCache.usernameRequests||[]).find(r=>r.id===reqId);
+  if(!req || req.status!=='pending'){ await loadAdminData(); renderControlPanel(); return; }
+  const oldUsername = req.fromUsername, newUsername = req.newUsername;
+  try{
+    const existing = await fetchAccount(newUsername);
+    if(existing){
+      alert('الاسم الجديد "'+newUsername+'" أصبح مستخدَماً بالفعل من حساب آخر، لازم ترفض هذا الطلب.');
+      await loadAdminData(); renderControlPanel(); return;
+    }
+    const oldRef = db.collection('accounts').doc(docId(oldUsername));
+    const oldSnap = await oldRef.get();
+    if(!oldSnap.exists){
+      alert('حساب الطالب الأصلي "'+oldUsername+'" لم يعد موجوداً.');
+      await loadAdminData(); renderControlPanel(); return;
+    }
+    const data = oldSnap.data();
+    const newData = { ...data, username: newUsername };
+    const batch = db.batch();
+    batch.set(db.collection('accounts').doc(docId(newUsername)), newData);
+    batch.delete(oldRef);
+    batch.update(db.collection('username_change_requests').doc(reqId), { status:'approved', approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await batch.commit();
+    await loadAdminData(); renderControlPanel();
+  }catch(e){
+    console.error('approve username change error', e);
+    alert('تعذر تنفيذ الموافقة، حاول مرة أخرى.');
+    await loadAdminData(); renderControlPanel();
+  }
+}
+async function adminRejectUsernameRequest(reqId, reason){
+  try{
+    await db.collection('username_change_requests').doc(reqId).update({ status:'rejected', reason: reason||'', rejectedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    await loadAdminData(); renderControlPanel();
+  }catch(e){
+    console.error('reject username change error', e);
+    alert('تعذر تنفيذ الرفض، حاول مرة أخرى.');
+    await loadAdminData(); renderControlPanel();
   }
 }
 
@@ -2631,10 +2688,11 @@ async function renderControlPanel(){
   if(!isSuperAdmin()) return;
   const active = adminTab;
   const tabs = [
-    ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['questions','❓ بنك الأسئلة'],
+    ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],['questions','❓ بنك الأسئلة'],
     ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
     ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ'],
-    ['sheikh-video','🎬 فيديوهات تعليمية'],['personal-messages','📩 رسائل خاصة']
+    ['sheikh-video','🎬 فيديوهات تعليمية'],['personal-messages','📩 رسائل خاصة'],
+    ['username-requests',`📝 طلبات تغيير الاسم${adminCache.usernameRequests.filter(r=>r.status==='pending').length ? ` (${adminCache.usernameRequests.filter(r=>r.status==='pending').length})` : ''}`]
   ];
   const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
   let content = '';
@@ -2691,6 +2749,43 @@ async function renderControlPanel(){
       <div class="admin-help">تقدر تعدّل النقاط أو الـ XP أو عدد الإجابات الصحيحة لأي طالب يدوياً (مثلاً لو حصلت مشكلة تقنية أثرت على درجاته)، اكتب القيمة الجديدة واضغط «💾 حفظ» بجنب اسمه.</div>
       <div class="admin-scroll"><table class="admin-table"><thead><tr><th>الطالب</th><th>النقاط</th><th>XP</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>
       <div class="admin-help" id="admin-score-status" style="min-height:16px;"></div>`;
+  } else if(active==='user-tracking'){
+    const todayStr = todayDateKey();
+    const todayEpoch = getTodayEpochDay();
+    const cards = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
+      const u=a.username||a.id, st=a.state||{};
+      const didWirdToday = st.wirdLastDoneDate === todayStr;
+      const dhikrCounts = Array.isArray(st.dhikrCounts) ? st.dhikrCounts : [];
+      const dhikrSum = dhikrCounts.reduce((s,c)=>s+(Number(c)||0),0);
+      const dhikrAllDone = dhikrCounts.length>0 && dhikrCounts.every(c=>(Number(c)||0) >= REPS_PER_DHIKR);
+      const dhikrBadge = dhikrAllDone ? '<span class="admin-badge ok">📿 الأذكار: خلّصها</span>'
+        : dhikrSum>0 ? '<span class="admin-badge">📿 الأذكار: شغّال فيها</span>'
+        : '<span class="admin-badge bad">📿 الأذكار: لسه ما بدأش</span>';
+      const quizToday = st.quizDate === todayEpoch && Array.isArray(st.quizAnsweredToday) && st.quizAnsweredToday.length>0;
+      const duelsTotal = (Number(st.duelWins)||0) + (Number(st.duelLosses)||0);
+      const loginCount = Number(a.loginCount)||0;
+      return `<div class="admin-ad-item">
+        <div class="admin-ad-item-head">
+          <b>${adminEsc(u)}</b>
+          ${a.banned?'<span class="admin-badge bad">محظور</span>':'<span class="admin-badge ok">نشط</span>'}
+        </div>
+        <div class="admin-ad-item-body" style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="admin-badge ${didWirdToday?'ok':'bad'}">📖 الورد اليومي: ${didWirdToday?'قرأه':'لسه'}</span>
+          ${dhikrBadge}
+          <span class="admin-badge ${quizToday?'ok':'bad'}">❓ مسابقة اليوم: ${quizToday?'جاوب':'لسه'}</span>
+          <span class="admin-badge">⚔️ تحديات: ${duelsTotal}</span>
+          <span class="admin-badge">🎡 عجلة الحظ: ${Number(st.wheelWins)||0}</span>
+          <span class="admin-badge">📖 ختمات: ${Number(st.khatmaCompletions)||0}</span>
+          <span class="admin-badge">🔥 سلسلة: ${(st.streak&&st.streak.count)||0} يوم</span>
+          <span class="admin-badge" dir="ltr">🔑 دخول: ${loginCount}</span>
+          <span class="admin-badge">⏱ ${fmtLastActive(a.lastActiveAt)}</span>
+        </div>
+        <div class="admin-actions"><button class="btn admin-mini admin-secondary" data-pm-user="${adminEsc(u)}">📩 مراسلة</button></div>
+      </div>`;
+    }).join('');
+    content = `<h3 class="admin-section-title">📡 تتبع نشاط الطلاب</h3>
+      <div class="admin-help">كل بطاقة بتوضحلك أي نشاط عمله الطالب: هل قرأ الورد اليومي، هل خلّص الأذكار ولا لسه، هل جاوب على مسابقة النهاردة، عدد التحديات وعجلة الحظ والختمات إجمالاً، وسلسلة الأيام المتتالية وعدد مرات الدخول وآخر نشاط له. لو لاحظت طالب ساكت (كل الشارات باللون الأحمر أو عدّاداته صفر)، اضغط «📩 مراسلة» لتبعتله تذكير.</div>
+      <div class="admin-scroll">${cards || '<div class="muted">لا يوجد طلاب</div>'}</div>`;
   } else if(active==='local-duel'){
     const matches = Array.isArray(adminCache.localDuels) ? adminCache.localDuels : [];
     const students = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME && !a.banned);
@@ -2871,13 +2966,37 @@ async function renderControlPanel(){
     content = `<h3 class="admin-section-title">📩 إرسال رسالة خاصة لطالب</h3>
       <div class="admin-help">اختر الطالب واكتب الرسالة. هتظهرله فوق شاشته الرئيسية زي الإعلان بالظبط، وهيقدر يضغط «شفت الرسالة 👍» عشان تعرف إنه قراها من الحالة اللي هتظهر جنب كل رسالة هنا.</div>
       <label>اختر الطالب</label>
-      <select class="admin-input" id="admin-pm-user"><option value="">اختر طالب...</option>${students.map(a=>{const u=a.username||a.id;return `<option value="${adminEsc(u)}">${adminEsc(u)}</option>`}).join('')}</select>
+      <select class="admin-input" id="admin-pm-user"><option value="">اختر طالب...</option>${students.map(a=>{const u=a.username||a.id;return `<option value="${adminEsc(u)}" ${adminPmPresetUser===u?'selected':''}>${adminEsc(u)}</option>`}).join('')}</select>
       <label>نص الرسالة</label>
       <textarea class="admin-input" id="admin-pm-text" placeholder="اكتب رسالتك للطالب..."></textarea>
       <button class="btn" id="btn-send-pm">📤 إرسال الرسالة</button>
       <div class="admin-help" id="admin-pm-status"></div>
       <h3 class="admin-section-title" style="margin-top:22px;">📋 الرسائل المرسلة (${(adminCache.personalMessages||[]).length})</h3>
       <div class="admin-scroll">${rows || '<div class="muted">لا توجد رسائل مرسلة بعد.</div>'}</div>`;
+  } else if(active==='username-requests'){
+    const reqs = (adminCache.usernameRequests||[]).slice().sort((a,b)=>{
+      const rank = r => r.status==='pending' ? 0 : 1;
+      if(rank(a)!==rank(b)) return rank(a)-rank(b);
+      return ((b.createdAt&&b.createdAt.seconds)||0) - ((a.createdAt&&a.createdAt.seconds)||0);
+    });
+    const rows = reqs.map(r=>{
+      const statusBadge = r.status==='pending' ? '<span class="admin-badge">⏳ بانتظار المراجعة</span>'
+        : r.status==='approved' ? '<span class="admin-badge ok">✅ تمت الموافقة</span>'
+        : '<span class="admin-badge bad">❌ مرفوض</span>';
+      return `<div class="admin-ad-item">
+        <div class="admin-ad-item-head"><b>${adminEsc(r.fromUsername)} ← ${adminEsc(r.newUsername)}</b>${statusBadge}</div>
+        ${r.status==='rejected' && r.reason ? `<div class="admin-ad-item-body muted">سبب الرفض: ${adminEsc(r.reason)}</div>` : ''}
+        ${r.status==='pending' ? `
+        <div class="admin-actions">
+          <button class="btn admin-mini admin-secondary" data-approve-username-req="${adminEsc(r.id)}">✅ موافقة</button>
+          <input class="admin-input" style="flex:1;min-width:120px;" id="reject-reason-${adminEsc(r.id)}" placeholder="سبب الرفض (اختياري)">
+          <button class="btn admin-mini admin-danger" data-reject-username-req="${adminEsc(r.id)}">❌ رفض</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+    content = `<h3 class="admin-section-title">📝 طلبات تغيير اسم المستخدم</h3>
+      <div class="admin-help">لما طالب يطلب تغيير اسمه من ملفه الشخصي، هيظهرلك هنا. الموافقة بتنقل بيانات الحساب كله (النقاط، الـXP، الأوسمة...) لاسم المستخدم الجديد وتحذف الاسم القديم، فلازم الطالب يسجّل دخول تاني بالاسم الجديد بعد الموافقة. تنبيه: أي رسائل أو مباريات قديمة كانت مسجّلة بالاسم القديم هتفضل ظاهرة بالاسم القديم في السجلات التاريخية.</div>
+      <div class="admin-scroll">${rows || '<div class="muted">لا توجد طلبات حالياً.</div>'}</div>`;
   }
   root.innerHTML = `
     <div class="contact-back" id="btn-back-from-panel">→ رجوع</div>
@@ -2914,6 +3033,11 @@ async function renderControlPanel(){
     catch(e){ alert('تعذر حذف المباراة.'); }
   });
 
+  document.querySelectorAll('[data-pm-user]').forEach(b=>b.onclick=()=>{
+    adminPmPresetUser = b.getAttribute('data-pm-user')||'';
+    adminTab = 'personal-messages';
+    renderControlPanel();
+  });
   document.querySelectorAll('[data-ban-user]').forEach(b=>b.onclick=async()=>{
     const u=b.getAttribute('data-ban-user'), acc=adminCache.accounts.find(a=>(a.username||a.id)===u);
     if(!acc) return;
@@ -3108,6 +3232,19 @@ async function renderControlPanel(){
     if(!confirm('حذف هذه الرسالة نهائياً؟')) return;
     await db.collection('personal_messages').doc(b.getAttribute('data-del-pm')).delete();
     await loadAdminData(); renderControlPanel();
+  });
+  document.querySelectorAll('[data-approve-username-req]').forEach(b=>b.onclick=async()=>{
+    const id=b.getAttribute('data-approve-username-req');
+    if(!confirm('الموافقة على تغيير الاسم؟ سينتقل الحساب بالكامل للاسم الجديد فوراً.')) return;
+    b.disabled=true;
+    await adminApproveUsernameRequest(id);
+  });
+  document.querySelectorAll('[data-reject-username-req]').forEach(b=>b.onclick=async()=>{
+    const id=b.getAttribute('data-reject-username-req');
+    const reasonEl=document.getElementById('reject-reason-'+id);
+    const reason=reasonEl ? reasonEl.value.trim() : '';
+    b.disabled=true;
+    await adminRejectUsernameRequest(id, reason);
   });
   const toggleChatBtn=document.getElementById('btn-toggle-group-chat');
   if(toggleChatBtn) toggleChatBtn.onclick=async()=>{
@@ -4261,6 +4398,52 @@ async function shareAchievement(){
   }
 }
 
+function renderUsernameChangeSectionHtml(){
+  if(usernameChangeCacheUser !== currentUser){
+    return `<div class="locked-note" style="margin-top:0">جارِ التحميل...</div>`;
+  }
+  const req = usernameChangeCache;
+  if(req && req.status==='pending'){
+    return `<div class="locked-note" style="margin-top:0">⏳ طلبك لتغيير اسمك إلى «<b>${adminEsc(req.newUsername)}</b>» قيد المراجعة من الأدمن. هيتم إعلامك بعد الموافقة أو الرفض.</div>`;
+  }
+  const rejectedNote = (req && req.status==='rejected')
+    ? `<div class="locked-note" style="margin-top:0">❌ تم رفض طلبك السابق لتغيير الاسم إلى «${adminEsc(req.newUsername)}»${req.reason?` — السبب: ${adminEsc(req.reason)}`:''}. تقدر تبعت طلباً جديداً.</div>`
+    : '';
+  const approvedNote = (req && req.status==='approved')
+    ? `<div class="locked-note" style="margin-top:0">✅ تمت الموافقة على تغيير اسمك سابقاً. لو ما اتغيّرش اسمك في أعلى الشاشة، سجّل خروج وادخل تاني بالاسم الجديد.</div>`
+    : '';
+  return `${rejectedNote}${approvedNote}
+    <div class="locked-note" style="margin-top:0">اكتب الاسم الجديد اللي عايز تتغيّر له. الطلب هيروح للأدمن للموافقة عليه قبل ما يتفعّل فعلياً.</div>
+    <label>الاسم الجديد</label>
+    <input class="admin-input" id="username-change-input" placeholder="اسم المستخدم الجديد" value="">
+    <button class="btn" id="btn-request-username-change" style="margin-top:8px;" ${usernameChangeSubmitting?'disabled':''}>${usernameChangeSubmitting?'جارِ الإرسال...':'📤 إرسال طلب تغيير الاسم'}</button>
+    <div class="error">${adminEsc(usernameChangeSubmitError||'')}</div>`;
+}
+async function submitUsernameChangeRequest(){
+  const input = document.getElementById('username-change-input');
+  const newUsername = (input && input.value || '').trim();
+  usernameChangeSubmitError = '';
+  if(!newUsername || newUsername.length < 3){ usernameChangeSubmitError='اكتب اسم مستخدم صحيح لا يقل عن 3 أحرف.'; renderProfile(); return; }
+  if(docId(newUsername) === docId(currentUser)){ usernameChangeSubmitError='هذا هو اسمك الحالي بالفعل.'; renderProfile(); return; }
+  usernameChangeSubmitting = true; renderProfile();
+  try{
+    const existing = await fetchAccount(newUsername);
+    if(existing){ usernameChangeSubmitError='هذا الاسم مستخدَم بالفعل، اختر اسماً آخر.'; usernameChangeSubmitting=false; renderProfile(); return; }
+    const pendingCheck = await db.collection('username_change_requests').where('fromUsername','==',currentUser).where('status','==','pending').get();
+    if(!pendingCheck.empty){ usernameChangeSubmitError='لديك طلب قيد المراجعة بالفعل، انتظر رد الأدمن.'; usernameChangeSubmitting=false; renderProfile(); return; }
+    const docRef = await db.collection('username_change_requests').add({
+      fromUsername: currentUser, newUsername, status:'pending', createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    usernameChangeCache = { id:docRef.id, fromUsername:currentUser, newUsername, status:'pending' };
+    usernameChangeSubmitting = false;
+    renderProfile();
+  }catch(e){
+    console.error('submit username change request error', e);
+    usernameChangeSubmitError='تعذر إرسال الطلب، حاول مرة أخرى.';
+    usernameChangeSubmitting = false;
+    renderProfile();
+  }
+}
 function renderProfile(){
   if(profileAccountCacheUser !== currentUser){
     profileAccountCacheUser = currentUser;
@@ -4269,6 +4452,15 @@ function renderProfile(){
       profileAccountCache = acc || {};
       if(view === 'profile') render();
     }).catch(e => console.warn('fetchAccount for profile failed', e));
+  }
+  if(usernameChangeCacheUser !== currentUser){
+    usernameChangeCacheUser = currentUser;
+    usernameChangeCache = null;
+    db.collection('username_change_requests').where('fromUsername','==',currentUser).orderBy('createdAt','desc').limit(1).get()
+      .then(snap => {
+        usernameChangeCache = snap.empty ? null : { id:snap.docs[0].id, ...snap.docs[0].data() };
+        if(view === 'profile') render();
+      }).catch(e => console.warn('fetch username change request failed', e));
   }
   const li=getLevelInfo(state.xp);
   root.innerHTML=`${topNavHtml('profile')}
@@ -4293,6 +4485,7 @@ function renderProfile(){
         <div class="streak-sub">أفضل سلسلة: ${(state.streak&&state.streak.longest)||0} يوم</div>
       </div>
     </div>
+    <div class="card"><h2>✏️ تغيير اسم المستخدم</h2>${renderUsernameChangeSectionHtml()}</div>
     <div class="card"><h2>👤 إحصائياتي</h2><div class="profile-grid">
       <div class="profile-stat"><b>${state.xp}</b><span>إجمالي XP</span></div><div class="profile-stat"><b>${state.points}</b><span>النقاط</span></div>
       <div class="profile-stat"><b>${state.correctAnswers}</b><span>إجابات صحيحة</span></div>
@@ -4325,6 +4518,8 @@ function renderProfile(){
   };
   const shareBtn = document.getElementById('btn-share-achievement');
   if(shareBtn) shareBtn.onclick = shareAchievement;
+  const usernameChangeBtn = document.getElementById('btn-request-username-change');
+  if(usernameChangeBtn) usernameChangeBtn.onclick = submitUsernameChangeRequest;
 }
 function renderSuggest(){
   root.innerHTML=`${topNavHtml('suggest')}<div class="card"><h2>💡 ساهم بسؤالك</h2><div class="locked-note" style="margin-top:0">اقترح سؤالاً جديداً للمسابقات. سيظهر للأدمن للمراجعة، وإذا تمت الموافقة سيتم نشره مع اسمك كمقترح.</div>
