@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>رفيق طالب</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -1463,6 +1466,24 @@ function addXP(amount){
 
 function docId(u){ return u.trim().toLowerCase(); }
 
+// ===================== حفظ جلسة الدخول (عشان المستخدم يفضل مسجل دخول) =====================
+const SESSION_KEY = 'rafeeq_session';
+function saveSession(username, password){
+  try{ localStorage.setItem(SESSION_KEY, JSON.stringify({u:username, p:password})); }catch(e){}
+}
+function getSavedSession(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    if(!raw) return null;
+    const obj = JSON.parse(raw);
+    if(!obj || !obj.u || !obj.p) return null;
+    return obj;
+  }catch(e){ return null; }
+}
+function clearSession(){
+  try{ localStorage.removeItem(SESSION_KEY); }catch(e){}
+}
+
 function defaultAvatarData(){
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
     <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#3a2a6a"/><stop offset="1" stop-color="#241750"/></linearGradient></defs>
@@ -1691,6 +1712,7 @@ let siteSettingsUnsub = null;
 let chatInputDraft = { group:'' };
 
 // ---- حالة قفل المنصة بالكامل (ميزة الأدمن) ----
+let TIPS_TIMER_ENABLED = true;   // لو false، تُعطَّل نصيحة اليوم ومؤقت الـ24 ساعة ويتقدم اليوم فوراً بلا انتظار
 let PLATFORM_LOCKED = false;     // لو true، الطلاب (غير الأدمن) يُمنعون من استخدام المنصة
 let PLATFORM_LOCK_REASON = '';   // سبب القفل الذي يظهر للطلاب
 let PLATFORM_LOCK_UNTIL = null;  // الطابع الزمني (ms) المتوقع لفتح المنصة، أو null لو غير محدد
@@ -2756,6 +2778,7 @@ async function renderControlPanel(skipReload){
     const banned = adminCache.accounts.filter(a=>a.banned).length;
     const openT = adminCache.tournaments.filter(t=>['registration','ongoing'].includes(t.status)).length;
     const platformLocked = adminCache.site.platformLocked === true;
+    const tipsTimerEnabled = adminCache.site.tipsTimerEnabled !== false;
     content = `
       <div class="admin-grid">
         <div class="admin-stat"><b>${adminCache.accounts.length}</b><span>إجمالي حسابات الطلاب</span></div>
@@ -2785,6 +2808,13 @@ async function renderControlPanel(skipReload){
       <button class="btn admin-mini admin-secondary" id="btn-save-lock-timer" style="margin-top:6px;">💾 حفظ المؤقت</button>
       <div class="admin-help" id="admin-lock-save-msg" style="min-height:16px;"></div>
       <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب. زرارَي «حفظ السبب» و«حفظ المؤقت» بيحدّثوا القيم فوراً حتى لو المنصة مقفولة بالفعل، من غير الحاجة لفتحها وقفلها تاني. مدة القفل بتُحسب من لحظة الضغط على «حفظ المؤقت» أو «قفل المنصة».</div>
+
+      <h3 class="admin-section-title" style="margin-top:24px;">🌙 التحكم في ظهور النصائح والمؤقتات</h3>
+      <div class="admin-chat-status">
+        <span>الحالة الحالية: <b>${tipsTimerEnabled ? 'شغالة (نصيحة اليوم + مؤقت 24 ساعة) 🌙' : 'مقفولة (بدون نصيحة ولا انتظار) ⏩'}</b></span>
+        <button class="btn admin-mini ${tipsTimerEnabled?'admin-danger':'admin-secondary'}" id="btn-toggle-tips-timer">${tipsTimerEnabled ? '🔒 قفل النصائح والمؤقتات' : '🔓 تشغيل النصائح والمؤقتات'}</button>
+      </div>
+      <div class="admin-help">لما تكون شغالة (الوضع الافتراضي): بعد ما الطالب يخلّص أذكار اليوم، هيشوف زر «اكشف نصيحة اليوم»، وبعد ما يدوس عليه هتظهرله نصيحة اليوم مع مؤقت عد تنازلي 24 ساعة قبل ما يقدر يبدأ أذكار اليوم الجديد. لما تقفلها: زر «اكشف نصيحة اليوم» بيتحول لزر «التالي: يوم جديد» وبمجرد ما الطالب يدوس عليه بينتقل فوراً لأذكار اليوم التالي من غير ما يشوف نصيحة ولا ينتظر 24 ساعة — يعني النصيحة والمؤقت بيبقوا مجرد إضافة اختيارية (زائد) بدل ما يكونوا شرط لازم للتقدم. أي مؤقت شغال بالفعل عند طلاب هيتجاوز فوراً أول ما تقفل الميزة، من غير ما يحتاجوا يستنوا الوقت المتبقي.</div>
     `;
   } else if(active==='users'){
     const nonAdminUsers = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
@@ -3456,6 +3486,16 @@ async function renderControlPanel(skipReload){
     }catch(e){ console.error(e); flashLockSaveMsg('⚠️ تعذر الحفظ، حاول مرة أخرى.'); }
     saveLockTimerBtn.disabled=false;
   };
+  const toggleTipsTimerBtn=document.getElementById('btn-toggle-tips-timer');
+  if(toggleTipsTimerBtn) toggleTipsTimerBtn.onclick=async()=>{
+    const isEnabled = adminCache.site.tipsTimerEnabled !== false;
+    toggleTipsTimerBtn.disabled=true;
+    try{
+      await db.collection('settings').doc('site').set({ tipsTimerEnabled: !isEnabled },{merge:true});
+      adminCache.site.tipsTimerEnabled = !isEnabled;
+      await loadAdminData(); renderControlPanel();
+    }catch(e){ console.error(e); alert('تعذر حفظ الإعداد، حاول مرة أخرى.'); toggleTipsTimerBtn.disabled=false; }
+  };
   document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
     if(!confirm('حذف هذه الرسالة من الشات العام؟')) return;
     await db.collection('group_chat').doc(b.getAttribute('data-del-groupmsg')).delete();
@@ -3642,6 +3682,7 @@ async function handleLogin(){
     state = ensureStateShape(acc.state || freshState());
     state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || '';
     errorMsg = '';
+    saveSession(currentUser, p);
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
@@ -3667,6 +3708,7 @@ async function handleRegister(){
     state = ensureStateShape(acc.state);
     state.profileImageUrl = acc.profileImageUrl || '';
     errorMsg = '';
+    saveSession(currentUser, p);
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
@@ -3705,6 +3747,7 @@ function logout(){
   currentUser = null; state = null; view = 'login'; errorMsg = '';
   authFields = { user:'', pass:'' };
   profileAccountCache = {}; profileAccountCacheUser = null;
+  clearSession();
   render();
 }
 
@@ -3725,8 +3768,9 @@ function nextWirdResetAt(){
 function updateWirdTimerOnly(){
   const el = document.getElementById('wird-countdown-val');
   if(!el) return;
+  if(state.wirdLastDoneDate !== todayDateKey()){ render(); return; }
   const remain = nextWirdResetAt() - Date.now();
-  if(remain <= 0){ render(); return; } // منتصف الليل وصل: نعمل render كامل عشان الزرار يرجع يشتغل
+  if(remain <= 0){ render(); return; }
   el.textContent = fmtCountdown(remain);
 }
 function updateWheelTimerOnly(){
@@ -3761,7 +3805,8 @@ function updateSyncBadge(){
 }
 
 function maybeAdvanceDay(){
-  if(state.nextAvailableAt && Date.now() >= state.nextAvailableAt){
+  // لو الأدمن عطّل النصائح والمؤقتات، أي قفل سابق (نتيجة تفعيل قديم) يتجاوَز فوراً بلا انتظار
+  if(state.nextAvailableAt && (!TIPS_TIMER_ENABLED || Date.now() >= state.nextAvailableAt)){
     state.day = state.day + 1;
     state.dhikrCounts = new Array(DHIKR_LIST.length).fill(0);
     state.tipRevealedAt = null;
@@ -3806,6 +3851,7 @@ function listenPlatformLock(){
     PLATFORM_LOCKED = d.platformLocked === true;
     PLATFORM_LOCK_REASON = d.platformLockReason || '';
     PLATFORM_LOCK_UNTIL = d.platformLockUntil || null;
+    TIPS_TIMER_ENABLED = d.tipsTimerEnabled !== false;
     if(!isSuperAdmin()) render(); // لو الطالب داخل، حدّث الشاشة فوراً لو الأدمن قفل/فتح المنصة
   }, e => console.warn('platform lock listen error', e));
 }
@@ -3996,7 +4042,7 @@ function dailyWirdWidgetHtml(){
     <ul style="margin:0 0 10px;padding-inline-start:20px;color:var(--gold-light);font-weight:700;text-align:right;">${listHtml}</ul>
     <div class="hint" style="margin:0 0 10px;">تقدّمك في الختمة الحالية: ${cursor} / ${TOTAL_AYAHS} آية (${pct}%)</div>
     <button class="btn" id="btn-wird-done" style="margin:0;${done?'background:transparent;border:1px solid var(--ok);color:var(--ok);':''}" ${done?'disabled':''}>${done ? '✓ تمت قراءته' : 'قرأته الحمد لله ✅'}</button>
-    <div class="hint" style="margin:10px 0 0;">${done ? 'ورد جديد بعد:' : 'باقي على تجدد الورد:'} <span id="wird-countdown-val" style="color:var(--gold-light);font-weight:700;">${fmtCountdown(nextWirdResetAt() - Date.now())}</span></div>
+    ${done ? `<div class="hint" style="margin:10px 0 0;">ورد جديد بعد: <span id="wird-countdown-val" style="color:var(--gold-light);font-weight:700;">${fmtCountdown(nextWirdResetAt() - Date.now())}</span></div>` : ''}
   </div>`;
 }
 function renderMain(){
@@ -4053,8 +4099,8 @@ function renderMain(){
           </div>
           <button class="tap-btn ${curDone?'done':''}" id="btn-tap-dhikr" data-idx="${currentIdx}" ${curDone?'disabled':''}>${curDone ? '✓' : (curCount+'/'+REPS_PER_DHIKR)}</button>
         </div>
-        <button class="btn" id="btn-reveal" ${allDone ? '' : 'disabled'}>اكشف نصيحة اليوم 🌙</button>
-        ${!allDone ? `<div class="hint">أكمل كل ذكر 33 مرة ليُفتح لك زر النصيحة، وهيظهرلك الذكر اللي بعده تلقائياً</div>` : ''}
+        <button class="btn" id="btn-reveal" ${allDone ? '' : 'disabled'}>${TIPS_TIMER_ENABLED ? 'اكشف نصيحة اليوم 🌙' : 'التالي: يوم جديد ▶'}</button>
+        ${!allDone ? `<div class="hint">أكمل كل ذكر 33 مرة ليُفتح لك زر ${TIPS_TIMER_ENABLED ? 'النصيحة' : 'الانتقال لليوم الجديد'}، وهيظهرلك الذكر اللي بعده تلقائياً</div>` : ''}
       </div>
     `;
   }
@@ -4115,6 +4161,16 @@ function renderMain(){
     if(revealBtn){
       revealBtn.onclick = () => {
         if(!allDhikrDone()) return;
+        if(!TIPS_TIMER_ENABLED){
+          // النصائح والمؤقتات معطّلة من الأدمن: ننتقل مباشرة لليوم التالي بلا نصيحة ولا انتظار
+          state.day = state.day + 1;
+          state.dhikrCounts = new Array(DHIKR_LIST.length).fill(0);
+          state.tipRevealedAt = null;
+          state.nextAvailableAt = null;
+          render();
+          persist();
+          return;
+        }
         const now = Date.now();
         state.tipRevealedAt = now;
         state.nextAvailableAt = now + 24*60*60*1000;
@@ -5613,8 +5669,33 @@ applyUiMode(getSavedMode());
 const modeToggleBtn = document.getElementById('btn-mode-toggle');
 if(modeToggleBtn) modeToggleBtn.onclick = toggleUiMode;
 
-view = 'login';
-render(); // نعرض شاشة الدخول فوراً، بدل ما ننتظر تحميل بنك الأسئلة من الإنترنت
+// ===================== محاولة الدخول التلقائي لو المستخدم مسجل بالفعل =====================
+async function tryAutoLogin(){
+  const session = getSavedSession();
+  if(!session){ view = 'login'; render(); return; }
+  view = 'loading';
+  render(); // نعرض شاشة تحميل بسيطة لحد ما نتأكد من الجلسة
+  try{
+    const acc = await fetchAccount(session.u);
+    if(!acc || acc.password !== session.p || acc.banned){
+      clearSession();
+      view = 'login'; render();
+      return;
+    }
+    currentUser = acc.username;
+    state = ensureStateShape(acc.state || freshState());
+    state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || '';
+    errorMsg = '';
+    logLoginEvent(currentUser);
+    enterMain();
+  }catch(e){
+    console.error(e);
+    // لو فشل الاتصال، نسيبه يحاول يدخل يدوياً بدل ما يفضل عالق في التحميل
+    view = 'login'; render();
+  }
+}
+
+tryAutoLogin();
 loadRuntimeQuestionBank(); // يشتغل في الخلفية، مش شرط لعرض الواجهة
 listenToAds();
 </script>
