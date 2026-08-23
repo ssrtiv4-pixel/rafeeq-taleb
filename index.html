@@ -564,6 +564,7 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .admin-input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,138,92,.35);background:rgba(36,23,80,.55);color:var(--text-light);font-family:'Cairo',sans-serif;margin-bottom:9px}
   textarea.admin-input{min-height:100px;resize:vertical}
   select.admin-input{appearance:auto}
+  .admin-score-input{width:90px;margin-bottom:0;padding:6px 8px;display:inline-block;direction:ltr;text-align:left}
   .admin-ad-item{border:1px solid rgba(255,138,92,.25);border-radius:12px;padding:12px;margin-bottom:10px;background:rgba(253,246,240,.03)}
   .admin-ad-item-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
   .admin-ad-item-head b{color:var(--gold-light);font-size:14px}
@@ -2673,16 +2674,23 @@ async function renderControlPanel(){
     `;
   } else if(active==='users'){
     const rows = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME).map(a=>{
-      const u=a.username||a.id, st=a.state||{};
-      return `<tr><td><b>${adminEsc(u)}</b></td><td>${Number(st.points)||0}</td><td>${Number(st.correctAnswers)||0}</td>
+      const u=a.username||a.id, st=a.state||{}, uid=adminEsc(a.id);
+      return `<tr>
+        <td><b>${adminEsc(u)}</b></td>
+        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-points-${uid}" value="${Number(st.points)||0}"></td>
+        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-xp-${uid}" value="${Number(st.xp)||0}"></td>
+        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-correct-${uid}" value="${Number(st.correctAnswers)||0}"></td>
         <td>${a.banned?'<span class="admin-badge bad">محظور</span>':'<span class="admin-badge ok">نشط</span>'}</td>
         <td><div class="admin-actions">
+          <button class="btn admin-mini admin-secondary" data-save-score="${uid}" data-user-label="${adminEsc(u)}">💾 حفظ</button>
           <button class="btn admin-mini admin-secondary" data-ban-user="${adminEsc(u)}">${a.banned?'فك الحظر':'حظر'}</button>
           <button class="btn admin-mini admin-danger" data-del-user="${adminEsc(u)}">حذف</button>
         </div></td></tr>`;
     }).join('');
     content = `<h3 class="admin-section-title">إدارة المستخدمين والمتصدرين</h3>
-      <div class="admin-scroll"><table class="admin-table"><thead><tr><th>الطالب</th><th>النقاط</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="5" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>`;
+      <div class="admin-help">تقدر تعدّل النقاط أو الـ XP أو عدد الإجابات الصحيحة لأي طالب يدوياً (مثلاً لو حصلت مشكلة تقنية أثرت على درجاته)، اكتب القيمة الجديدة واضغط «💾 حفظ» بجنب اسمه.</div>
+      <div class="admin-scroll"><table class="admin-table"><thead><tr><th>الطالب</th><th>النقاط</th><th>XP</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="6" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>
+      <div class="admin-help" id="admin-score-status" style="min-height:16px;"></div>`;
   } else if(active==='local-duel'){
     const matches = Array.isArray(adminCache.localDuels) ? adminCache.localDuels : [];
     const students = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME && !a.banned);
@@ -2911,6 +2919,29 @@ async function renderControlPanel(){
     if(!acc) return;
     await db.collection('accounts').doc(acc.id).update({banned:!acc.banned});
     await loadAdminData(); renderControlPanel();
+  });
+  document.querySelectorAll('[data-save-score]').forEach(b=>b.onclick=async()=>{
+    const uid=b.getAttribute('data-save-score');
+    const label=b.getAttribute('data-user-label')||uid;
+    const statusEl=document.getElementById('admin-score-status');
+    const pointsEl=document.getElementById('admin-points-'+uid);
+    const xpEl=document.getElementById('admin-xp-'+uid);
+    const correctEl=document.getElementById('admin-correct-'+uid);
+    const points=Math.max(0, parseInt(pointsEl && pointsEl.value, 10) || 0);
+    const xp=Math.max(0, parseInt(xpEl && xpEl.value, 10) || 0);
+    const correctAnswers=Math.max(0, parseInt(correctEl && correctEl.value, 10) || 0);
+    b.disabled=true;
+    try{
+      await db.collection('accounts').doc(uid).update({
+        'state.points': points, 'state.xp': xp, 'state.correctAnswers': correctAnswers
+      });
+      if(statusEl) statusEl.textContent = `تم تحديث درجات ${label} بنجاح ✅`;
+      await loadAdminData(); renderControlPanel();
+    }catch(e){
+      console.error('update user score error', e);
+      if(statusEl) statusEl.textContent = 'تعذر تحديث الدرجات، حاول مرة أخرى.';
+      b.disabled=false;
+    }
   });
   document.querySelectorAll('[data-del-user]').forEach(b=>b.onclick=async()=>{
     const u=b.getAttribute('data-del-user');
