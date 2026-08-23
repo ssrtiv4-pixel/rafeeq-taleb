@@ -2499,7 +2499,53 @@ function renderAuth(){
       </div>
     </div>
     <div class="auth-admin-link" id="go-admin-contact">تواصل مع الأدمن</div>
+    <div style="text-align:center;margin-top:10px;"><button class="btn" id="btn-debug-worker" style="opacity:0.7;font-size:13px;padding:8px 14px;">🔧 اختبار الاتصال بالسيرفر (تشخيص)</button></div>
+    <div style="text-align:center;margin-top:10px;"><button class="btn" id="btn-debug-register" style="opacity:0.7;font-size:13px;padding:8px 14px;">🧪 اختبار إنشاء حساب تجريبي (تشخيص)</button></div>
   `;
+  const debugRegBtn = document.getElementById('btn-debug-register');
+  if(debugRegBtn){
+    debugRegBtn.onclick = async () => {
+      debugRegBtn.textContent = 'جارِ الاختبار...'; debugRegBtn.disabled = true;
+      const testUser = 'test_diag_' + Date.now();
+      const t0 = Date.now();
+      try{
+        const controller = new AbortController();
+        const timer = setTimeout(()=>controller.abort(), 20000);
+        const res = await fetch(AUTH_WORKER_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ action:'register', username: testUser, password:'test1234' }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        const elapsed = Date.now() - t0;
+        const data = await res.json();
+        console.log('[DEBUG register test]', elapsed, 'ms', data);
+        errorMsg = 'استغرق: ' + elapsed + 'ms | status: ' + res.status + ' | رد: ' + JSON.stringify(data);
+      }catch(e){
+        const elapsed = Date.now() - t0;
+        errorMsg = 'فشل بعد: ' + elapsed + 'ms [DEBUG: ' + (e.name||'') + ' ' + (e.message||e) + ']';
+      }
+      render();
+    };
+  }
+  const debugBtn = document.getElementById('btn-debug-worker');
+  if(debugBtn){
+    debugBtn.onclick = async () => {
+      debugBtn.textContent = 'جارِ الفحص...'; debugBtn.disabled = true;
+      try{
+        const res = await fetch(AUTH_WORKER_URL, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ action: 'debug_test' })
+        });
+        const data = await res.json();
+        console.log('[DEBUG worker test]', data);
+        errorMsg = 'نتيجة الفحص: ' + JSON.stringify(data);
+      }catch(e){
+        errorMsg = 'فشل الاتصال بالـ Worker نفسه [DEBUG: ' + (e.message||e) + ']';
+      }
+      render();
+    };
+  }
   const userInput = document.getElementById('in-user');
   const passInput = document.getElementById('in-pass');
   userInput.oninput = () => authFields.user = userInput.value;
@@ -3578,6 +3624,23 @@ function renderAdminContact(){
   };
 }
 
+// جلب (fetch) بمهلة قصوى: لو السيرفر أو الإنترنت بطيء جداً أو الاتصال اتعلق،
+// بيرمي خطأ واضح بعد المهلة المحددة بدل ما الصفحة تفضل "جارِ الدخول..." معلقة للأبد
+async function fetchWithTimeout(url, options, timeoutMs = 15000){
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try{
+    return await fetch(url, { ...options, signal: controller.signal });
+  }catch(e){
+    if(e && e.name === 'AbortError'){
+      throw new Error('انتهت مهلة الاتصال بالسيرفر، تأكد من قوة اتصالك بالإنترنت وحاول مرة أخرى');
+    }
+    throw e;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
 async function handleLogin(){
   const u = document.getElementById('in-user').value.trim();
   const p = document.getElementById('in-pass').value;
@@ -3585,18 +3648,25 @@ async function handleLogin(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الدخول...';
   try{
-    const res = await fetch(AUTH_WORKER_URL, {
+    const res = await fetchWithTimeout(AUTH_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'login', username: u, password: p })
     });
     const data = await res.json();
+    console.log('[DEBUG login] worker response status:', res.status, 'body:', data);
     if(!res.ok){
       if(data.error === 'banned'){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; }
-      else { errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة'; }
+      else { errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة [DEBUG: ' + (data.error || res.status) + (data.detail ? ' | ' + data.detail : '') + ']'; }
       render(); return;
     }
-    await fbAuth.signInWithCustomToken(data.token);
+    try{
+      await fbAuth.signInWithCustomToken(data.token);
+    }catch(tokenErr){
+      console.error('[DEBUG login] signInWithCustomToken failed:', tokenErr);
+      errorMsg = 'فشل تسجيل الدخول لـ Firebase [DEBUG: ' + (tokenErr.code || '') + ' ' + (tokenErr.message || tokenErr) + ']';
+      render(); return;
+    }
     currentUser = data.username;
     state = ensureStateShape(data.state || freshState());
     state.profileImageUrl = data.profileImageUrl || state.profileImageUrl || '';
@@ -3604,8 +3674,8 @@ async function handleLogin(){
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
-    console.error(e);
-    errorMsg = 'تعذر الاتصال بقاعدة البيانات، تأكد من اتصالك بالإنترنت وحاول مرة أخرى';
+    console.error('[DEBUG login] fetch/network error:', e);
+    errorMsg = 'تعذر الاتصال بقاعدة البيانات [DEBUG: ' + (e.message || e) + ']';
     render();
   }
 }
@@ -3619,18 +3689,25 @@ async function handleRegister(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الإنشاء...';
   try{
-    const res = await fetch(AUTH_WORKER_URL, {
+    const res = await fetchWithTimeout(AUTH_WORKER_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'register', username: u, password: p })
     });
     const data = await res.json();
+    console.log('[DEBUG register] worker response status:', res.status, 'body:', data);
     if(!res.ok){
       if(data.error === 'username_taken'){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; }
-      else { errorMsg = 'تعذر إنشاء الحساب، تأكد من اتصالك بالإنترنت وحاول مرة أخرى'; }
+      else { errorMsg = 'تعذر إنشاء الحساب [DEBUG: ' + (data.error || res.status) + (data.detail ? ' | ' + data.detail : '') + ']'; }
       render(); return;
     }
-    await fbAuth.signInWithCustomToken(data.token);
+    try{
+      await fbAuth.signInWithCustomToken(data.token);
+    }catch(tokenErr){
+      console.error('[DEBUG register] signInWithCustomToken failed:', tokenErr);
+      errorMsg = 'تم إنشاء الحساب لكن فشل تسجيل الدخول لـ Firebase [DEBUG: ' + (tokenErr.code || '') + ' ' + (tokenErr.message || tokenErr) + ']';
+      render(); return;
+    }
     currentUser = data.username;
     state = ensureStateShape(data.state);
     state.profileImageUrl = data.profileImageUrl || '';
@@ -3638,8 +3715,8 @@ async function handleRegister(){
     logLoginEvent(currentUser);
     enterMain();
   }catch(e){
-    console.error(e);
-    errorMsg = 'تعذر إنشاء الحساب، تأكد من اتصالك بالإنترنت وحاول مرة أخرى';
+    console.error('[DEBUG register] fetch/network error:', e);
+    errorMsg = 'تعذر إنشاء الحساب [DEBUG: ' + (e.message || e) + ']';
     render();
   }
 }
