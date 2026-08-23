@@ -2621,7 +2621,14 @@ let oneSignalReady = false;
   OneSignalDeferred.push(async function(OneSignal){
     try{
       if(!ONESIGNAL_APP_ID || ONESIGNAL_APP_ID.includes('ضع_')){ console.warn('OneSignal App ID لسه متعمّلش إعداد.'); return; }
-      await OneSignal.init({ appId: ONESIGNAL_APP_ID, allowLocalhostAsSecureOrigin: true });
+      await OneSignal.init({
+        appId: ONESIGNAL_APP_ID,
+        allowLocalhostAsSecureOrigin: true,
+        // الموقع شغال جوه مجلد فرعي (rafeeq-taleb) مش في جذر الدومين،
+        // فلازم نقول لـ OneSignal يدور على ملف الـ Service Worker في نفس المجلد ده.
+        serviceWorkerParam: { scope: '/rafeeq-taleb/' },
+        serviceWorkerPath: 'OneSignalSDKWorker.js'
+      });
       oneSignalReady = true;
       // لو المستخدم مسجّل دخول بالفعل (فتح تبويب جديد مثلاً) اربط جهازه باسمه فوراً
       if(currentUser) OneSignal.login(currentUser).catch(e=>console.warn('onesignal login error',e));
