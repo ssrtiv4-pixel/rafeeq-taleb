@@ -2578,6 +2578,30 @@ function listenToPersonalMessages(){
       if(view === 'main') render();
     }, e => console.warn('personal messages listen error', e));
 }
+let accountPointsUnsub = null;
+// بيستمع لحساب الطالب نفسه في الوقت الحقيقي عشان لو الأدمن منحه نقاط (فردي أو جماعي)
+// تتحدث القيمة عنده فوراً، وميحصلش إن أول "حفظ" من الطالب يمسح النقاط اللي اتضافت من الأدمن
+// (لأن persist() كان بيبعت state.points المحلي القديم فوق قيمة السيرفر الجديدة).
+function listenToAccountPoints(){
+  if(accountPointsUnsub || !currentUser) return;
+  accountPointsUnsub = db.collection('accounts').doc(docId(currentUser))
+    .onSnapshot(snap => {
+      // نتجاهل اللحظة اللي إحنا نفسنا بنكتب فيها (hasPendingWrites) عشان منعملش تعارض مع نقاطنا المحلية أثناء أي عملية شرائية بتحصل في نفس الوقت
+      if(!snap.exists || snap.metadata.hasPendingWrites || !state) return;
+      const data = snap.data();
+      const serverPoints = data && data.state && typeof data.state.points === 'number' ? data.state.points : null;
+      if(serverPoints === null) return;
+      if(serverPoints !== state.points){
+        const diff = serverPoints - state.points;
+        state.points = serverPoints;
+        if(diff > 0){
+          setTimeout(() => alert(`🎁 وصلتك ${diff} نقطة جديدة من الأدمن!`), 50);
+        }
+        render();
+      }
+    }, e => console.warn('account points listen error', e));
+}
+
 function renderPersonalMessagesSection(){
   if(!PERSONAL_MESSAGES.length) return '';
   return `
@@ -3633,6 +3657,7 @@ function enterMain(){
   listenFriendRequests();
   listenPlatformLock();
   listenToPersonalMessages();
+  listenToAccountPoints();
 }
 
 function logout(){
@@ -3644,6 +3669,7 @@ function logout(){
   if(friendInviteUnsub){friendInviteUnsub();friendInviteUnsub=null;}
   if(friendRequestsUnsub){ friendRequestsUnsub(); friendRequestsUnsub = null; }
   if(personalMessagesUnsub){ personalMessagesUnsub(); personalMessagesUnsub = null; }
+  if(accountPointsUnsub){ accountPointsUnsub(); accountPointsUnsub = null; }
   PERSONAL_MESSAGES = [];
   if(tournamentUnsub){ tournamentUnsub(); tournamentUnsub = null; }
   tournamentId = null; tournamentData = null; duelSearching = false;
