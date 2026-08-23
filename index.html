@@ -3680,7 +3680,7 @@ function enterMain(){
   view = isSuperAdmin() ? 'control-panel' : 'main'; // حساب المشرف يدخل مباشرة على لوحة التحكم فقط
   render();
   if(tickInterval) clearInterval(tickInterval);
-  tickInterval = setInterval(() => { if(view === 'main') updateTimerOnly(); if(view === 'wheel') updateWheelTimerOnly(); }, 1000);
+  tickInterval = setInterval(() => { if(view === 'main'){ updateTimerOnly(); updateWirdTimerOnly(); } if(view === 'wheel') updateWheelTimerOnly(); }, 1000);
   listenFriendRequests();
   listenPlatformLock();
   listenToPersonalMessages();
@@ -3716,6 +3716,19 @@ function updateTimerOnly(){
   el.textContent = fmtCountdown(remain);
 }
 
+function nextWirdResetAt(){
+  // بداية اليوم الفعلي التالي (منتصف الليل حسب توقيت الجهاز) — وقتها يتجدد الورد
+  const d = new Date();
+  d.setHours(24,0,0,0);
+  return d.getTime();
+}
+function updateWirdTimerOnly(){
+  const el = document.getElementById('wird-countdown-val');
+  if(!el) return;
+  const remain = nextWirdResetAt() - Date.now();
+  if(remain <= 0){ render(); return; } // منتصف الليل وصل: نعمل render كامل عشان الزرار يرجع يشتغل
+  el.textContent = fmtCountdown(remain);
+}
 function updateWheelTimerOnly(){
   const el = document.getElementById('wheel-countdown-val');
   if(!el || !state.wheelNextSpinAt) return;
@@ -3983,6 +3996,7 @@ function dailyWirdWidgetHtml(){
     <ul style="margin:0 0 10px;padding-inline-start:20px;color:var(--gold-light);font-weight:700;text-align:right;">${listHtml}</ul>
     <div class="hint" style="margin:0 0 10px;">تقدّمك في الختمة الحالية: ${cursor} / ${TOTAL_AYAHS} آية (${pct}%)</div>
     <button class="btn" id="btn-wird-done" style="margin:0;${done?'background:transparent;border:1px solid var(--ok);color:var(--ok);':''}" ${done?'disabled':''}>${done ? '✓ تمت قراءته' : 'قرأته الحمد لله ✅'}</button>
+    <div class="hint" style="margin:10px 0 0;">${done ? 'ورد جديد بعد:' : 'باقي على تجدد الورد:'} <span id="wird-countdown-val" style="color:var(--gold-light);font-weight:700;">${fmtCountdown(nextWirdResetAt() - Date.now())}</span></div>
   </div>`;
 }
 function renderMain(){
