@@ -576,6 +576,12 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .ad-title{font-family:'Amiri',serif;font-size:16px;color:var(--gold-light);margin-bottom:6px}
   .ad-body{font-size:13.5px;color:var(--text-light);line-height:1.8}
 
+  .pm-card{border-color:rgba(93,168,255,.45);background:linear-gradient(180deg,rgba(93,168,255,.16),rgba(93,168,255,.05))}
+  .pm-card .ad-title{color:#8fc1ff}
+  .pm-like-btn{margin-top:10px;padding:8px 14px;border-radius:999px;border:1px solid rgba(93,168,255,.5);background:rgba(93,168,255,.12);color:#8fc1ff;font-family:'Cairo',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer}
+  .pm-like-btn.liked{background:rgba(61,220,151,.15);border-color:rgba(61,220,151,.55);color:var(--ok);cursor:default}
+  .pm-like-btn:disabled{opacity:.9}
+
   /* ---- الشات ---- */
   .chat-lock-note{text-align:center;padding:22px 14px;color:var(--text-dim);font-size:14px;line-height:1.8;border:1px dashed rgba(255,138,92,.35);border-radius:12px;margin-bottom:12px}
   .chat-messages{display:flex;flex-direction:column;gap:8px;max-height:52vh;overflow-y:auto;padding:4px 2px;margin-bottom:12px}
@@ -1072,6 +1078,7 @@ function freshState(){
     khatmaCompletions: 0,
     wirdAyahCursor: 0,
     wirdLastDoneDay: null,
+    wirdLastDoneDate: null,
     wrongQuestions: {},
     streak: {count:0, longest:0, lastDay:null},
     xpHistory: [],
@@ -1107,6 +1114,9 @@ function ensureStateShape(s){
     delete s.wirdSurahsRead;
   }
   if(typeof s.wirdLastDoneDay !== 'number') s.wirdLastDoneDay = null;
+  // النظام الجديد: تاريخ حقيقي (وليس رقم يوم داخلي مرتبط بدورة الأذكار) عشان الورد يتجدد كل 24 ساعة فعلية
+  // بدل ما يفضل عالق على "تمت قراءته" لحد ما المستخدم يخلّص كل أذكار اليوم وتمر 24 ساعة من قفلها.
+  if(typeof s.wirdLastDoneDate !== 'string') s.wirdLastDoneDate = null;
   if(!s.wrongQuestions || typeof s.wrongQuestions !== 'object') s.wrongQuestions = {};
   if(!s.streak || typeof s.streak !== 'object') s.streak = {count:0, longest:0, lastDay:null};
   if(typeof s.streak.count !== 'number') s.streak.count = 0;
@@ -2298,6 +2308,7 @@ function render(){
   if(view === 'suggest'){ renderSuggest(); return; }
   if(view === 'wheel'){ renderWheel(); return; }
   if(view === 'sheikh-audio'){ renderSheikhAudio(); return; }
+  if(view === 'sheikh-video'){ renderSheikhVideo(); return; }
   if(view === 'duel'){ renderDuelLobby(); return; }
   if(view === 'local-duel'){ renderLocal1v1Lobby(); return; }
   if(view === 'duel-match'){ renderDuelMatch(); return; }
@@ -2333,7 +2344,8 @@ const MAIN_CATEGORY_GROUPS = [
       { key:'quiz', label:'❓ المسابقات' },
       { key:'review', label:'🔁 راجع أخطاءك' },
       { key:'wheel', label:'🎡 عجلة الحظ' },
-      { key:'sheikh-audio', label:'🎙️ صوتيات المشايخ' }
+      { key:'sheikh-audio', label:'🎙️ صوتيات المشايخ' },
+      { key:'sheikh-video', label:'🎬 فيديوهات تعليمية' }
     ]},
   { key:'social', cls:'cat-social', label:'🧑‍🤝‍🧑 التواصل والمنافسة', items:[
       { key:'friends', label:'🧑‍🤝‍🧑 الأصدقاء' },
@@ -2479,7 +2491,7 @@ function renderAuth(){
 
 
 let adminTab = 'dashboard';
-let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[] };
+let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[], sheikhVideos:[], personalMessages:[] };
 let ADS_LIST = [];
 
 function listenToAds(){
@@ -2513,13 +2525,65 @@ function renderSheikhAudio(){
   updateSyncBadge(); bindTopNav();
 }
 
+// ===================== فيديوهات المشايخ =====================
+let SHEIKH_VIDEOS = [];
+let sheikhVideoUnsub = null;
+function listenToSheikhVideos(){
+  if(sheikhVideoUnsub) return;
+  sheikhVideoUnsub = db.collection('sheikh_videos').orderBy('createdAt','desc').onSnapshot(snap => {
+    SHEIKH_VIDEOS = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+    if(view === 'sheikh-video') render();
+  }, e => console.warn('sheikh videos listen error', e));
+}
+function renderSheikhVideo(){
+  listenToSheikhVideos();
+  const items = SHEIKH_VIDEOS;
+  const listHtml = items.length ? items.map(v => `
+    <div class="suggest-card" style="margin-bottom:14px;">
+      <p style="margin:0 0 4px;"><b>🎬 ${adminEsc(v.title||'بدون عنوان')}</b></p>
+      ${v.description ? `<div class="suggest-meta" style="margin-bottom:8px;">${adminEsc(v.description)}</div>` : ''}
+      ${v.videoUrl ? `<video controls preload="none" style="width:100%;border-radius:10px;" src="${adminEsc(v.videoUrl)}">متصفحك لا يدعم تشغيل الفيديو.</video>` : '<div class="muted">لا يوجد رابط فيديو صالح.</div>'}
+    </div>
+  `).join('') : '<div class="locked-note">لا توجد فيديوهات مضافة حالياً. تابعنا، الأدمن هيضيف قريباً 🎬</div>';
+  root.innerHTML = `${topNavHtml('sheikh-video')}<div class="card"><h2>🎬 فيديوهات تعليمية</h2><div class="locked-note" style="margin-top:0;">شاهد فيديوهات ودروس مختارة من الأدمن.</div><div style="margin-top:18px;">${listHtml}</div></div>`;
+  updateSyncBadge(); bindTopNav();
+}
+
+// ===================== الرسائل الخاصة من الأدمن =====================
+let PERSONAL_MESSAGES = [];
+let personalMessagesUnsub = null;
+function listenToPersonalMessages(){
+  if(personalMessagesUnsub || !currentUser) return;
+  personalMessagesUnsub = db.collection('personal_messages')
+    .where('toUsername','==',currentUser)
+    .onSnapshot(snap => {
+      PERSONAL_MESSAGES = snap.docs.map(d => ({ id:d.id, ...d.data() }))
+        .sort((a,b) => ((b.createdAt && b.createdAt.seconds) || 0) - ((a.createdAt && a.createdAt.seconds) || 0));
+      if(view === 'main') render();
+    }, e => console.warn('personal messages listen error', e));
+}
+function renderPersonalMessagesSection(){
+  if(!PERSONAL_MESSAGES.length) return '';
+  return `
+    <div class="ads-section">
+      ${PERSONAL_MESSAGES.map(m => `
+        <div class="ad-card pm-card">
+          <div class="ad-title">📩 رسالة من الأدمن</div>
+          <div class="ad-body">${adminEsc(m.text||'')}</div>
+          <button class="pm-like-btn ${m.seen?'liked':''}" data-pm-like="${adminEsc(m.id)}" ${m.seen?'disabled':''}>${m.seen ? '👍 شفتها' : '👍 شفت الرسالة'}</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
 function adminEsc(v){
   return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 async function loadAdminData(){
   if(!isSuperAdmin()) return;
   try{
-    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap, sheikhAudiosSnap] = await Promise.all([
+    const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap, sheikhAudiosSnap, sheikhVideosSnap, personalMessagesSnap] = await Promise.all([
       db.collection('accounts').get(),
       db.collection('question_bank').get(),
       db.collection('tournaments').orderBy('createdAt','desc').limit(20).get().catch(()=>db.collection('tournaments').limit(20).get()),
@@ -2528,7 +2592,9 @@ async function loadAdminData(){
       db.collection('group_chat').orderBy('createdAt','asc').limitToLast(300).get().catch(()=>db.collection('group_chat').get()),
       db.collection('question_suggestions').orderBy('createdAt','desc').limit(100).get().catch(()=>db.collection('question_suggestions').limit(100).get()),
       db.collection('local_1v1_matches').limit(100).get().catch(()=>({docs:[]})),
-      db.collection('sheikh_audios').orderBy('createdAt','desc').get().catch(()=>db.collection('sheikh_audios').get())
+      db.collection('sheikh_audios').orderBy('createdAt','desc').get().catch(()=>db.collection('sheikh_audios').get()),
+      db.collection('sheikh_videos').orderBy('createdAt','desc').get().catch(()=>db.collection('sheikh_videos').get()),
+      db.collection('personal_messages').orderBy('createdAt','desc').limit(200).get().catch(()=>db.collection('personal_messages').limit(200).get())
     ]);
     adminCache.accounts = accountsSnap.docs.map(d=>({id:d.id,...d.data()}));
     if(questionsSnap.empty && Array.isArray(RELIGIOUS_QUESTIONS_BANK) && RELIGIOUS_QUESTIONS_BANK.length){
@@ -2550,6 +2616,8 @@ async function loadAdminData(){
     adminCache.suggestions = suggestionsSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.localDuels = localDuelSnap && localDuelSnap.docs ? localDuelSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>((b.createdAt?.seconds||0)-(a.createdAt?.seconds||0))) : [];
     adminCache.sheikhAudios = sheikhAudiosSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.sheikhVideos = sheikhVideosSnap.docs.map(d=>({id:d.id,...d.data()}));
+    adminCache.personalMessages = personalMessagesSnap.docs.map(d=>({id:d.id,...d.data()}));
   }catch(e){
     console.error('admin load error',e);
   }
@@ -2564,7 +2632,8 @@ async function renderControlPanel(){
   const tabs = [
     ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['questions','❓ بنك الأسئلة'],
     ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
-    ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ']
+    ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ'],
+    ['sheikh-video','🎬 فيديوهات تعليمية'],['personal-messages','📩 رسائل خاصة']
   ];
   const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
   let content = '';
@@ -2759,6 +2828,48 @@ async function renderControlPanel(){
       <button class="btn" id="btn-add-audio">➕ إضافة تسجيل صوتي</button>
       <div class="admin-help" id="admin-audio-status"></div>
       <div class="admin-scroll" style="margin-top:14px;">${rows || '<div class="muted">لا توجد تسجيلات صوتية حالياً</div>'}</div>`;
+  } else if(active==='sheikh-video'){
+    const rows = (adminCache.sheikhVideos||[]).map(v => `
+      <div class="admin-ad-item">
+        <div class="admin-ad-item-head">
+          <b>🎬 ${adminEsc(v.title||'بدون عنوان')}</b>
+          <button class="btn admin-mini admin-danger" data-del-video="${adminEsc(v.id)}">حذف</button>
+        </div>
+        ${v.description ? `<div class="admin-ad-item-body">${adminEsc(v.description)}</div>` : ''}
+        ${v.videoUrl ? `<video controls preload="none" style="width:100%;border-radius:8px;margin-top:6px;" src="${adminEsc(v.videoUrl)}"></video>` : ''}
+      </div>
+    `).join('');
+    content = `<h3 class="admin-section-title">🎬 فيديوهات تعليمية</h3>
+      <div class="admin-help">أضف فيديو (شرح أو محاضرة)، إما برابط مباشر أو برفع ملف فيديو من جهازك مباشرة. سيظهر لكل الطلاب في صفحة «فيديوهات تعليمية».</div>
+      <label>عنوان الفيديو</label><input class="admin-input" id="admin-video-title" placeholder="مثال: شرح أحكام التجويد">
+      <label>رابط الفيديو المباشر (اختياري)</label><input class="admin-input" id="admin-video-url" placeholder="https://...">
+      <label>أو ارفع ملف فيديو من جهازك (اختياري)</label><input class="admin-input" id="admin-video-file" type="file" accept="video/*">
+      <label>وصف مختصر (اختياري)</label><textarea class="admin-input" id="admin-video-desc" placeholder="نبذة عن الفيديو..."></textarea>
+      <button class="btn" id="btn-add-video">➕ إضافة فيديو</button>
+      <div class="admin-help" id="admin-video-status"></div>
+      <div class="admin-scroll" style="margin-top:14px;">${rows || '<div class="muted">لا توجد فيديوهات حالياً</div>'}</div>`;
+  } else if(active==='personal-messages'){
+    const students = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
+    const rows = (adminCache.personalMessages||[]).map(m => `
+      <div class="admin-ad-item">
+        <div class="admin-ad-item-head">
+          <b>📩 إلى: ${adminEsc(m.toUsername||'—')}</b>
+          <span class="admin-badge ${m.seen?'ok':''}">${m.seen ? '✅ شافها' : '⏳ لسه ما شافهاش'}</span>
+        </div>
+        <div class="admin-ad-item-body">${adminEsc(m.text||'')}</div>
+        <div class="admin-actions"><button class="btn admin-mini admin-danger" data-del-pm="${adminEsc(m.id)}">حذف</button></div>
+      </div>
+    `).join('');
+    content = `<h3 class="admin-section-title">📩 إرسال رسالة خاصة لطالب</h3>
+      <div class="admin-help">اختر الطالب واكتب الرسالة. هتظهرله فوق شاشته الرئيسية زي الإعلان بالظبط، وهيقدر يضغط «شفت الرسالة 👍» عشان تعرف إنه قراها من الحالة اللي هتظهر جنب كل رسالة هنا.</div>
+      <label>اختر الطالب</label>
+      <select class="admin-input" id="admin-pm-user"><option value="">اختر طالب...</option>${students.map(a=>{const u=a.username||a.id;return `<option value="${adminEsc(u)}">${adminEsc(u)}</option>`}).join('')}</select>
+      <label>نص الرسالة</label>
+      <textarea class="admin-input" id="admin-pm-text" placeholder="اكتب رسالتك للطالب..."></textarea>
+      <button class="btn" id="btn-send-pm">📤 إرسال الرسالة</button>
+      <div class="admin-help" id="admin-pm-status"></div>
+      <h3 class="admin-section-title" style="margin-top:22px;">📋 الرسائل المرسلة (${(adminCache.personalMessages||[]).length})</h3>
+      <div class="admin-scroll">${rows || '<div class="muted">لا توجد رسائل مرسلة بعد.</div>'}</div>`;
   }
   root.innerHTML = `
     <div class="contact-back" id="btn-back-from-panel">→ رجوع</div>
@@ -2901,6 +3012,70 @@ async function renderControlPanel(){
   document.querySelectorAll('[data-del-audio]').forEach(b=>b.onclick=async()=>{
     if(!confirm('حذف هذا التسجيل الصوتي نهائياً؟')) return;
     await db.collection('sheikh_audios').doc(b.getAttribute('data-del-audio')).delete();
+    await loadAdminData(); renderControlPanel();
+  });
+  const addVideoBtn=document.getElementById('btn-add-video');
+  if(addVideoBtn) addVideoBtn.onclick=async()=>{
+    const title=(document.getElementById('admin-video-title').value||'').trim();
+    let videoUrl=(document.getElementById('admin-video-url').value||'').trim();
+    const description=(document.getElementById('admin-video-desc').value||'').trim();
+    const fileInput=document.getElementById('admin-video-file');
+    const file=fileInput && fileInput.files && fileInput.files[0];
+    const statusEl=document.getElementById('admin-video-status');
+    if(!title || (!videoUrl && !file)){ if(statusEl) statusEl.textContent='اكتب عنوان الفيديو، وأدخل رابط فيديو أو ارفع ملف فيديو على الأقل.'; return; }
+    if(file && file.size > 100*1024*1024){ if(statusEl) statusEl.textContent='حجم الملف كبير جداً (الحد الأقصى 100 ميجا)، جرّب ملف أصغر أو استخدم رابط مباشر.'; return; }
+    addVideoBtn.disabled=true;
+    try{
+      if(file){
+        if(statusEl) statusEl.textContent='جارِ رفع الفيديو... 0%';
+        videoUrl = await uploadAudioToCloudinary(file, pct=>{
+          if(statusEl) statusEl.textContent=`جارِ الرفع... ${pct}%`;
+        });
+      }
+      await db.collection('sheikh_videos').add({
+        title, videoUrl, description,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      if(statusEl) statusEl.textContent='تمت الإضافة بنجاح ✅';
+      ['admin-video-title','admin-video-url','admin-video-desc'].forEach(id=>{const el=document.getElementById(id); if(el) el.value='';});
+      if(fileInput) fileInput.value='';
+      await loadAdminData(); renderControlPanel();
+    }catch(e){
+      console.error('add sheikh video error',e);
+      if(statusEl) statusEl.textContent = 'تعذر الإضافة: ' + (e && e.message ? e.message : 'حاول مرة أخرى.');
+      addVideoBtn.disabled=false;
+    }
+  };
+  document.querySelectorAll('[data-del-video]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('حذف هذا الفيديو نهائياً؟')) return;
+    await db.collection('sheikh_videos').doc(b.getAttribute('data-del-video')).delete();
+    await loadAdminData(); renderControlPanel();
+  });
+  const sendPmBtn=document.getElementById('btn-send-pm');
+  if(sendPmBtn) sendPmBtn.onclick=async()=>{
+    const toUsername=(document.getElementById('admin-pm-user').value||'').trim();
+    const text=(document.getElementById('admin-pm-text').value||'').trim();
+    const st=document.getElementById('admin-pm-status');
+    if(!toUsername){ if(st) st.textContent='اختر الطالب المرسل إليه.'; return; }
+    if(!text){ if(st) st.textContent='اكتب نص الرسالة.'; return; }
+    sendPmBtn.disabled=true;
+    try{
+      await db.collection('personal_messages').add({
+        toUsername, text, seen:false,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      const ta=document.getElementById('admin-pm-text'); if(ta) ta.value='';
+      if(st) st.textContent='تم إرسال الرسالة بنجاح ✅';
+      await loadAdminData(); renderControlPanel();
+    }catch(e){
+      console.error('send personal message error',e);
+      if(st) st.textContent='تعذر إرسال الرسالة، حاول مرة أخرى.';
+      sendPmBtn.disabled=false;
+    }
+  };
+  document.querySelectorAll('[data-del-pm]').forEach(b=>b.onclick=async()=>{
+    if(!confirm('حذف هذه الرسالة نهائياً؟')) return;
+    await db.collection('personal_messages').doc(b.getAttribute('data-del-pm')).delete();
     await loadAdminData(); renderControlPanel();
   });
   const toggleChatBtn=document.getElementById('btn-toggle-group-chat');
@@ -3182,6 +3357,7 @@ function enterMain(){
   tickInterval = setInterval(() => { if(view === 'main') updateTimerOnly(); if(view === 'wheel') updateWheelTimerOnly(); }, 1000);
   listenFriendRequests();
   listenPlatformLock();
+  listenToPersonalMessages();
 }
 
 function logout(){
@@ -3192,6 +3368,8 @@ function logout(){
   if(duelQueueUnsub){ duelQueueUnsub(); duelQueueUnsub = null; }
   if(friendInviteUnsub){friendInviteUnsub();friendInviteUnsub=null;}
   if(friendRequestsUnsub){ friendRequestsUnsub(); friendRequestsUnsub = null; }
+  if(personalMessagesUnsub){ personalMessagesUnsub(); personalMessagesUnsub = null; }
+  PERSONAL_MESSAGES = [];
   if(tournamentUnsub){ tournamentUnsub(); tournamentUnsub = null; }
   tournamentId = null; tournamentData = null; duelSearching = false;
   friendRequestsIncoming = []; friendsProfilesLoaded = false; friendsProfilesCache = {};
@@ -3424,11 +3602,22 @@ function renderChat(){
 }
 
 // ===================== الورد اليومي (سور بالاسم، ونطاق آيات للسور الطويلة) =====================
+// ملحوظة: الورد بيتجدد بناءً على التاريخ الفعلي (تاريخ الجهاز)، وليس على "يوم" التطبيق الداخلي
+// (اللي بيتقدم بس لما المستخدم يخلّص كل الأذكار وتمر 24 ساعة). بالطريقة دي الورد بيرجع "قرأته الحمد لله ✅"
+// تلقائياً كل يوم فعلي جديد، حتى لو المستخدم لسه ما خلّصش أذكار النهاردة.
+function todayDateKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function dayOfYearNum(d){
+  const start = new Date(d.getFullYear(), 0, 0);
+  return Math.floor((d - start) / 86400000);
+}
 function dailyWirdSegments(){
-  // بيحدد كمية آيات مقترحة لليوم (بتتغيّر حسب يوم المستخدم عشان الورد يبقى متنوع)،
+  // بيحدد كمية آيات مقترحة لليوم (بتتغيّر حسب تاريخ اليوم الفعلي عشان الورد يبقى متنوع)،
   // وبيترجمها لسور بالاسم مع نطاق آيات دقيق (خصوصاً للسور الطويلة اللي مش هتتقرأ كاملة في يوم واحد)
   const pace = [15,20,30,20,40,15,25];
-  const target = pace[(state.day - 1) % pace.length];
+  const target = pace[dayOfYearNum(new Date()) % pace.length];
   const cursor = state.wirdAyahCursor % TOTAL_AYAHS;
   const toConsume = Math.min(target, TOTAL_AYAHS - cursor);
   const segments = [];
@@ -3456,7 +3645,7 @@ function dailyWirdSegmentLabel(seg){
 }
 function dailyWirdWidgetHtml(){
   const {segments} = dailyWirdSegments();
-  const done = state.wirdLastDoneDay === state.day;
+  const done = state.wirdLastDoneDate === todayDateKey();
   const cursor = state.wirdAyahCursor % TOTAL_AYAHS;
   const pct = Math.round((cursor / TOTAL_AYAHS) * 100);
   const listHtml = segments.map(seg => `<li>${dailyWirdSegmentLabel(seg)}</li>`).join('');
@@ -3530,6 +3719,7 @@ function renderMain(){
 
   root.innerHTML = `
     ${mainCategoryNavHtml()}
+    ${renderPersonalMessagesSection()}
     ${renderAdsSection()}
     ${prayerTimesWidgetHtml()}
     ${dailyWirdWidgetHtml()}
@@ -3537,12 +3727,23 @@ function renderMain(){
   `;
   updateSyncBadge();
   bindMainCategoryNav();
+  document.querySelectorAll('[data-pm-like]').forEach(b => {
+    b.onclick = async () => {
+      const id = b.getAttribute('data-pm-like');
+      b.disabled = true; b.textContent = '👍 شفتها';
+      try{
+        await db.collection('personal_messages').doc(id).update({
+          seen: true, seenAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }catch(e){ console.warn('mark pm seen error', e); b.disabled = false; }
+    };
+  });
   const wirdBtn = document.getElementById('btn-wird-done');
   if(wirdBtn){
     wirdBtn.onclick = () => {
       const {consumed} = dailyWirdSegments();
       const newCursor = (state.wirdAyahCursor % TOTAL_AYAHS) + consumed;
-      state.wirdLastDoneDay = state.day;
+      state.wirdLastDoneDate = todayDateKey();
       if(newCursor >= TOTAL_AYAHS){
         state.khatmaCompletions = (state.khatmaCompletions||0) + 1;
         addXP(50);
