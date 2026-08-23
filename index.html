@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <!-- OneSignal: بيسمح بوصول إشعارات حقيقية (Push) حتى لو التاب/المتصفح مقفول خالص. مجاني بالكامل. -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
@@ -777,6 +778,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const fbAuth = firebase.auth();
+// نفس رابط الـ Worker المستخدم للإشعارات، دلوقتي بيستخدم كمان لتسجيل الدخول/الحساب بأمان
+// (لازم يكون معرف قبل استخدامه هنا؛ تعريفه الأصلي أسفل الملف تم نقله هنا أيضاً للتأكد من الترتيب)
+const AUTH_WORKER_URL = 'https://mute-thunder-606c.ssrtiv4.workers.dev';
 
 // إعدادات رفع الملفات الصوتية عبر Cloudinary (رفع مباشر بدون سيرفر)
 const CLOUDINARY_CLOUD_NAME = "xyuye5bm";
@@ -3580,12 +3585,21 @@ async function handleLogin(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الدخول...';
   try{
-    const acc = await fetchAccount(u);
-    if(!acc || acc.password !== p){ errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة'; render(); return; }
-    if(acc.banned){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; render(); return; }
-    currentUser = acc.username;
-    state = ensureStateShape(acc.state || freshState());
-    state.profileImageUrl = acc.profileImageUrl || state.profileImageUrl || '';
+    const res = await fetch(AUTH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'login', username: u, password: p })
+    });
+    const data = await res.json();
+    if(!res.ok){
+      if(data.error === 'banned'){ errorMsg = 'هذا الحساب محظور من دخول التطبيق، تواصل مع الأدمن.'; }
+      else { errorMsg = 'اسم المستخدم أو كلمة المرور غير صحيحة'; }
+      render(); return;
+    }
+    await fbAuth.signInWithCustomToken(data.token);
+    currentUser = data.username;
+    state = ensureStateShape(data.state || freshState());
+    state.profileImageUrl = data.profileImageUrl || state.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
@@ -3605,12 +3619,21 @@ async function handleRegister(){
   const btn = document.getElementById('btn-submit');
   btn.disabled = true; btn.textContent = 'جارِ الإنشاء...';
   try{
-    const existing = await fetchAccount(u);
-    if(existing){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; render(); return; }
-    const acc = await createAccount(u, p);
-    currentUser = acc.username;
-    state = ensureStateShape(acc.state);
-    state.profileImageUrl = acc.profileImageUrl || '';
+    const res = await fetch(AUTH_WORKER_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'register', username: u, password: p })
+    });
+    const data = await res.json();
+    if(!res.ok){
+      if(data.error === 'username_taken'){ errorMsg = 'اسم المستخدم موجود بالفعل، اختر اسماً آخر'; }
+      else { errorMsg = 'تعذر إنشاء الحساب، تأكد من اتصالك بالإنترنت وحاول مرة أخرى'; }
+      render(); return;
+    }
+    await fbAuth.signInWithCustomToken(data.token);
+    currentUser = data.username;
+    state = ensureStateShape(data.state);
+    state.profileImageUrl = data.profileImageUrl || '';
     errorMsg = '';
     logLoginEvent(currentUser);
     enterMain();
@@ -3633,6 +3656,7 @@ function enterMain(){
 }
 
 function logout(){
+  fbAuth.signOut().catch(e=>console.warn('signout error', e));
   if(tickInterval) clearInterval(tickInterval);
   stopPlatformLockListener();
   closeChatView();
