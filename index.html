@@ -2766,19 +2766,20 @@ async function renderControlPanel(skipReload){
   }
   const active = adminTab;
   const tabs = [
-    ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],['questions','❓ بنك الأسئلة'],
+    ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],
+    ['tips-timer','🌙 النصائح والمؤقتات'],['questions','❓ بنك الأسئلة'],
     ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
     ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ'],
     ['sheikh-video','🎬 فيديوهات تعليمية'],['personal-messages','📩 رسائل خاصة'],
     ['username-requests',`📝 طلبات تغيير الاسم${adminCache.usernameRequests.filter(r=>r.status==='pending').length ? ` (${adminCache.usernameRequests.filter(r=>r.status==='pending').length})` : ''}`]
   ];
   const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
+  const tipsTimerEnabled = adminCache.site.tipsTimerEnabled !== false;
   let content = '';
   if(active==='dashboard'){
     const banned = adminCache.accounts.filter(a=>a.banned).length;
     const openT = adminCache.tournaments.filter(t=>['registration','ongoing'].includes(t.status)).length;
     const platformLocked = adminCache.site.platformLocked === true;
-    const tipsTimerEnabled = adminCache.site.tipsTimerEnabled !== false;
     content = `
       <div class="admin-grid">
         <div class="admin-stat"><b>${adminCache.accounts.length}</b><span>إجمالي حسابات الطلاب</span></div>
@@ -2808,13 +2809,43 @@ async function renderControlPanel(skipReload){
       <button class="btn admin-mini admin-secondary" id="btn-save-lock-timer" style="margin-top:6px;">💾 حفظ المؤقت</button>
       <div class="admin-help" id="admin-lock-save-msg" style="min-height:16px;"></div>
       <div class="admin-help">لما تقفل المنصة، كل الطلاب (غير حساب الأدمن) هيتمنعوا من استخدام أي جزء من التطبيق فوراً وهيشوفوا رسالة إن المنصة مقفولة مؤقتاً مع السبب اللي كتبته، وهيشوفوا مؤقت عد تنازلي حتى موعد الفتح المتوقع (لو حددت مدة)، وهيقدروا بس يتواصلوا مع الأدمن أو يسجّلوا خروج. حسابك كأدمن دايماً بيدخل عادي حتى لو المنصة مقفولة. لو سبت خانات المدة صفر، مش هيظهر مؤقت للطلاب. زرارَي «حفظ السبب» و«حفظ المؤقت» بيحدّثوا القيم فوراً حتى لو المنصة مقفولة بالفعل، من غير الحاجة لفتحها وقفلها تاني. مدة القفل بتُحسب من لحظة الضغط على «حفظ المؤقت» أو «قفل المنصة».</div>
-
-      <h3 class="admin-section-title" style="margin-top:24px;">🌙 التحكم في ظهور النصائح والمؤقتات</h3>
+    `;
+  } else if(active==='tips-timer'){
+    const nonAdminAccs = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
+    const now = Date.now();
+    const rows = nonAdminAccs.map(a=>{
+      const u=a.username||a.id, st=a.state||{}, uid=adminEsc(a.id);
+      const nextAt = Number(st.nextAvailableAt)||0;
+      const locked = nextAt > now;
+      const remainMs = locked ? nextAt - now : 0;
+      const remainH = Math.floor(remainMs/3600000);
+      const remainM = Math.floor((remainMs%3600000)/60000);
+      const statusHtml = locked
+        ? `<span class="admin-badge bad">🔒 مقفول — باقي ${remainH}س ${remainM}د</span>`
+        : `<span class="admin-badge ok">🌙 متاح يبدأ اليوم ${Number(st.day)||1}</span>`;
+      return `<div class="admin-ad-item">
+        <div class="admin-ad-item-head"><b>${adminEsc(u)}</b>${statusHtml}</div>
+        <div class="admin-ad-item-body muted">اليوم الحالي: ${Number(st.day)||1}</div>
+        <div class="friend-row" style="gap:6px;margin-top:6px;">
+          <input type="number" dir="ltr" class="admin-input" id="admin-tt-hours-${uid}" placeholder="زوّد/قلّل بالساعة (مثلاً 2 أو 2-)" style="flex:1;text-align:center;">
+          <button class="btn admin-mini admin-secondary" data-tt-adjust="${uid}">💾 حفظ التعديل</button>
+        </div>
+        <div class="admin-actions" style="margin-top:6px;">
+          <button class="btn admin-mini admin-secondary" data-tt-unlock="${uid}" ${locked?'':'disabled'}>⏩ افتح له دلوقتي</button>
+          <button class="btn admin-mini admin-danger" data-tt-lock24="${uid}">🔒 اقفل عليه 24 ساعة من دلوقتي</button>
+        </div>
+      </div>`;
+    }).join('');
+    content = `<h3 class="admin-section-title">🌙 التحكم في النصائح والمؤقتات</h3>
       <div class="admin-chat-status">
-        <span>الحالة الحالية: <b>${tipsTimerEnabled ? 'شغالة (نصيحة اليوم + مؤقت 24 ساعة) 🌙' : 'مقفولة (بدون نصيحة ولا انتظار) ⏩'}</b></span>
+        <span>الحالة العامة: <b>${tipsTimerEnabled ? 'شغالة (نصيحة اليوم + مؤقت 24 ساعة) 🌙' : 'مقفولة (بدون نصيحة ولا انتظار) ⏩'}</b></span>
         <button class="btn admin-mini ${tipsTimerEnabled?'admin-danger':'admin-secondary'}" id="btn-toggle-tips-timer">${tipsTimerEnabled ? '🔒 قفل النصائح والمؤقتات' : '🔓 تشغيل النصائح والمؤقتات'}</button>
       </div>
-      <div class="admin-help">لما تكون شغالة (الوضع الافتراضي): بعد ما الطالب يخلّص أذكار اليوم، هيشوف زر «اكشف نصيحة اليوم»، وبعد ما يدوس عليه هتظهرله نصيحة اليوم مع مؤقت عد تنازلي 24 ساعة قبل ما يقدر يبدأ أذكار اليوم الجديد. لما تقفلها: زر «اكشف نصيحة اليوم» بيتحول لزر «التالي: يوم جديد» وبمجرد ما الطالب يدوس عليه بينتقل فوراً لأذكار اليوم التالي من غير ما يشوف نصيحة ولا ينتظر 24 ساعة — يعني النصيحة والمؤقت بيبقوا مجرد إضافة اختيارية (زائد) بدل ما يكونوا شرط لازم للتقدم. أي مؤقت شغال بالفعل عند طلاب هيتجاوز فوراً أول ما تقفل الميزة، من غير ما يحتاجوا يستنوا الوقت المتبقي.</div>
+      <div class="admin-help">لما تكون شغالة (الوضع الافتراضي): بعد ما الطالب يخلّص أذكار اليوم، هيشوف زر «اكشف نصيحة اليوم»، وبعد ما يدوس عليه هتظهرله نصيحة اليوم مع مؤقت عد تنازلي 24 ساعة قبل ما يقدر يبدأ أذكار اليوم الجديد. لما تقفلها: زر «اكشف نصيحة اليوم» بيتحول لزر «التالي: يوم جديد» وبمجرد ما الطالب يدوس عليه بينتقل فوراً لأذكار اليوم التالي من غير نصيحة ولا انتظار — يعني بيبقوا زيادة اختيارية مش شرط. أي مؤقت شغال بالفعل عند طلاب هيتجاوز فوراً أول ما تقفل الميزة.</div>
+
+      <h3 class="admin-section-title" style="margin-top:22px;">⏱️ التحكم في مؤقت كل طالب على حدة</h3>
+      <div class="admin-help">لكل طالب هنا زر لفتح مؤقته فوراً (لو مقفول)، وزر لقفل مؤقته 24 ساعة من دلوقتي، وخانة لزيادة أو إنقاص المؤقت الحالي بعدد ساعات (اكتب رقم سالب زي "3-" عشان تقلل، أو رقم موجب زي "5" عشان تزود)، مع زرار «حفظ التعديل» يخصه هو بس. لو الطالب مش مقفول أصلاً وكتبت رقم موجب، هيتحط له مؤقت جديد يبدأ من دلوقتي.</div>
+      <div class="admin-scroll">${rows || '<div class="muted">لا يوجد طلاب</div>'}</div>
     `;
   } else if(active==='users'){
     const nonAdminUsers = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
@@ -3496,6 +3527,62 @@ async function renderControlPanel(skipReload){
       await loadAdminData(); renderControlPanel();
     }catch(e){ console.error(e); alert('تعذر حفظ الإعداد، حاول مرة أخرى.'); toggleTipsTimerBtn.disabled=false; }
   };
+  document.querySelectorAll('[data-tt-unlock]').forEach(b=>b.onclick=async()=>{
+    const uid=b.getAttribute('data-tt-unlock');
+    b.disabled=true;
+    try{
+      const acc = adminCache.accounts.find(a=>a.id===uid);
+      const st = (acc && acc.state) || {};
+      await db.collection('accounts').doc(uid).update({
+        'state.day': (Number(st.day)||1) + 1,
+        'state.dhikrCounts': [],
+        'state.tipRevealedAt': null,
+        'state.nextAvailableAt': null
+      });
+      await loadAdminData(); renderControlPanel();
+    }catch(e){ console.error(e); alert('تعذر فتح المؤقت، حاول مرة أخرى.'); b.disabled=false; }
+  });
+  document.querySelectorAll('[data-tt-lock24]').forEach(b=>b.onclick=async()=>{
+    const uid=b.getAttribute('data-tt-lock24');
+    if(!confirm('تأكيد قفل مؤقت هذا الطالب 24 ساعة من الآن؟')) return;
+    b.disabled=true;
+    try{
+      await db.collection('accounts').doc(uid).update({
+        'state.tipRevealedAt': Date.now(),
+        'state.nextAvailableAt': Date.now() + 24*60*60*1000
+      });
+      await loadAdminData(); renderControlPanel();
+    }catch(e){ console.error(e); alert('تعذر قفل المؤقت، حاول مرة أخرى.'); b.disabled=false; }
+  });
+  document.querySelectorAll('[data-tt-adjust]').forEach(b=>b.onclick=async()=>{
+    const uid=b.getAttribute('data-tt-adjust');
+    const input=document.getElementById('admin-tt-hours-'+uid);
+    const hours=parseFloat(input && input.value);
+    if(!hours || isNaN(hours)){ alert('اكتب عدد ساعات صحيح (موجب للزيادة أو سالب زي "3-" للإنقاص).'); return; }
+    b.disabled=true;
+    try{
+      const acc = adminCache.accounts.find(a=>a.id===uid);
+      const st = (acc && acc.state) || {};
+      const base = (Number(st.nextAvailableAt)||0) > Date.now() ? Number(st.nextAvailableAt) : Date.now();
+      const newTime = base + hours*60*60*1000;
+      if(newTime <= Date.now()){
+        // النتيجة بقت في الماضي: يبقى فتح فوري وانتقال لليوم التالي
+        await db.collection('accounts').doc(uid).update({
+          'state.day': (Number(st.day)||1) + 1,
+          'state.dhikrCounts': [],
+          'state.tipRevealedAt': null,
+          'state.nextAvailableAt': null
+        });
+      } else {
+        await db.collection('accounts').doc(uid).update({
+          'state.tipRevealedAt': st.tipRevealedAt || Date.now(),
+          'state.nextAvailableAt': newTime
+        });
+      }
+      if(input) input.value='';
+      await loadAdminData(); renderControlPanel();
+    }catch(e){ console.error(e); alert('تعذر حفظ التعديل، حاول مرة أخرى.'); b.disabled=false; }
+  });
   document.querySelectorAll('[data-del-groupmsg]').forEach(b=>b.onclick=async()=>{
     if(!confirm('حذف هذه الرسالة من الشات العام؟')) return;
     await db.collection('group_chat').doc(b.getAttribute('data-del-groupmsg')).delete();
@@ -4612,8 +4699,18 @@ async function shareAchievement(){
     if(!blob) throw new Error('فشل إنشاء الصورة');
     const fileName = 'إنجازي-رفيق-طالب.png';
     const file = (typeof File !== 'undefined') ? new File([blob], fileName, {type:'image/png'}) : null;
+    const shareText = `وصلت إلى مستوى ${getLevelInfo(state.xp).name} 🎉 انضم إليّ في رفيق طالب!`;
     if(file && navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({ files:[file], title:'إنجازي في رفيق طالب', text:`وصلت إلى مستوى ${getLevelInfo(state.xp).name} 🎉 انضم إليّ!` });
+      // مشاركة الصورة مباشرة؛ هيفتح قائمة المشاركة بتاعة الجهاز (واتساب، ماسنجر، إنستجرام...) حسب التطبيقات المثبتة
+      await navigator.share({ files:[file], title:'إنجازي في رفيق طالب', text: shareText });
+    } else if(navigator.share){
+      // بعض تطبيقات الـ WebView بتدعم مشاركة النص بس مش الصور، فبنحمّل الصورة للطالب
+      // وبعدين نفتح قائمة المشاركة (واتساب، ماسنجر، وأي تطبيق تواصل عنده) بالنص، ويقدر يرفق الصورة يدوياً لو حب
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = fileName;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 8000);
+      await navigator.share({ title:'إنجازي في رفيق طالب', text: shareText });
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url; a.download = fileName;
