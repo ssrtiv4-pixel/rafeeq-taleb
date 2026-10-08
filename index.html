@@ -256,6 +256,7 @@ const RELIGIOUS_QUESTIONS_BANK = [
     --text-dim:#a8c4b8;
     --danger:#f0707a;
     --ok:#5fd9a0;
+    --gold-rgb:212,168,67; --bg2-rgb:4,24,19;
     --radius-card:28px;
     --radius-btn:14px;
     --radius-input:14px;
@@ -396,8 +397,8 @@ const RELIGIOUS_QUESTIONS_BANK = [
   }
   .category-band:active{ transform:scale(.98); }
   .category-band.cat-learn{ background:linear-gradient(120deg,#2fd6a8,#0b3f38); border-radius:24px 8px 24px 8px; box-shadow:0 10px 24px rgba(47,214,168,.3); }
-  .category-band.cat-social{ background:linear-gradient(120deg,#c9a227,#0d3329); border-radius:8px 24px 8px 24px; box-shadow:0 10px 24px rgba(201,162,39,.3); }
-  .category-band.cat-account{ background:linear-gradient(120deg,#e9c46a,#1d5a4b); border-radius:999px; box-shadow:0 10px 24px rgba(230,184,10,.3); }
+  .category-band.cat-social{ background:linear-gradient(120deg,#ff5da2,#3d1030); border-radius:8px 24px 8px 24px; box-shadow:0 10px 24px rgba(255,93,162,.3); }
+  .category-band.cat-account{ background:linear-gradient(120deg,#e6b80a,#7a3d5a); border-radius:999px; box-shadow:0 10px 24px rgba(230,184,10,.3); }
   .category-band.open{ box-shadow:0 4px 12px rgba(0,0,0,.3) inset; }
 
   .category-stack{ display:flex; flex-direction:column; gap:10px; margin:-2px 0 16px; }
@@ -579,6 +580,27 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .admin-ad-item-head b{color:var(--gold-light-text);font-size:14px}
   .admin-ad-item-body{margin-top:6px;font-size:12.5px;color:var(--text-dim);line-height:1.7}
   .admin-ad-item-img{margin-top:6px;font-size:11px;color:var(--text-dim);word-break:break-all}
+
+  /* ===== تنظيم تبويبات لوحة الأدمن ===== */
+  .admin-nav{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
+  .admin-nav-group-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--gold-text, var(--gold));margin:0 2px 8px;letter-spacing:.3px}
+  .admin-nav-group-title::after{content:"";flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(var(--gold-rgb),.35))}
+  .admin-nav-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .admin-nav-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:74px;padding:10px 6px;border-radius:16px;border:1px solid rgba(var(--gold-rgb),.28);background:rgba(var(--bg2-rgb),.5);color:var(--text-dim);font-family:'Cairo',sans-serif;cursor:pointer;transition:transform .15s ease,background .2s ease,border-color .2s ease}
+  .admin-nav-btn:active{transform:scale(.96)}
+  .admin-nav-btn .ico{font-size:22px;line-height:1}
+  .admin-nav-btn .lbl{font-size:11.5px;line-height:1.35;text-align:center;font-weight:600}
+  .admin-nav-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a2a22;border-color:transparent;box-shadow:0 8px 18px rgba(var(--gold-rgb),.3)}
+  .admin-nav-btn.active .lbl{font-weight:800}
+  .admin-nav-badge{position:absolute;top:6px;inset-inline-start:6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--danger);color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center}
+  .admin-grid{grid-template-columns:repeat(2,1fr)}
+  .admin-stat{position:relative;overflow:hidden;padding:16px 14px 14px!important;border-radius:18px!important;background:linear-gradient(160deg,rgba(var(--gold-rgb),.12),rgba(var(--gold-rgb),.03))!important}
+  .admin-stat::before{content:"";position:absolute;inset-inline-start:0;top:14px;bottom:14px;width:4px;border-radius:4px;background:var(--gold)}
+  .admin-stat b{font-size:28px!important;line-height:1.1;margin-bottom:6px!important}
+  .admin-stat span{font-size:12px!important;font-weight:600}
+  body[data-mode="light"] .admin-nav-btn{background:#fff;color:var(--text-light);border-color:rgba(13,51,43,.14)}
+  body[data-mode="light"] .admin-nav-btn.active{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:#0a2a22;border-color:transparent}
+  @media(min-width:640px){.admin-nav-grid{grid-template-columns:repeat(5,1fr)}.admin-grid{grid-template-columns:repeat(4,1fr)}}
 
   .ads-section{display:flex;flex-direction:column;gap:10px;margin-bottom:16px}
   .ad-card{border:1px solid rgba(212,168,67,.4);border-radius:14px;padding:14px;background:linear-gradient(180deg,rgba(212,168,67,.14),rgba(212,168,67,.05))}
@@ -2761,7 +2783,20 @@ async function renderControlPanel(skipReload){
     ['sheikh-video','🎬 فيديوهات تعليمية'],['personal-messages','📩 رسائل خاصة'],
     ['username-requests',`📝 طلبات تغيير الاسم${adminCache.usernameRequests.filter(r=>r.status==='pending').length ? ` (${adminCache.usernameRequests.filter(r=>r.status==='pending').length})` : ''}`]
   ];
-  const nav = tabs.map(([k,l])=>`<button class="nav-btn ${active===k?'active':''}" data-admin-tab="${k}">${l}</button>`).join('');
+  const pendingNames = adminCache.usernameRequests.filter(r=>r.status==='pending').length;
+  const tabMap = {};
+  tabs.forEach(([k,l])=>{ const m=String(l).replace(/\s*\(\d+\)\s*$/,'').match(/^(\S+)\s+(.*)$/); tabMap[k]={ico:m?m[1]:'•',lbl:m?m[2]:l}; });
+  const navGroups = [
+    ['⚙️ الإدارة',['dashboard','users','user-tracking','username-requests']],
+    ['📚 المحتوى',['questions','tips-timer','announcements','sheikh-audio','sheikh-video']],
+    ['🏆 المنافسات',['local-duel','tournaments']],
+    ['💬 التواصل',['chat','suggestions','personal-messages']]
+  ];
+  const nav = navGroups.map(([title,keys])=>`
+    <div class="admin-nav-group">
+      <div class="admin-nav-group-title">${title}</div>
+      <div class="admin-nav-grid">${keys.map(k=>`<button class="admin-nav-btn ${active===k?'active':''}" data-admin-tab="${k}"><span class="ico">${tabMap[k].ico}</span><span class="lbl">${tabMap[k].lbl}</span>${k==='username-requests'&&pendingNames?`<span class="admin-nav-badge">${pendingNames}</span>`:''}</button>`).join('')}</div>
+    </div>`).join('');
   const tipsTimerEnabled = adminCache.site.tipsTimerEnabled !== false;
   let content = '';
   if(active==='dashboard'){
@@ -3136,7 +3171,7 @@ async function renderControlPanel(skipReload){
     <div class="contact-back" id="btn-back-from-panel">→ رجوع</div>
     <div class="card">
       <h2>🛠️ لوحة تحكم Abo Yazan@</h2>
-      <div class="nav-row">${nav}</div>
+      <div class="admin-nav">${nav}</div>
       ${content}
     </div>`;
   document.getElementById('btn-back-from-panel').onclick=()=>{view=prevView||'main';render();};
