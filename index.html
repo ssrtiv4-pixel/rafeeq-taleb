@@ -608,6 +608,28 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .tr-top li b{flex:1}
   .tr-top li em{font-style:normal;font-weight:900;color:var(--gold-light-text, var(--gold-light))}
   .tr-top-empty{text-align:center;color:var(--text-dim);padding:10px}
+
+  /* ===== كروت المستخدمين في لوحة الأدمن ===== */
+  .admin-user-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:6px 0 12px}
+  .admin-user-toolbar .admin-input{flex:1;min-width:150px;margin:0}
+  .admin-selectall{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;cursor:pointer;padding:9px 12px;border-radius:12px;border:1px dashed rgba(var(--gold-rgb),.4);color:var(--text-light)}
+  .admin-user-list{display:grid;grid-template-columns:1fr;gap:12px}
+  .admin-user-card{padding:14px;border-radius:18px;border:1px solid rgba(var(--gold-rgb),.28);background:linear-gradient(160deg,rgba(var(--gold-rgb),.09),rgba(var(--gold-rgb),.02));transition:border-color .2s,box-shadow .2s}
+  .admin-user-card.selected{border-color:var(--gold);box-shadow:0 0 0 2px rgba(var(--gold-rgb),.3)}
+  .admin-user-card.banned{opacity:.8;border-style:dashed}
+  .admin-user-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+  .admin-user-pick{display:flex;align-items:center;gap:10px;cursor:pointer;min-width:0}
+  .admin-user-pick input{width:22px;height:22px;flex-shrink:0;accent-color:var(--gold)}
+  .admin-user-name{font-size:17px;font-weight:800;color:var(--gold-light-text, var(--gold-light));overflow-wrap:anywhere}
+  .admin-user-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+  .admin-user-fields label{display:flex;flex-direction:column;gap:4px;min-width:0}
+  .admin-user-fields label span{font-size:11.5px;font-weight:700;color:var(--text-dim);text-align:center}
+  .admin-user-fields .admin-input{margin:0;padding:9px 4px;text-align:center;min-width:0}
+  .admin-user-card .admin-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .admin-user-card .admin-actions .btn{flex:1;min-width:80px;text-align:center}
+  body[data-mode="light"] .admin-user-card{background:#fff;border-color:rgba(13,51,43,.15)}
+  body[data-mode="light"] .admin-user-card.selected{border-color:var(--gold)}
+  @media(min-width:700px){.admin-user-list{grid-template-columns:repeat(2,1fr)}}
   /* ===== تنظيم تبويبات لوحة الأدمن ===== */
   .admin-nav{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
   .admin-nav-group-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--gold-text, var(--gold));margin:0 2px 8px;letter-spacing:.3px}
@@ -2797,6 +2819,7 @@ async function adminRejectUsernameRequest(reqId, reason){
   }
 }
 
+let adminUserSearch = '';
 async function renderControlPanel(skipReload){
   if(!isSuperAdmin()){ view='main'; render(); return; }
   if(!skipReload){
@@ -2906,20 +2929,30 @@ async function renderControlPanel(skipReload){
     const currentUsernames = new Set(nonAdminUsers.map(a=>a.username||a.id));
     Array.from(adminSelectedUsers).forEach(u=>{ if(!currentUsernames.has(u)) adminSelectedUsers.delete(u); });
     const allSelected = nonAdminUsers.length>0 && nonAdminUsers.every(a=>adminSelectedUsers.has(a.username||a.id));
+    const q = (adminUserSearch||'').trim().toLowerCase();
     const rows = nonAdminUsers.map(a=>{
       const u=a.username||a.id, st=a.state||{}, uid=adminEsc(a.id);
-      return `<tr>
-        <td><input type="checkbox" class="admin-user-checkbox" data-user-checkbox="${adminEsc(u)}" ${adminSelectedUsers.has(u)?'checked':''}></td>
-        <td><b>${adminEsc(u)}</b></td>
-        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-points-${uid}" value="${Number(st.points)||0}"></td>
-        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-xp-${uid}" value="${Number(st.xp)||0}"></td>
-        <td><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-correct-${uid}" value="${Number(st.correctAnswers)||0}"></td>
-        <td>${a.banned?'<span class="admin-badge bad">محظور</span>':'<span class="admin-badge ok">نشط</span>'}</td>
-        <td><div class="admin-actions">
+      const sel = adminSelectedUsers.has(u);
+      const hidden = q && !String(u).toLowerCase().includes(q);
+      return `<div class="admin-user-card ${sel?'selected':''} ${a.banned?'banned':''}" data-user-name="${adminEsc(String(u).toLowerCase())}" ${hidden?'style="display:none"':''}>
+        <div class="admin-user-head">
+          <label class="admin-user-pick">
+            <input type="checkbox" class="admin-user-checkbox" data-user-checkbox="${adminEsc(u)}" ${sel?'checked':''}>
+            <span class="admin-user-name">${adminEsc(u)}</span>
+          </label>
+          ${a.banned?'<span class="admin-badge bad">محظور</span>':'<span class="admin-badge ok">نشط</span>'}
+        </div>
+        <div class="admin-user-fields">
+          <label><span>النقاط</span><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-points-${uid}" value="${Number(st.points)||0}"></label>
+          <label><span>XP</span><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-xp-${uid}" value="${Number(st.xp)||0}"></label>
+          <label><span>الصحيح</span><input type="number" dir="ltr" class="admin-input admin-score-input" id="admin-correct-${uid}" value="${Number(st.correctAnswers)||0}"></label>
+        </div>
+        <div class="admin-actions">
           <button class="btn admin-mini admin-secondary" data-save-score="${uid}" data-user-label="${adminEsc(u)}">💾 حفظ</button>
           <button class="btn admin-mini admin-secondary" data-ban-user="${adminEsc(u)}">${a.banned?'فك الحظر':'حظر'}</button>
           <button class="btn admin-mini admin-danger" data-del-user="${adminEsc(u)}">حذف</button>
-        </div></td></tr>`;
+        </div>
+      </div>`;
     }).join('');
     content = `<h3 class="admin-section-title">إدارة المستخدمين والمتصدرين</h3>
       <div class="admin-help">تقدر تعدّل النقاط أو الـ XP أو عدد الإجابات الصحيحة لأي طالب يدوياً (مثلاً لو حصلت مشكلة تقنية أثرت على درجاته)، اكتب القيمة الجديدة واضغط «💾 حفظ» بجنب اسمه. تقدر كمان تحدد أكتر من طالب بعلامة ✔️ في الجدول تحت وتحذفهم كلهم مرة واحدة، أو تمنحهم نقاط جماعية من الخانة اللي تحت دي.</div>
@@ -2927,8 +2960,8 @@ async function renderControlPanel(skipReload){
       <h3 class="admin-section-title" style="margin-top:22px;">🎁 منح نقاط جماعية</h3>
       <div class="admin-help">حدد الطلاب بعلامة ✔️ في الجدول تحت، اكتب عدد النقاط (تقدر تكتب رقم سالب عشان تخصم) والسبب، وبعدين اضغط «امنح النقاط». النقاط هتتضاف لرصيد كل طالب محدد فوق النقاط اللي عنده بالفعل (مش هتستبدلها)، والسبب بيتسجل في سجل المنح تحت عشان يبقى عندك مرجع.</div>
       <div class="friend-row" style="gap:6px;">
-        <input type="number" id="admin-bulk-points-amount" placeholder="عدد النقاط" style="text-align:center;max-width:120px;">
-        <input type="text" id="admin-bulk-points-reason" placeholder="السبب (مثلاً: فوز في مسابقة الحفظ)" style="flex:1;">
+        <input type="number" id="admin-bulk-points-amount" class="admin-input" placeholder="عدد النقاط" style="text-align:center;max-width:120px;margin:0;">
+        <input type="text" id="admin-bulk-points-reason" class="admin-input" placeholder="السبب (مثلاً: فوز في مسابقة الحفظ)" style="flex:1;margin:0;">
       </div>
       <button class="btn admin-mini admin-secondary" id="admin-bulk-award-points" style="margin-top:8px;" ${adminSelectedUsers.size===0?'disabled':''}>🎁 امنح النقاط للمحددين (${adminSelectedUsers.size})</button>
       <div class="admin-help" id="admin-bulk-points-status" style="min-height:16px;"></div>
@@ -2937,7 +2970,11 @@ async function renderControlPanel(skipReload){
         <button class="btn admin-mini admin-danger" id="admin-bulk-delete-users" ${adminSelectedUsers.size===0?'disabled':''}>🗑️ حذف المحددين (${adminSelectedUsers.size})</button>
         ${adminSelectedUsers.size>0 ? `<button class="btn admin-mini admin-secondary" id="admin-clear-selection-users">إلغاء التحديد</button>` : ''}
       </div>
-      <div class="admin-scroll"><table class="admin-table"><thead><tr><th><input type="checkbox" id="admin-select-all-users" ${allSelected?'checked':''}></th><th>الطالب</th><th>النقاط</th><th>XP</th><th>الصحيح</th><th>الحالة</th><th>إجراء</th></tr></thead><tbody>${rows||'<tr><td colspan="7" class="muted">لا يوجد طلاب</td></tr>'}</tbody></table></div>
+      <div class="admin-user-toolbar">
+        <label class="admin-selectall"><input type="checkbox" id="admin-select-all-users" ${allSelected?'checked':''}> تحديد الكل (${nonAdminUsers.length})</label>
+        <input type="search" id="admin-user-search" class="admin-input" placeholder="🔍 ابحث باسم الطالب" value="${adminEsc(adminUserSearch||'')}">
+      </div>
+      <div class="admin-user-list">${rows||'<div class="muted">لا يوجد طلاب</div>'}</div>
       <div class="admin-help" id="admin-score-status" style="min-height:16px;"></div>
 
       <h3 class="admin-section-title" style="margin-top:22px;">📋 سجل منح النقاط الأخيرة</h3>
@@ -3279,6 +3316,14 @@ async function renderControlPanel(skipReload){
     if(cb.checked) adminSelectedUsers.add(u); else adminSelectedUsers.delete(u);
     renderControlPanel(true);
   });
+  const userSearchInput=document.getElementById('admin-user-search');
+  if(userSearchInput) userSearchInput.oninput=()=>{
+    adminUserSearch=userSearchInput.value;
+    const qq=adminUserSearch.trim().toLowerCase();
+    document.querySelectorAll('.admin-user-card').forEach(c=>{
+      c.style.display = (!qq || (c.getAttribute('data-user-name')||'').includes(qq)) ? '' : 'none';
+    });
+  };
   const selectAllUsersCb=document.getElementById('admin-select-all-users');
   if(selectAllUsersCb) selectAllUsersCb.onchange=()=>{
     const nonAdminUsers = adminCache.accounts.filter(a=>(a.username||a.id)!==SUPER_ADMIN_USERNAME);
