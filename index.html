@@ -581,6 +581,33 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .admin-ad-item-body{margin-top:6px;font-size:12.5px;color:var(--text-dim);line-height:1.7}
   .admin-ad-item-img{margin-top:6px;font-size:11px;color:var(--text-dim);word-break:break-all}
 
+
+  /* ===== سباق الوقت ===== */
+  .tr-intro{text-align:center;line-height:1.9;margin:6px 0 14px;color:var(--text-dim)}
+  .tr-intro b{color:var(--gold-light-text, var(--gold-light))}
+  .tr-head{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+  .tr-time{font-size:38px;font-weight:900;line-height:1;color:var(--gold-light-text, var(--gold-light));font-variant-numeric:tabular-nums}
+  .tr-time.low{color:var(--danger);animation:trPulse .6s ease-in-out infinite}
+  @keyframes trPulse{50%{transform:scale(1.12)}}
+  .tr-score{padding:6px 14px;border-radius:999px;font-weight:800;background:rgba(var(--gold-rgb),.14);border:1px solid rgba(var(--gold-rgb),.35)}
+  .tr-bar{height:12px;border-radius:999px;background:rgba(var(--gold-rgb),.15);overflow:hidden;margin:12px 0 8px}
+  .tr-bar-fill{height:100%;width:100%;border-radius:999px;background:linear-gradient(90deg,var(--ok),var(--gold));transition:width .1s linear}
+  .tr-bar-fill.low{background:linear-gradient(90deg,var(--danger),#ff9f45)}
+  .tr-big{font-size:72px;font-weight:900;text-align:center;line-height:1.1;color:var(--gold-light-text, var(--gold-light));margin-top:8px}
+  .tr-big-label{text-align:center;font-weight:800;margin:2px 0 14px}
+  .tr-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:8px;margin-bottom:14px}
+  .tr-stat{text-align:center;padding:12px 6px;border-radius:14px;background:rgba(var(--gold-rgb),.08);border:1px solid rgba(var(--gold-rgb),.25)}
+  .tr-stat b{display:block;font-size:24px;color:var(--gold-light-text, var(--gold-light))}
+  .tr-stat span{font-size:11.5px;color:var(--text-dim)}
+  .tr-hint{text-align:center;font-size:12.5px;color:var(--text-dim);margin:0 0 12px}
+  .tr-sub{margin:20px 0 10px;font-size:15px}
+  .tr-top{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .tr-top li{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;background:rgba(var(--gold-rgb),.06);border:1px solid rgba(var(--gold-rgb),.18)}
+  .tr-top li.me{border-color:var(--gold);background:rgba(var(--gold-rgb),.16)}
+  .tr-top li span{width:26px;text-align:center}
+  .tr-top li b{flex:1}
+  .tr-top li em{font-style:normal;font-weight:900;color:var(--gold-light-text, var(--gold-light))}
+  .tr-top-empty{text-align:center;color:var(--text-dim);padding:10px}
   /* ===== تنظيم تبويبات لوحة الأدمن ===== */
   .admin-nav{display:flex;flex-direction:column;gap:14px;margin-bottom:20px}
   .admin-nav-group-title{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--gold-text, var(--gold));margin:0 2px 8px;letter-spacing:.3px}
@@ -2350,6 +2377,7 @@ function render(){
   if(view === 'login' || view === 'register'){ renderAuth(); return; }
   if(view === 'store'){ renderStore(); return; }
   if(view === 'quiz'){ renderQuiz(); return; }
+  if(view === 'timerace'){ renderTimeRace(); return; }
   if(view === 'review'){ renderReview(); return; }
   if(view === 'leaderboard'){ renderLeaderboard(); return; }
   if(view === 'profile'){ renderProfile(); return; }
@@ -2370,6 +2398,7 @@ function render(){
 
 function navigateToPage(target){
   if(target === 'quiz'){ ensureQuizDay(); quizAnswered=false; quizSelected=null; quizFeedback=''; quizCurrentIndex=null; }
+  if(target === 'timerace'){ stopTimeRace(); trRace = { phase:'idle' }; trTop = null; }
   if(target === 'review'){ reviewAnswered=false; reviewSelected=null; reviewCurrentKey=null; }
   if(target === 'leaderboard'){ leaderboardData = null; }
   if(target === 'friends'){ friendsProfilesLoaded = false; }
@@ -2392,6 +2421,7 @@ function goBackFromPage(){
 const MAIN_CATEGORY_GROUPS = [
   { key:'learn', cls:'cat-learn', label:'📖 التعلّم والعبادة', items:[
       { key:'quiz', label:'❓ المسابقات' },
+      { key:'timerace', label:'⏱️ سباق الوقت' },
       { key:'review', label:'🔁 راجع أخطاءك' },
       { key:'wheel', label:'🎡 عجلة الحظ' },
       { key:'sheikh-audio', label:'🎙️ صوتيات المشايخ' },
@@ -5743,10 +5773,215 @@ async function renderLocal1v1Match(){
   updateSyncBadge();bindTopNav();document.querySelectorAll('[data-local-answer]').forEach(b=>b.onclick=()=>local1v1Answer(Number(b.getAttribute('data-local-answer'))));
 }
 
+
+// ===================== ⏱️ سباق الوقت =====================
+// أجب على أكبر عدد من الأسئلة في TR_DURATION ثانية.
+const TR_DURATION = 60;            // مدة السباق بالثواني
+const TR_REWARD_RUNS_PER_DAY = 3;  // عدد المحاولات اليومية اللي بتتحسب فيها نقاط
+const TR_POINTS_PER_CORRECT = 1;   // نقاط (و XP) لكل إجابة صحيحة في المحاولات المحتسبة
+let trRace = null;      // حالة السباق الحالي
+let trTimer = null;
+let trTop = null;       // أفضل 5 لاعبين (null = لم تُحمّل بعد)
+let trTopLoading = false;
+
+function stopTimeRace(){ if(trTimer){ clearInterval(trTimer); trTimer = null; } }
+function trRunsToday(){ return state.timeRaceDay === getTodayEpochDay() ? (state.timeRaceRuns || 0) : 0; }
+function trValidIndices(){
+  const out = [];
+  (DAILY_QUIZ_POOL || []).forEach((q, i) => {
+    if(q && q.q && Array.isArray(q.options) && q.options.length >= 2 && typeof q.correct === 'number') out.push(i);
+  });
+  return out;
+}
+function trShuffle(a){
+  for(let i = a.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+function trStart(){
+  const order = trShuffle(trValidIndices());
+  if(!order.length) return;
+  trRace = { phase:'run', order, pos:0, score:0, wrong:0, locked:false, picked:null, endAt: Date.now() + TR_DURATION * 1000 };
+  stopTimeRace();
+  trTimer = setInterval(trTick, 100);
+  render();
+}
+
+function trTick(){
+  if(!trRace || trRace.phase !== 'run' || view !== 'timerace'){ stopTimeRace(); return; }
+  const left = trRace.endAt - Date.now();
+  if(left <= 0){ trFinish(); return; }
+  const sec = Math.ceil(left / 1000);
+  const t = document.getElementById('tr-time'), bar = document.getElementById('tr-bar-fill');
+  const low = sec <= 10;
+  if(t){ t.textContent = sec; t.classList.toggle('low', low); }
+  if(bar){ bar.style.width = (left / (TR_DURATION * 1000) * 100) + '%'; bar.classList.toggle('low', low); }
+}
+
+function trDrawQuestion(){
+  const box = document.getElementById('tr-qbox');
+  if(!box || !trRace || trRace.phase !== 'run') return;
+  const idx = trRace.order[trRace.pos];
+  const q = DAILY_QUIZ_POOL[idx];
+  const sc = document.getElementById('tr-score'); if(sc) sc.textContent = '✅ ' + trRace.score;
+  box.innerHTML = `
+    <div class="quiz-q">${q.q}</div>
+    ${q.options.map((opt, i) => {
+      let cls = 'quiz-opt';
+      if(trRace.locked){
+        if(i === q.correct) cls += ' correct';
+        else if(i === trRace.picked) cls += ' wrong';
+      }
+      return `<button class="${cls}" data-tr-opt="${i}" ${trRace.locked ? 'disabled' : ''}>${opt}</button>`;
+    }).join('')}`;
+  box.querySelectorAll('[data-tr-opt]').forEach(b => b.onclick = () => trAnswer(parseInt(b.getAttribute('data-tr-opt'))));
+}
+
+function trAnswer(i){
+  if(!trRace || trRace.phase !== 'run' || trRace.locked) return;
+  if(Date.now() >= trRace.endAt){ trFinish(); return; }
+  const idx = trRace.order[trRace.pos];
+  const q = DAILY_QUIZ_POOL[idx];
+  const ok = (i === q.correct);
+  trRace.locked = true; trRace.picked = i;
+  if(ok){ trRace.score++; }
+  else { trRace.wrong++; recordWrongAnswer(idx, q); }
+  trDrawQuestion();
+  setTimeout(() => {
+    if(!trRace || trRace.phase !== 'run') return;
+    trRace.pos++; trRace.locked = false; trRace.picked = null;
+    if(trRace.pos >= trRace.order.length) trFinish(); else trDrawQuestion();
+  }, ok ? 350 : 900);
+}
+
+function trFinish(){
+  if(!trRace || trRace.phase !== 'run') return;
+  stopTimeRace();
+  trRace.phase = 'done';
+  const today = getTodayEpochDay();
+  const runsBefore = trRunsToday();
+  const counted = runsBefore < TR_REWARD_RUNS_PER_DAY;
+  const gain = counted ? trRace.score * TR_POINTS_PER_CORRECT : 0;
+  const prevBest = state.timeRaceBest || 0;
+  trRace.counted = counted;
+  trRace.gain = gain;
+  trRace.prevBest = prevBest;
+  trRace.newRecord = trRace.score > prevBest && trRace.score > 0;
+  state.timeRaceDay = today;
+  state.timeRaceRuns = runsBefore + 1;
+  state.timeRaceBest = Math.max(prevBest, trRace.score);
+  if(counted){
+    state.points = (state.points || 0) + gain;
+    state.xp = (state.xp || 0) + gain;
+    state.correctAnswers = (state.correctAnswers || 0) + trRace.score;
+  }
+  trTop = null;
+  render();
+  persist();
+}
+
+async function trLoadTop(){
+  if(trTopLoading) return;
+  trTopLoading = true;
+  try{
+    const snap = await db.collection('accounts').get();
+    const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data();
+      const name = d.username || doc.id;
+      if(name === SUPER_ADMIN_USERNAME) return;
+      const b = d.state && d.state.timeRaceBest;
+      if(typeof b === 'number' && b > 0) rows.push({ name, best: b });
+    });
+    rows.sort((a, b) => b.best - a.best);
+    trTop = rows.slice(0, 5);
+  }catch(e){ console.error(e); trTop = []; }
+  trTopLoading = false;
+  if(view === 'timerace' && trRace && trRace.phase !== 'run') render();
+}
+
+function trTopHtml(){
+  if(trTop === null) return `<div class="tr-top-empty">جارِ تحميل المتصدرين...</div>`;
+  if(!trTop.length) return `<div class="tr-top-empty">لا توجد نتائج بعد، كن أول المتصدرين! 🏁</div>`;
+  const medals = ['🥇', '🥈', '🥉'];
+  return `<ol class="tr-top">${trTop.map((r, i) => `
+    <li class="${r.name === currentUser ? 'me' : ''}"><span>${medals[i] || (i + 1)}</span><b>${adminEsc(r.name)}</b><em>${r.best}</em></li>`).join('')}</ol>`;
+}
+
+function renderTimeRace(){
+  if(!trRace) trRace = { phase:'idle' };
+  const runsLeft = Math.max(0, TR_REWARD_RUNS_PER_DAY - trRunsToday());
+  const best = state.timeRaceBest || 0;
+
+  if(trRace.phase === 'run'){
+    root.innerHTML = `
+      ${topNavHtml('timerace')}
+      <div class="card">
+        <h2>⏱️ سباق الوقت</h2>
+        <div class="tr-head">
+          <div class="tr-time" id="tr-time">${TR_DURATION}</div>
+          <div class="tr-score" id="tr-score">✅ ${trRace.score}</div>
+        </div>
+        <div class="tr-bar"><div class="tr-bar-fill" id="tr-bar-fill"></div></div>
+        <div id="tr-qbox"></div>
+      </div>`;
+    updateSyncBadge(); bindTopNav(); trDrawQuestion(); trTick();
+    return;
+  }
+
+  if(trRace.phase === 'done'){
+    const r = trRace;
+    root.innerHTML = `
+      ${topNavHtml('timerace')}
+      <div class="card">
+        <h2>⏱️ انتهى الوقت!</h2>
+        <div class="tr-big">${r.score}</div>
+        <div class="tr-big-label">${r.newRecord ? '🔥 رقم قياسي جديد!' : 'إجابة صحيحة'}</div>
+        <div class="tr-stats">
+          <div class="tr-stat"><b>${r.wrong}</b><span>إجابات خاطئة</span></div>
+          <div class="tr-stat"><b>${state.timeRaceBest || 0}</b><span>أفضل نتيجة</span></div>
+          <div class="tr-stat"><b>${r.counted ? '+' + r.gain : '0'}</b><span>نقاط مكتسبة</span></div>
+        </div>
+        ${r.counted ? '' : `<div class="locked-note">استهلكت محاولاتك المحتسبة لليوم، وده تدريب بدون نقاط. عُد غدًا لمحاولات جديدة 🌙</div>`}
+        ${r.wrong ? `<div class="tr-hint">الأسئلة اللي أخطأت فيها اتضافت لقسم "🔁 راجع أخطاءك".</div>` : ''}
+        <button class="btn" id="btn-tr-again">🔁 سباق جديد</button>
+        <h3 class="tr-sub">🏆 أفضل 5 في سباق الوقت</h3>
+        ${trTopHtml()}
+      </div>`;
+    updateSyncBadge(); bindTopNav();
+    document.getElementById('btn-tr-again').onclick = () => { trRace = { phase:'idle' }; render(); };
+    if(trTop === null && !trTopLoading) trLoadTop();
+    return;
+  }
+
+  // idle
+  root.innerHTML = `
+    ${topNavHtml('timerace')}
+    <div class="card">
+      <h2>⏱️ سباق الوقت</h2>
+      <div class="tr-intro">
+        أجب عن أكبر عدد من الأسئلة في <b>${TR_DURATION} ثانية</b>.<br>
+        كل إجابة صحيحة = <b>+${TR_POINTS_PER_CORRECT} نقطة</b> (أول ${TR_REWARD_RUNS_PER_DAY} محاولات في اليوم).
+      </div>
+      <div class="tr-stats">
+        <div class="tr-stat"><b>${best}</b><span>أفضل نتيجة</span></div>
+        <div class="tr-stat"><b>${runsLeft}</b><span>محاولات محتسبة متبقية</span></div>
+      </div>
+      ${trValidIndices().length ? `<button class="btn" id="btn-tr-start">🚀 ابدأ السباق</button>` : `<div class="locked-note">لا توجد أسئلة متاحة حاليًا.</div>`}
+      <h3 class="tr-sub">🏆 أفضل 5 في سباق الوقت</h3>
+      ${trTopHtml()}
+    </div>`;
+  updateSyncBadge(); bindTopNav();
+  const sb = document.getElementById('btn-tr-start');
+  if(sb) sb.onclick = trStart;
+  if(trTop === null && !trTopLoading) trLoadTop();
+}
+
 const _render = render;
 render = function(){
   if(state && view === 'main') maybeAdvanceDay();
   document.body.setAttribute('data-page', view || 'login');
+  if(view !== 'timerace') stopTimeRace();
   _render();
 };
 
