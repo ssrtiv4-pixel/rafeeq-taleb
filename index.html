@@ -816,9 +816,61 @@ const RELIGIOUS_QUESTIONS_BANK = [
     background:rgba(4,24,19,0.06); border-color:rgba(4,24,19,0.2);
   }
 
+
+  /* ===== أجواء رمضان ===== */
+  .app{ position:relative; z-index:2; padding-top:34px; }
+  .ramadan-deco{ position:fixed; top:0; left:0; right:0; height:120px; z-index:1; pointer-events:none; overflow:hidden; }
+  .rd-fanous{ position:absolute; top:0; transform-origin:50% 0; animation:rdSway 4.6s ease-in-out infinite; animation-delay:var(--d,0s); }
+  .rd-fanous i{ display:block; width:1px; height:var(--s,18px); margin:0 auto; background:linear-gradient(var(--gold),rgba(var(--gold-rgb),.35)); }
+  .rd-fanous svg{ display:block; width:var(--w,28px); height:auto; animation:rdGlow 3.2s ease-in-out infinite; animation-delay:var(--d,0s); }
+  .rd-moon{ position:absolute; top:8px; right:14px; width:50px; height:50px; filter:drop-shadow(0 0 12px rgba(241,217,143,.55)); animation:rdFloat 6s ease-in-out infinite; }
+  .rd-star{ position:absolute; color:var(--gold-light); font-size:11px; opacity:.5; animation:rdTwinkle 2.8s ease-in-out infinite; animation-delay:var(--d,0s); }
+  @keyframes rdSway{ 0%,100%{ transform:rotate(-4deg); } 50%{ transform:rotate(4deg); } }
+  @keyframes rdGlow{ 0%,100%{ filter:drop-shadow(0 0 4px rgba(241,217,143,.35)); } 50%{ filter:drop-shadow(0 0 11px rgba(241,217,143,.85)); } }
+  @keyframes rdFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(5px); } }
+  @keyframes rdTwinkle{ 0%,100%{ opacity:.15; transform:scale(.7); } 50%{ opacity:.9; transform:scale(1.15); } }
+  @media (prefers-reduced-motion:reduce){ .rd-fanous,.rd-fanous svg,.rd-moon,.rd-star{ animation:none; } }
+  .ramadan-badge{ display:inline-block; margin-bottom:8px; padding:4px 18px; border-radius:20px; font-family:'Amiri',serif; font-size:16px; font-weight:700; color:var(--gold-light-text); border:1px solid rgba(var(--gold-rgb),.45); background:rgba(var(--gold-rgb),.1); text-shadow:0 0 12px rgba(var(--gold-rgb),.4); }
+
+  /* ===== تحديد وحذف الأسئلة جماعياً ===== */
+  .admin-q-toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; }
+  .admin-q-toolbar .admin-selectall{ flex:1; min-width:150px; }
+  .admin-selectall input,.admin-q-check{ width:20px; height:20px; accent-color:var(--gold); cursor:pointer; flex-shrink:0; }
+  .admin-table th.q-pick,.admin-table td.q-pick{ width:34px; text-align:center; padding-inline:4px; }
+  .admin-table tr.q-selected td{ background:rgba(var(--gold-rgb),.13); }
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="rdG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1d98f"/><stop offset="1" stop-color="#b8861f"/></linearGradient>
+    <radialGradient id="rdL" cx="50%" cy="50%" r="60%"><stop offset="0" stop-color="#fff3bf"/><stop offset=".6" stop-color="#f1c85a" stop-opacity=".92"/><stop offset="1" stop-color="#d4a843" stop-opacity=".78"/></radialGradient>
+    <mask id="rdM"><rect width="60" height="60" fill="#fff"/><circle cx="40" cy="22" r="19" fill="#000"/></mask>
+    <symbol id="rd-fanous" viewBox="0 0 40 62">
+      <circle cx="20" cy="3" r="2.6" fill="none" stroke="url(#rdG)" stroke-width="1.4"/>
+      <path d="M9 17 Q20 1 31 17 Z" fill="url(#rdG)"/>
+      <rect x="8" y="17" width="24" height="3.5" rx="1.7" fill="url(#rdG)"/>
+      <path d="M10.5 20.5 H29.5 L33 43 Q20 51 7 43 Z" fill="url(#rdL)"/>
+      <path d="M20 20.5 V47 M14.5 20.5 L12 45 M25.5 20.5 L28 45" stroke="#8a5f12" stroke-width=".9" fill="none" opacity=".7"/>
+      <rect x="8.5" y="43.5" width="23" height="3.5" rx="1.7" fill="url(#rdG)"/>
+      <path d="M20 47 V54" stroke="url(#rdG)" stroke-width="1.4"/>
+      <circle cx="20" cy="57" r="3" fill="url(#rdG)"/>
+    </symbol>
+  </defs>
+</svg>
+<div class="ramadan-deco" aria-hidden="true">
+  <div class="rd-fanous" style="left:16%;--s:14px;--w:26px;--d:0s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:31%;--s:30px;--w:30px;--d:-1.2s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:50%;--s:16px;--w:24px;--d:-2.4s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:66%;--s:34px;--w:28px;--d:-.6s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <svg class="rd-moon" viewBox="0 0 60 60"><circle cx="28" cy="30" r="22" fill="url(#rdG)" mask="url(#rdM)"/><polygon points="46,14 48,19.5 53.5,19.5 49,23 50.8,28.5 46,25.2 41.2,28.5 43,23 38.5,19.5 44,19.5" fill="#f1d98f"/></svg>
+  <span class="rd-star" style="left:9%;top:42px;--d:-.4s">✦</span>
+  <span class="rd-star" style="left:24%;top:78px;--d:-1.6s">✦</span>
+  <span class="rd-star" style="left:42%;top:52px;--d:-2.2s">✧</span>
+  <span class="rd-star" style="left:58%;top:84px;--d:-.9s">✦</span>
+  <span class="rd-star" style="left:78%;top:46px;--d:-1.9s">✧</span>
+  <span class="rd-star" style="left:88%;top:80px;--d:-.2s">✦</span>
+</div>
 <button class="mode-toggle-btn" id="btn-mode-toggle" title="تبديل الوضع الليلي/النهاري">☀️</button>
 <div class="welcome-overlay" id="welcome-overlay">
   <div class="welcome-modal">
@@ -2557,6 +2609,7 @@ function renderAuth(){
   const isLogin = view === 'login';
   root.innerHTML = `
     <div class="brand">
+      <div class="ramadan-badge">🌙 رمضان كريم 🌙</div>
       <div class="beads">۞ ۞ ۞</div>
       <h1>رفيق طالب</h1>
       <p>ابدأ يومك بذكر الله، وافتح نصيحتك</p>
@@ -2594,6 +2647,7 @@ function renderAuth(){
 
 let adminTab = 'dashboard';
 let adminCache = { accounts:[], questions:[], tournaments:[], site:{}, ads:[], groupChat:[], suggestions:[], localDuels:[], sheikhAudios:[], sheikhVideos:[], personalMessages:[], usernameRequests:[], pointsAwards:[] };
+let adminSelectedQuestions = new Set(); // ids الأسئلة المحددة في تبويب بنك الأسئلة للحذف الجماعي
 let adminSelectedUsers = new Set(); // أسماء الطلاب المحددين حالياً في تبويب المستخدمين للحذف الجماعي
 let adminPmPresetUser = ''; // اسم مقترح يُملأ تلقائياً في خانة "إرسال رسالة خاصة" لما الأدمن يضغط زر المراسلة من جدول المستخدمين
 let ADS_LIST = [];
@@ -3056,11 +3110,19 @@ async function renderControlPanel(skipReload){
       <div class="admin-scroll">${matchRows || '<div class="locked-note">لا توجد مباريات مضافة حتى الآن.</div>'}</div>`;
   } else if(active==='questions'){
     const qs = adminCache.questions.length ? adminCache.questions : DUEL_QUESTION_POOL.map((q,i)=>({...q,id:'static-'+i}));
-    const rows = qs.slice(0,200).map((q,i)=>`<tr>
+    const deletableQIds = new Set(qs.filter(q=>!String(q.id).startsWith('static-')).map(q=>q.id));
+    Array.from(adminSelectedQuestions).forEach(id=>{ if(!deletableQIds.has(id)) adminSelectedQuestions.delete(id); });
+    const allQSelected = deletableQIds.size>0 && adminSelectedQuestions.size>=deletableQIds.size;
+    const rows = qs.map((q,i)=>{
+      const canDel = !String(q.id).startsWith('static-');
+      const qSel = adminSelectedQuestions.has(q.id);
+      return `<tr class="${qSel?'q-selected':''}">
+      <td class="q-pick">${canDel?`<input type="checkbox" class="admin-q-check" data-q-checkbox="${adminEsc(q.id)}" ${qSel?'checked':''}>`:''}</td>
       <td>${i+1}</td><td>${adminEsc(q.q)}</td><td>${Number(q.level)||0}</td>
       <td>${Number(q.correct)+1}</td>
-      <td><div class="admin-actions"><button class="btn admin-mini admin-secondary" data-edit-q="${adminEsc(q.id)}">تعديل</button>${!String(q.id).startsWith('static-')?`<button class="btn admin-mini admin-danger" data-del-q="${adminEsc(q.id)}">حذف</button>`:''}</div></td>
-    </tr>`).join('');
+      <td><div class="admin-actions"><button class="btn admin-mini admin-secondary" data-edit-q="${adminEsc(q.id)}">تعديل</button>${canDel?`<button class="btn admin-mini admin-danger" data-del-q="${adminEsc(q.id)}">حذف</button>`:''}</div></td>
+    </tr>`;
+    }).join('');
     content = `<h3 class="admin-section-title">إدارة بنك الأسئلة</h3>
       <button class="btn admin-mini" id="btn-add-question">➕ إضافة سؤال جديد</button>
       <button class="btn admin-mini admin-danger" id="btn-delete-all-questions" style="margin-inline-start:8px;">🗑️ حذف جميع الأسئلة</button>
@@ -3073,7 +3135,12 @@ async function renderControlPanel(skipReload){
       <button class="btn admin-mini admin-secondary" id="btn-upload-questions">⬆️ رفع الملف وإضافة الأسئلة</button>
       <div class="admin-help" id="admin-questions-upload-status"></div>
 
-      <div class="admin-scroll" style="margin-top:14px;"><table class="admin-table"><thead><tr><th>#</th><th>السؤال</th><th>المستوى</th><th>الإجابة</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+      <div class="admin-q-toolbar">
+        <label class="admin-selectall"><input type="checkbox" id="admin-select-all-questions" ${allQSelected?'checked':''}> تحديد الكل (${deletableQIds.size})</label>
+        <button class="btn admin-mini admin-danger" id="admin-bulk-delete-questions" ${adminSelectedQuestions.size===0?'disabled':''}>🗑️ حذف المحددين (${adminSelectedQuestions.size})</button>
+        <button class="btn admin-mini admin-secondary" id="admin-clear-selection-questions" style="${adminSelectedQuestions.size?'':'display:none'}">إلغاء التحديد</button>
+      </div>
+      <div class="admin-scroll" style="margin-top:10px;"><table class="admin-table"><thead><tr><th class="q-pick"></th><th>#</th><th>السؤال</th><th>المستوى</th><th>الإجابة</th><th>إجراء</th></tr></thead><tbody>${rows}</tbody></table></div>`;
   } else if(active==='announcements'){
     const title=adminCache.site.welcomeTitle || '🌙 بداية جديدة وتحديث يواكب طموحاتكم';
     const body=adminCache.site.welcomeBody || 'تم تحديث التطبيق ليخدمكم بشكل أفضل، وعشان نلتقي على الخير والمنافسة الشريفة.. جهزنا لكم بطولة تليق بكم وبأخلاقكم العالية.';
@@ -3395,6 +3462,40 @@ async function renderControlPanel(skipReload){
   if(addQ) addQ.onclick=adminAddQuestion;
   const deleteAllQBtn=document.getElementById('btn-delete-all-questions');
   if(deleteAllQBtn) deleteAllQBtn.onclick=adminDeleteAllQuestions;
+  // --- تحديد وحذف أسئلة متعددة ---
+  const syncQSelectionUI=()=>{
+    const n=adminSelectedQuestions.size;
+    const cbs=Array.from(document.querySelectorAll('[data-q-checkbox]'));
+    const bulkBtn=document.getElementById('admin-bulk-delete-questions');
+    if(bulkBtn){ bulkBtn.disabled = n===0; bulkBtn.textContent = `🗑️ حذف المحددين (${n})`; }
+    const clearBtn=document.getElementById('admin-clear-selection-questions');
+    if(clearBtn) clearBtn.style.display = n ? '' : 'none';
+    const allCb=document.getElementById('admin-select-all-questions');
+    if(allCb){ allCb.checked = cbs.length>0 && n>=cbs.length; allCb.indeterminate = n>0 && n<cbs.length; }
+    cbs.forEach(cb=>{ const tr=cb.closest('tr'); if(tr) tr.classList.toggle('q-selected', cb.checked); });
+  };
+  document.querySelectorAll('[data-q-checkbox]').forEach(cb=>cb.onchange=()=>{
+    const id=cb.getAttribute('data-q-checkbox');
+    if(cb.checked) adminSelectedQuestions.add(id); else adminSelectedQuestions.delete(id);
+    syncQSelectionUI();
+  });
+  const selectAllQCb=document.getElementById('admin-select-all-questions');
+  if(selectAllQCb) selectAllQCb.onchange=()=>{
+    document.querySelectorAll('[data-q-checkbox]').forEach(cb=>{
+      cb.checked = selectAllQCb.checked;
+      const id=cb.getAttribute('data-q-checkbox');
+      if(selectAllQCb.checked) adminSelectedQuestions.add(id); else adminSelectedQuestions.delete(id);
+    });
+    syncQSelectionUI();
+  };
+  const clearQSelBtn=document.getElementById('admin-clear-selection-questions');
+  if(clearQSelBtn) clearQSelBtn.onclick=()=>{
+    adminSelectedQuestions.clear();
+    document.querySelectorAll('[data-q-checkbox]').forEach(cb=>cb.checked=false);
+    syncQSelectionUI();
+  };
+  const bulkDelQBtn=document.getElementById('admin-bulk-delete-questions');
+  if(bulkDelQBtn) bulkDelQBtn.onclick=adminDeleteSelectedQuestions;
   const uploadQBtn=document.getElementById('btn-upload-questions');
   if(uploadQBtn) uploadQBtn.onclick=adminUploadQuestionsFile;
   document.querySelectorAll('[data-edit-q]').forEach(b=>b.onclick=()=>adminEditQuestion(b.getAttribute('data-edit-q')));
@@ -3748,6 +3849,28 @@ async function adminDeleteAllQuestions(){
     console.error('delete all questions error', e);
     alert('تعذر حذف كل الأسئلة. تأكد من صلاحيات Firestore (Rules) وحاول مرة أخرى.');
     if(btn){ btn.disabled=false; btn.textContent='🗑️ حذف جميع الأسئلة'; }
+  }
+}
+async function adminDeleteSelectedQuestions(){
+  if(!isSuperAdmin()) return;
+  const ids=Array.from(adminSelectedQuestions);
+  if(!ids.length) return;
+  if(!confirm(`حذف ${ids.length} سؤال نهائياً؟ الإجراء ده مينفعش يترجع.`)) return;
+  const btn=document.getElementById('admin-bulk-delete-questions');
+  if(btn){ btn.disabled=true; btn.textContent='جارِ الحذف...'; }
+  try{
+    const batchSize=400; // أقل من حد Firestore (500) لكل دفعة
+    for(let i=0;i<ids.length;i+=batchSize){
+      const batch=db.batch();
+      ids.slice(i,i+batchSize).forEach(id=>batch.delete(db.collection('question_bank').doc(id)));
+      await batch.commit();
+    }
+    adminSelectedQuestions.clear();
+    await loadRuntimeQuestionBank(); await loadAdminData(); renderControlPanel();
+  }catch(e){
+    console.error('bulk delete questions error', e);
+    alert('تعذر حذف الأسئلة المحددة. تأكد من صلاحيات Firestore (Rules) وحاول مرة أخرى.');
+    if(btn){ btn.disabled=false; btn.textContent=`🗑️ حذف المحددين (${adminSelectedQuestions.size})`; }
   }
 }
 async function adminEditQuestion(id){
