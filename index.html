@@ -704,6 +704,20 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .rm-badge small{ display:block; font-size:10px; color:var(--text-dim); }
   .rm-sec select.admin-input{ margin-bottom:6px; }
   .rm-sec input[type=text]{ margin-bottom:6px; }
+
+  /* ===== المرحلة 1 ===== */
+  .daily-reward{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin:0 0 12px; padding:11px 14px; border-radius:16px; border:1px solid rgba(var(--gold-rgb),.45); background:linear-gradient(120deg,rgba(var(--gold-rgb),.14),rgba(95,217,160,.1)); font-size:13px; color:var(--text-light); line-height:1.7; }
+  .daily-reward small{ color:var(--text-dim); font-size:11px; }
+  .daily-reward.done{ justify-content:center; opacity:.8; font-size:12px; padding:8px 12px; }
+  .daily-reward.wb{ border-color:rgba(255,141,184,.5); background:linear-gradient(120deg,rgba(255,141,184,.14),rgba(var(--gold-rgb),.1)); }
+  .daily-reward .btn{ white-space:nowrap; }
+  .report-q-btn{ display:block; margin:12px auto 0; background:transparent; border:none; color:var(--text-dim); font-family:'Cairo',sans-serif; font-size:12px; text-decoration:underline; cursor:pointer; }
+  .stat-row{ display:flex; align-items:center; gap:8px; margin:6px 0; font-size:12px; color:var(--text-light); }
+  .stat-row .bar{ flex:1; height:8px; border-radius:999px; background:rgba(255,255,255,.08); overflow:hidden; }
+  .stat-row .bar i{ display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--ok)); }
+  .rep-card{ border:1px solid rgba(var(--gold-rgb),.3); border-radius:14px; padding:12px; margin-bottom:10px; background:rgba(255,255,255,.03); font-size:13px; }
+  .rep-card .opt{ font-size:12px; color:var(--text-dim); margin:2px 0; }
+  .rep-card .opt.ok{ color:var(--ok); font-weight:700; }
 </style>
 </head>
 <body>
@@ -1139,7 +1153,20 @@ const BADGE_DEFS = [
   {id:'streak_30', icon:'🌟', name:'30 يوم متتالي', desc:'حافظ على نشاطك 30 يوماً متتالياً', check:s=>((s.streak&&s.streak.longest)||0)>=30},
   {id:'khatma_done', icon:'📖', name:'ختمة كاملة', desc:'أتمم ختمة القرآن الكريم مرة واحدة', check:s=>(s.khatmaCompletions||0)>=1},
   {id:'duel_10', icon:'⚔️', name:'محارب الأسئلة', desc:'حقق 10 انتصارات في التحدي', check:s=>(s.duelWins||0)>=10},
-  {id:'level_legend', icon:'👑', name:'أسطورة', desc:'وصلت لأعلى مستوى (1500 XP)', check:s=>(s.xp||0)>=1500}
+  {id:'level_legend', icon:'👑', name:'أسطورة', desc:'وصلت لأعلى مستوى (1500 XP)', check:s=>(s.xp||0)>=1500},
+  {id:'streak_3', icon:'✨', name:'3 أيام متتالية', desc:'حافظ على نشاطك 3 أيام متتالية', check:s=>((s.streak&&s.streak.longest)||0)>=3},
+  {id:'streak_14', icon:'🌙', name:'أسبوعان متتاليان', desc:'حافظ على نشاطك 14 يوماً متتالياً', check:s=>((s.streak&&s.streak.longest)||0)>=14},
+  {id:'correct_500', icon:'🎯', name:'500 إجابة صحيحة', desc:'أجب بشكل صحيح على 500 سؤال', check:s=>(s.correctAnswers||0)>=500},
+  {id:'correct_1000', icon:'🏆', name:'ألف إجابة صحيحة', desc:'أجب بشكل صحيح على 1000 سؤال', check:s=>(s.correctAnswers||0)>=1000},
+  {id:'xp_500', icon:'⭐', name:'500 XP', desc:'اجمع 500 نقطة خبرة', check:s=>(s.xp||0)>=500},
+  {id:'xp_1000', icon:'💎', name:'1000 XP', desc:'اجمع 1000 نقطة خبرة', check:s=>(s.xp||0)>=1000},
+  {id:'duel_first', icon:'🤺', name:'أول انتصار', desc:'حقق أول انتصار في التحدي', check:s=>(s.duelWins||0)>=1},
+  {id:'wheel_5', icon:'🎡', name:'صاحب الحظ', desc:'اربح 5 مرات في عجلة الحظ', check:s=>(s.wheelWins||0)>=5},
+  {id:'khatma_3', icon:'📚', name:'3 ختمات', desc:'أتمم 3 ختمات للقرآن الكريم', check:s=>(s.khatmaCompletions||0)>=3},
+  {id:'contributor', icon:'💡', name:'مساهم', desc:'اقترح سؤالاً للمنصة', check:s=>(s.suggestionsSubmitted||0)>=1},
+  {id:'friends_3', icon:'🧑‍🤝‍🧑', name:'صاحب أصدقاء', desc:'أضف 3 أصدقاء', check:s=>Array.isArray(s.friends)&&s.friends.length>=3},
+  {id:'reward_7', icon:'🎁', name:'مواظب', desc:'استلم المكافأة اليومية 7 أيام متتالية', check:s=>((s.dailyReward&&s.dailyReward.streak)||0)>=7},
+  {id:'ramadan_khatma', icon:'🕌', name:'ختمة رمضان', desc:'أتمم ختمة في مسابقات رمضان', check:s=>((s.ramadan&&s.ramadan.khatmas)||0)>=1}
 ];
 function checkBadges(){
   if(!state.badges || typeof state.badges !== 'object') state.badges = {};
@@ -1155,6 +1182,7 @@ function checkBadges(){
 
 // ===================== الستريك اليومي + سجل XP للرسم البياني =====================
 function recordDailyActivity(){
+  try{ weeklyRollover(); }catch(e){}
   const today = getTodayEpochDay();
   if(!state.streak || typeof state.streak !== 'object') state.streak = {count:0, longest:0, lastDay:null};
   const last = state.streak.lastDay;
@@ -2337,6 +2365,9 @@ function render(){
   if(view === 'timerace'){ renderTimeRace(); return; }
   if(view === 'review'){ renderReview(); return; }
   if(view === 'ramadan'){ renderRamadan(); return; }
+  if(view === 'friday'){ renderFriday(); return; }
+  if(view === 'season'){ renderSeason(); return; }
+  if(view === 'weekly'){ renderWeekly(); return; }
   if(view === 'leaderboard'){ renderLeaderboard(); return; }
   if(view === 'profile'){ renderProfile(); return; }
   if(view === 'friends'){ renderFriends(); return; }
@@ -2360,6 +2391,7 @@ function navigateToPage(target){
   if(target === 'timerace'){ stopTimeRace(); trRace = { phase:'idle' }; trTop = null; }
   if(target === 'review'){ reviewAnswered=false; reviewSelected=null; reviewCurrentKey=null; }
   if(target === 'leaderboard'){ leaderboardData = null; }
+  if(target === 'weekly'){ weeklyBoard = null; weeklyTab = 'this'; }
   if(target === 'friends'){ friendsProfilesLoaded = false; }
   if(target === 'team'){ teamData = null; teamsLeaderboardData = null; teamViewMode = 'main'; }
   if(target === 'tournament'){ tournamentData = null; }
@@ -2588,16 +2620,6 @@ function ramadanBannerHtml(){
   const dua = (ramadanActive() && t.status === 'on') ? ramadanDayInfo(t.dayNo).dua : ramadanDua();
   const sub = (ramadanActive() && t.status === 'on') ? `<small class="rb-day">اليوم ${t.dayNo} من ${t.N}</small>` : '';
   return `<div class="ramadan-banner"><span class="rb-ico">🌙</span><div><b>رمضان كريم</b>${sub}<span class="rb-dua">${adminEsc(dua)}</span></div><span class="rb-ico">🏮</span></div>`;
-}
-function mainGroups(){
-  if(!ramadanActive()) return MAIN_CATEGORY_GROUPS;
-  return [{ key:'ramadan', cls:'cat-ramadan', label:'🌙 رمضان', items:[
-    { key:'ramadan:today', label:'❓ سؤال وفزورة اليوم' },
-    { key:'ramadan:worship', label:'🕌 متتبع العبادات' },
-    { key:'ramadan:khatma', label:'📖 ختمة القرآن' },
-    { key:'ramadan:duel', label:'⚔️ دويلو رمضان' },
-    { key:'ramadan:board', label:'🏆 متصدرو رمضان' }
-  ]}].concat(MAIN_CATEGORY_GROUPS);
 }
 function ramadanOpen(tab){
   ramadanTab = tab || 'today';
@@ -3048,6 +3070,346 @@ function bindRamadanAdmin(){
   });
 }
 
+// ===================== المرحلة 1: مكافأة يومية، بلاغات الأسئلة، إحصائيات الأدمن، رسالة العودة =====================
+let welcomeGapDays = 0, welcomeGapUser = null, welcomeBackDismissed = false;
+
+function dailyRewardInfo(){
+  const today = getTodayEpochDay();
+  const d = state.dailyReward || { lastDay:null, streak:0 };
+  const claimed = d.lastDay === today;
+  const nextStreak = claimed ? (d.streak || 1) : ((d.lastDay === today - 1) ? (d.streak || 0) + 1 : 1);
+  const amount = Math.min(50, 10 + 5 * (Math.min(nextStreak, 9) - 1));
+  return { claimed, today, nextStreak, amount };
+}
+function dailyRewardHtml(){
+  if(isSuperAdmin() || !FEATURES.dailyReward) return '';
+  const r = dailyRewardInfo();
+  if(r.claimed) return `<div class="daily-reward done">🎁 استلمت مكافأة اليوم • سلسلة ${r.nextStreak} يوم</div>`;
+  return `<div class="daily-reward"><div>🎁 <b>مكافأتك اليومية</b><br><small>اليوم ${r.nextStreak} في السلسلة — كل يوم متتالي مكافأة أكبر</small></div><button class="btn admin-mini" id="btn-daily-reward">استلم +${r.amount} XP</button></div>`;
+}
+function welcomeBackHtml(){
+  if(isSuperAdmin() || welcomeBackDismissed || welcomeGapDays < 5) return '';
+  if(state.welcomeBackDay === getTodayEpochDay()) return '';
+  return `<div class="daily-reward wb"><div>🤍 <b>افتقدناك!</b><br><small>غبت ${welcomeGapDays} يوماً، أهلاً بعودتك ورجوعك فيه خير.</small></div><button class="btn admin-mini" id="btn-welcome-back">هدية العودة +15 XP</button></div>`;
+}
+function bindHomeExtras(){
+  const dr = document.getElementById('btn-daily-reward');
+  if(dr) dr.onclick = () => { const r = dailyRewardInfo(); if(r.claimed) return; addXP(r.amount); state.dailyReward = { lastDay:r.today, streak:r.nextStreak }; persist(); render(); };
+  const wb = document.getElementById('btn-welcome-back');
+  if(wb) wb.onclick = () => { addXP(15); state.welcomeBackDay = getTodayEpochDay(); welcomeBackDismissed = true; persist(); render(); };
+}
+
+// ---- بلّغ عن خطأ في سؤال ----
+async function reportQuestion(q, idx){
+  const note = prompt('ما المشكلة في السؤال؟ (اختياري)\nمثال: الإجابة الصحيحة خطأ، أو الصياغة غير واضحة', '');
+  if(note === null) return;
+  try{
+    await db.collection('question_reports').add({ q:q.q, options:q.options, correct:q.correct, qIndex:idx, by:currentUser, note:String(note).slice(0, 300), status:'open', createdAtMs:Date.now() });
+    alert('وصل بلاغك للمشرف، شكراً لك 🌷');
+  }catch(e){ console.error(e); alert('تعذر إرسال البلاغ، حاول لاحقاً'); }
+}
+function reportsAdminHtml(){
+  const all = (adminCache.reports || []).slice().sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
+  const open = all.filter(r => r.status !== 'done');
+  const card = r => `<div class="rep-card">
+    <div style="font-weight:700;margin-bottom:6px">${adminEsc(r.q)}</div>
+    ${(r.options || []).map((o, i) => `<div class="opt ${i === r.correct ? 'ok' : ''}">${i === r.correct ? '✅' : '▫️'} ${adminEsc(o)}</div>`).join('')}
+    ${r.note ? `<div class="admin-help">📝 الملاحظة: <b>${adminEsc(r.note)}</b></div>` : ''}
+    <div class="admin-help">من: ${adminEsc(r.by || '')} • ${r.createdAtMs ? new Date(r.createdAtMs).toLocaleDateString('ar-EG') : ''}</div>
+    <div class="admin-actions">${r.status !== 'done' ? `<button class="btn admin-mini" data-rep-done="${adminEsc(r.id)}">✓ تم الحل</button>` : '<span class="admin-help">✅ تم الحل</span>'}<button class="btn admin-mini admin-danger" data-rep-del="${adminEsc(r.id)}">حذف</button></div></div>`;
+  return `<h3 class="admin-section-title">🚩 بلاغات الأسئلة (${open.length} مفتوح)</h3>
+    <div class="admin-help">الطلاب يبلغون عن أسئلة فيها خطأ. انسخ نص السؤال وابحث عنه في «بنك الأسئلة» لتعديله، ثم اضغط «تم الحل».</div>
+    ${open.length ? open.map(card).join('') : '<div class="hint">لا توجد بلاغات مفتوحة 🎉</div>'}
+    ${all.length > open.length ? `<h3 class="admin-section-title" style="margin-top:18px">تم حلها</h3>${all.filter(r => r.status === 'done').slice(0, 20).map(card).join('')}` : ''}`;
+}
+
+// ---- إحصائيات الأدمن ----
+function statsAdminHtml(){
+  const accs = (adminCache.accounts || []).filter(a => (a.username || a.id) !== SUPER_ADMIN_USERNAME && !a.banned);
+  const today = getTodayEpochDay();
+  const rows = accs.map(a => { const st = a.state || {}; const ld = st.streak && st.streak.lastDay; return { name:a.username || a.id, gap:(typeof ld === 'number') ? today - ld : null, xp:Number(st.xp) || 0 }; });
+  const act1 = rows.filter(g => g.gap !== null && g.gap <= 0).length;
+  const act7 = rows.filter(g => g.gap !== null && g.gap <= 6).length;
+  const never = rows.filter(g => g.gap === null).length;
+  const absent = rows.filter(g => g.gap !== null && g.gap >= 5).sort((a, b) => b.gap - a.gap);
+  const agg = {};
+  accs.forEach(a => { const wq = (a.state && a.state.wrongQuestions) || {}; Object.keys(wq).forEach(k => { const it = wq[k]; if(!it || !it.q) return; const e = agg[it.q] = agg[it.q] || { q:it.q, options:it.options || [], correct:it.correct, students:0, wrong:0 }; e.students++; e.wrong += Number(it.wrongCount) || 1; }); });
+  const top = Object.keys(agg).map(k => agg[k]).sort((x, y) => y.students - x.students || y.wrong - x.wrong).slice(0, 15);
+  const lv = {};
+  accs.forEach(a => { const li = getLevelInfo((a.state && a.state.xp) || 0); const k = li.icon + ' ' + li.name; lv[k] = (lv[k] || 0) + 1; });
+  const lvList = Object.keys(lv).map(k => [k, lv[k]]).sort((a, b) => b[1] - a[1]);
+  const maxLv = Math.max(1, ...lvList.map(x => x[1]));
+  return `<h3 class="admin-section-title">📈 إحصائيات المنصة</h3>
+    <div class="admin-grid">
+      <div class="admin-stat"><b>${accs.length}</b><span>طلاب نشطون (غير محظورين)</span></div>
+      <div class="admin-stat"><b>${act1}</b><span>دخلوا اليوم</span></div>
+      <div class="admin-stat"><b>${act7}</b><span>آخر 7 أيام</span></div>
+      <div class="admin-stat"><b>${never}</b><span>لم يبدؤوا النشاط بعد</span></div>
+    </div>
+    <h3 class="admin-section-title" style="margin-top:20px">🎚️ توزيع المستويات</h3>
+    ${lvList.length ? lvList.map(([k, n]) => `<div class="stat-row"><span style="min-width:96px">${adminEsc(k)}</span><div class="bar"><i style="width:${Math.round(n / maxLv * 100)}%"></i></div><b>${n}</b></div>`).join('') : '<div class="hint">لا توجد بيانات</div>'}
+    <h3 class="admin-section-title" style="margin-top:20px">❌ أكثر الأسئلة غلطاً</h3>
+    <div class="admin-help">محسوبة من قوائم «راجع أخطاءك» عند الطلاب (أي من أخطأ فيها ولم يتقنها بعد). الأسئلة اللي يغلط فيها كثيرون قد تحتاج مراجعة صياغتها أو رفع مستواها.</div>
+    ${top.length ? top.map(t => `<div class="rep-card"><div style="font-weight:700">${adminEsc(t.q)}</div><div class="opt ok">✅ ${adminEsc((t.options || [])[t.correct] || '')}</div><div class="admin-help">${t.students} طالب • ${t.wrong} مرة غلط</div></div>`).join('') : '<div class="hint">لا توجد أخطاء مسجلة بعد</div>'}
+    <h3 class="admin-section-title" style="margin-top:20px">💤 غائبون 5 أيام أو أكثر (${absent.length})</h3>
+    ${absent.length ? `<div class="admin-actions"><button class="btn admin-mini" id="btn-copy-absent" data-names="${adminEsc(absent.map(a => a.name).join('، '))}">📋 نسخ الأسماء</button></div>
+      ${absent.slice(0, 40).map(a => `<div class="stat-row"><span style="flex:1">${adminEsc(a.name)}</span><b>${a.gap} يوم</b></div>`).join('')}` : '<div class="hint">لا يوجد غائبون 🎉</div>'}`;
+}
+function bindAdminExtras(){
+  document.querySelectorAll('[data-rep-done]').forEach(b => b.onclick = async () => {
+    const id = b.getAttribute('data-rep-done');
+    try{ await db.collection('question_reports').doc(id).update({ status:'done' }); const r = (adminCache.reports || []).find(x => x.id === id); if(r) r.status = 'done'; renderControlPanel(true); }
+    catch(e){ alert('تعذر التحديث'); }
+  });
+  document.querySelectorAll('[data-rep-del]').forEach(b => b.onclick = async () => {
+    if(!confirm('حذف هذا البلاغ؟')) return;
+    const id = b.getAttribute('data-rep-del');
+    try{ await db.collection('question_reports').doc(id).delete(); adminCache.reports = (adminCache.reports || []).filter(x => x.id !== id); renderControlPanel(true); }
+    catch(e){ alert('تعذر الحذف'); }
+  });
+  const cp = document.getElementById('btn-copy-absent');
+  if(cp) cp.onclick = async () => { const names = cp.getAttribute('data-names') || ''; try{ await navigator.clipboard.writeText(names); cp.textContent = 'تم النسخ ✅'; }catch(e){ prompt('انسخ الأسماء:', names); } };
+}
+
+// ===================== المرحلة 2: مفاتيح الميزات، الجمعة، بطولة الأسبوع، المواسم، فريق الإشراف =====================
+const FEATURES_DEFAULT = { friday:true, weekly:true, season:true, dailyReward:true, reportButton:true };
+let FEATURES = Object.assign({}, FEATURES_DEFAULT);
+let SEASON = { enabled:false, title:'', icon:'🌟', startDate:'', endDate:'', items:[] };
+let STAFF = { content:[], community:[] };
+let STAFF_ROLE = null;
+let p2Unsubs = [];
+const STAFF_TABS = {
+  content:['questions','reports','announcements','sheikh-audio','sheikh-video','tips-timer','ramadan-admin','season','stats'],
+  community:['chat','suggestions','personal-messages','username-requests','user-tracking','stats']
+};
+function listenPhase2Config(){
+  if(p2Unsubs.length) return;
+  const rerender = () => { if(['main','friday','season','weekly'].indexOf(view) !== -1) render(); };
+  const warn = e => console.warn('phase2 config listen error', e);
+  p2Unsubs.push(db.collection('settings').doc('features').onSnapshot(s => { FEATURES = Object.assign({}, FEATURES_DEFAULT, s.exists ? s.data() : {}); rerender(); }, warn));
+  p2Unsubs.push(db.collection('settings').doc('season').onSnapshot(s => { const d = s.exists ? s.data() : {}; SEASON = Object.assign({ enabled:false, title:'', icon:'🌟', startDate:'', endDate:'', items:[] }, d, { items:Array.isArray(d.items) ? d.items : [] }); rerender(); }, warn));
+  p2Unsubs.push(db.collection('settings').doc('staff').onSnapshot(s => { const d = s.exists ? s.data() : {}; STAFF = { content:Array.isArray(d.content) ? d.content : [], community:Array.isArray(d.community) ? d.community : [] }; computeStaffRole(); if(view === 'main') render(); }, warn));
+}
+function computeStaffRole(){
+  STAFF_ROLE = null;
+  if(!currentUser || isSuperAdmin()) return;
+  const me = docId(currentUser);
+  if(STAFF.content.some(u => docId(u) === me)) STAFF_ROLE = 'content';
+  else if(STAFF.community.some(u => docId(u) === me)) STAFF_ROLE = 'community';
+}
+function canOpenPanel(){ return isSuperAdmin() || !!STAFF_ROLE; }
+function canContentAdmin(){ return isSuperAdmin() || STAFF_ROLE === 'content'; }
+
+// ---- بطولة الأسبوع (تلقائية، أسبوعها يبدأ السبت) ----
+function weekKeyOf(epochDay){ const wd = (epochDay + 4) % 7; return epochDay - ((wd + 1) % 7); }
+function currentWeekKey(){ return weekKeyOf(getTodayEpochDay()); }
+function weeklyRollover(){
+  if(!state) return;
+  const cur = currentWeekKey(), w = state.weekly, xp = Number(state.xp) || 0;
+  if(!w || typeof w.key !== 'number'){ state.weekly = { key:cur, baseXp:xp }; return; }
+  if(w.key !== cur){ state.weekly = { key:cur, baseXp:xp, prev:{ key:w.key, xp:Math.max(0, xp - (Number(w.baseXp) || 0)) } }; }
+}
+let weeklyBoard = null, weeklyLoading = false, weeklyTab = 'this';
+async function loadWeeklyBoard(){
+  weeklyLoading = true;
+  try{
+    const snap = await db.collection('accounts').get();
+    const cur = currentWeekKey(), last = cur - 7; const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data(); const name = d.username || doc.id; if(name === SUPER_ADMIN_USERNAME) return;
+      const st = d.state || {}, w = st.weekly || {}, xp = Number(st.xp) || 0; let thisXp = 0, lastXp = 0;
+      if(w.key === cur){ thisXp = Math.max(0, xp - (Number(w.baseXp) || 0)); if(w.prev && w.prev.key === last) lastXp = Number(w.prev.xp) || 0; }
+      else if(w.key === last){ lastXp = Math.max(0, xp - (Number(w.baseXp) || 0)); }
+      rows.push({ name, thisXp, lastXp });
+    });
+    weeklyBoard = rows;
+  }catch(e){ console.error(e); weeklyBoard = []; }
+  weeklyLoading = false; if(view === 'weekly') render();
+}
+function renderWeekly(){
+  if(weeklyBoard === null && !weeklyLoading) loadWeeklyBoard();
+  const cur = currentWeekKey(), daysLeft = 7 - (getTodayEpochDay() - cur);
+  const field = weeklyTab === 'this' ? 'thisXp' : 'lastXp';
+  const rows = (weeklyBoard || []).filter(r => r[field] > 0).sort((a, b) => b[field] - a[field]);
+  const myIdx = rows.findIndex(r => r.name === currentUser);
+  let claim = '';
+  if(weeklyTab === 'last' && myIdx >= 0 && myIdx < 3 && state.weeklyClaimed !== cur - 7){
+    const prize = [50, 30, 20][myIdx];
+    claim = `<button class="btn" id="btn-weekly-claim" data-prize="${prize}">🎁 استلم جائزة المركز ${myIdx + 1} (+${prize} XP)</button>`;
+  }
+  const list = weeklyBoard === null ? `<div class="loading">جارِ تحميل الترتيب...</div>`
+    : rows.length ? rows.slice(0, 20).map((r, i) => { const medal = i < 3 ? ['🥇', '🥈', '🥉'][i] : null;
+        return `<div class="rank-item ${r.name === currentUser ? 'me' : ''} ${medal ? 'rank-medal-' + (i + 1) : ''}"><div class="rank-left"><span class="rank-pos">${medal || i + 1}</span><span class="rank-name">${adminEsc(r.name)}${r.name === currentUser ? ' (أنت)' : ''}</span></div><div class="rank-stats"><b>${r[field]}</b> XP</div></div>`; }).join('')
+    : `<div class="hint">لا توجد نقاط بعد ${weeklyTab === 'this' ? 'هذا الأسبوع — كن أول المتصدرين!' : 'للأسبوع الماضي'}</div>`;
+  const myNow = (weeklyBoard || []).find(r => r.name === currentUser);
+  root.innerHTML = `${topNavHtml('weekly')}<div class="card"><h2>🏅 بطولة الأسبوع</h2>
+    <div class="hint">تبدأ كل سبت وتتصفّر تلقائياً. ${weeklyTab === 'this' ? 'تنتهي بعد ' + daysLeft + ' يوم.' : 'جوائز المراكز الثلاثة الأولى تُستلم من هنا.'}</div>
+    <div class="rm-stats" style="margin-top:12px"><div><b>${myNow ? myNow.thisXp : 0}</b><span>نقاطي هذا الأسبوع</span></div><div><b>${myIdx >= 0 ? '#' + (myIdx + 1) : '—'}</b><span>ترتيبي</span></div></div>
+    <div class="rm-tabs"><button class="rm-tab ${weeklyTab === 'this' ? 'active' : ''}" data-wtab="this">هذا الأسبوع</button><button class="rm-tab ${weeklyTab === 'last' ? 'active' : ''}" data-wtab="last">الأسبوع الماضي</button></div>
+    ${claim}${list}</div>`;
+  updateSyncBadge(); bindTopNav();
+  document.querySelectorAll('[data-wtab]').forEach(b => b.onclick = () => { weeklyTab = b.getAttribute('data-wtab'); render(); });
+  const cb = document.getElementById('btn-weekly-claim');
+  if(cb) cb.onclick = () => { addXP(Number(cb.getAttribute('data-prize')) || 0); state.weeklyClaimed = currentWeekKey() - 7; persist(); render(); };
+}
+
+// ---- يوم الجمعة ----
+const FRIDAY_ITEMS = [['kahf', '📖 قرأت سورة الكهف'], ['ghusl', '🚿 اغتسلت وتطيّبت'], ['early', '🕌 بكّرت لصلاة الجمعة'], ['sadaqa', '💝 تصدّقت'], ['dua', '🤲 دعوت في ساعة الإجابة']];
+function fridayKey(){ const d = new Date(); return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate(); }
+function ensureFriday(){
+  if(!state.friday || state.friday.key !== fridayKey()) state.friday = { key:fridayKey(), done:{}, salawat:0, sAw:0 };
+  return state.friday;
+}
+function renderFriday(){
+  const isFri = new Date().getDay() === 5;
+  if(!isFri){
+    const left = (5 - new Date().getDay() + 7) % 7;
+    root.innerHTML = `${topNavHtml('friday')}<div class="card"><h2>🕌 يوم الجمعة</h2><div class="locked-note">تُفتح هذه الصفحة كل يوم جمعة 🌷<br>باقي <b>${left}</b> ${left === 1 ? 'يوم' : 'أيام'}.<br><br>«خير يوم طلعت عليه الشمس يوم الجمعة»</div></div>`;
+    updateSyncBadge(); bindTopNav(); return;
+  }
+  const f = ensureFriday(); const doneCount = FRIDAY_ITEMS.filter(([k]) => f.done[k]).length;
+  root.innerHTML = `${topNavHtml('friday')}<div class="card"><h2>🕌 جمعة مباركة</h2>
+    <div class="progress-wrap"><div class="progress-label"><span>أعمال الجمعة</span><span>${doneCount} / ${FRIDAY_ITEMS.length}</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:${doneCount / FRIDAY_ITEMS.length * 100}%"></div></div></div>
+    <div class="rm-grid">${FRIDAY_ITEMS.map(([k, l]) => `<button class="rm-check ${f.done[k] ? 'on' : ''}" data-fk="${k}" ${f.done[k] ? 'disabled' : ''}>${f.done[k] ? '✅' : '⬜'} ${l}</button>`).join('')}</div>
+    <div class="hint">كل عمل جديد +5 XP</div>
+    <div class="rm-sec" style="margin-top:14px"><h3>🌹 الصلاة على النبي ﷺ</h3>
+      <div class="rm-stats"><div><b>${f.salawat}</b><span>صلاة اليوم</span></div><div><b>100</b><span>الهدف (+20 XP)</span></div></div>
+      <div class="progress-bar"><div class="progress-bar-fill" style="width:${Math.min(100, f.salawat)}%"></div></div>
+      <div class="rm-grid" style="grid-template-columns:repeat(3,1fr)"><button class="rm-check" data-sal="1">+1</button><button class="rm-check" data-sal="10">+10</button><button class="rm-check" data-sal="33">+33</button></div></div></div>`;
+  updateSyncBadge(); bindTopNav();
+  document.querySelectorAll('[data-fk]').forEach(b => b.onclick = () => { const k = b.getAttribute('data-fk'); const ff = ensureFriday(); if(ff.done[k]) return; ff.done[k] = 1; addXP(5); persist(); render(); });
+  document.querySelectorAll('[data-sal]').forEach(b => b.onclick = () => {
+    const ff = ensureFriday(); ff.salawat += Number(b.getAttribute('data-sal')) || 0;
+    if(ff.salawat >= 100 && !ff.sAw){ ff.sAw = 1; addXP(20); }
+    persist(); render();
+  });
+}
+
+// ---- المواسم العامة (عشر ذي الحجة، السيرة...) ----
+function seasonRange(){
+  const m1 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(SEASON.startDate || '')), m2 = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(SEASON.endDate || ''));
+  if(!m1 || !m2) return null;
+  const s = new Date(+m1[1], +m1[2] - 1, +m1[3]), e = new Date(+m2[1], +m2[2] - 1, +m2[3]);
+  const n = new Date(); const t0 = new Date(n.getFullYear(), n.getMonth(), n.getDate());
+  const total = Math.round((e - s) / 864e5) + 1; const diff = Math.round((t0 - s) / 864e5);
+  if(total < 1) return null;
+  return { total, dayNo:diff + 1, status:diff < 0 ? 'before' : (diff >= total ? 'after' : 'on') };
+}
+function seasonActive(){ if(!FEATURES.season || !SEASON.enabled || !SEASON.title) return false; const r = seasonRange(); return !!r && r.status === 'on'; }
+function renderSeason(){
+  const r = seasonRange();
+  if(!seasonActive() || !r){ root.innerHTML = `${topNavHtml('season')}<div class="card"><h2>🌟 موسم خاص</h2><div class="locked-note">لا يوجد موسم نشط حالياً.</div></div>`; updateSyncBadge(); bindTopNav(); return; }
+  const id = SEASON.title + '|' + SEASON.startDate;
+  if(!state.season || state.season.id !== id) state.season = { id, done:{} };
+  const items = SEASON.items.length ? SEASON.items : ['أكثر من الذكر والدعاء اليوم'];
+  const task = items[(r.dayNo - 1) % items.length]; const doneDays = Object.keys(state.season.done).length;
+  const doneToday = !!state.season.done[r.dayNo];
+  root.innerHTML = `${topNavHtml('season')}<div class="card"><h2>${adminEsc(SEASON.icon || '🌟')} ${adminEsc(SEASON.title)}</h2>
+    <div style="text-align:center"><span class="day-badge">اليوم ${r.dayNo} من ${r.total}</span></div>
+    <div class="progress-wrap" style="margin-top:12px"><div class="progress-label"><span>أيامي المنجزة</span><span>${doneDays} / ${r.total}</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:${doneDays / r.total * 100}%"></div></div></div>
+    <div class="rm-sec"><h3>مهمة اليوم</h3><div class="rm-dua" style="font-size:17px">${adminEsc(task)}</div>
+      ${doneToday ? `<div class="quiz-feedback ok">بارك الله فيك! أُنجزت مهمة اليوم ✅</div>` : `<button class="btn" id="btn-season-done">✅ أنجزتها (+10 XP)</button>`}</div></div>`;
+  updateSyncBadge(); bindTopNav();
+  const b = document.getElementById('btn-season-done');
+  if(b) b.onclick = () => { if(state.season.done[r.dayNo]) return; state.season.done[r.dayNo] = 1; addXP(10); persist(); render(); };
+}
+
+// ---- مجموعات القائمة الرئيسية ----
+function mainGroups(){
+  const extra = { learn:[], social:[] };
+  if(FEATURES.friday) extra.learn.push({ key:'friday', label:'🕌 يوم الجمعة' });
+  if(seasonActive()) extra.learn.push({ key:'season', label:(SEASON.icon || '🌟') + ' ' + SEASON.title });
+  if(FEATURES.weekly) extra.social.push({ key:'weekly', label:'🏅 بطولة الأسبوع' });
+  const base = MAIN_CATEGORY_GROUPS.map(g => (extra[g.key] && extra[g.key].length) ? Object.assign({}, g, { items:g.items.concat(extra[g.key]) }) : g);
+  if(!ramadanActive()) return base;
+  return [{ key:'ramadan', cls:'cat-ramadan', label:'🌙 رمضان', items:[
+    { key:'ramadan:today', label:'❓ سؤال وفزورة اليوم' },
+    { key:'ramadan:worship', label:'🕌 متتبع العبادات' },
+    { key:'ramadan:khatma', label:'📖 ختمة القرآن' },
+    { key:'ramadan:duel', label:'⚔️ دويلو رمضان' },
+    { key:'ramadan:board', label:'🏆 متصدرو رمضان' }
+  ]}].concat(base);
+}
+
+// ---- لوحة المشرف: مفاتيح الميزات / المواسم / فريق الإشراف ----
+function featuresAdminHtml(){
+  const rows = [['friday', '🕌 صفحة يوم الجمعة'], ['weekly', '🏅 بطولة الأسبوع'], ['season', '🌟 المواسم العامة'], ['dailyReward', '🎁 المكافأة اليومية'], ['reportButton', '🚩 زر «بلّغ عن خطأ» في المسابقة']];
+  return `<h3 class="admin-section-title">🎛️ مفاتيح الميزات</h3>
+    <div class="admin-help">افتح أو اقفل أي ميزة للطلاب فوراً دون تعديل الكود. (وضع رمضان له تبويبه الخاص.)</div>
+    ${rows.map(([k, l]) => `<div class="admin-chat-status"><span>${l}: <b>${FEATURES[k] ? 'مفتوحة ✅' : 'مقفولة ⛔'}</b></span><button class="btn admin-mini ${FEATURES[k] ? 'admin-danger' : 'admin-secondary'}" data-feature="${k}">${FEATURES[k] ? 'إيقاف' : 'تشغيل'}</button></div>`).join('')}
+    <div class="success" id="p2-status"></div>`;
+}
+const SEASON_PRESETS = {
+  dhul:{ title:'عشر ذي الحجة', icon:'🕋', items:['أكثر من التكبير والتهليل والتحميد اليوم', 'صم هذا اليوم إن استطعت', 'تصدّق بما تستطيع', 'اقرأ جزءاً من القرآن', 'صل رحمك بمكالمة أو زيارة', 'أكثر من الاستغفار مئة مرة', 'أعن محتاجاً بما تقدر', 'اعفُ عمّن أخطأ في حقك', 'صيام يوم عرفة والإكثار من الدعاء (لغير الحاج)', 'صلاة العيد وفرحة الأضحية وصلة الأرحام'] },
+  seerah:{ title:'أيام السيرة النبوية', icon:'🌹', items:['صلِّ على النبي ﷺ مئة مرة', 'اقرأ موقفاً من السيرة وتأمله', 'تعلّم حديثاً جديداً', 'تخلّق بخلق الصدق اليوم', 'تخلّق بخلق الرحمة بمن حولك', 'ابتسم في وجه من تقابل فهي صدقة', 'اجتهد في إحياء سنة مهجورة'] }
+};
+function seasonAdminHtml(){
+  const s = SEASON, r = seasonRange();
+  const st = !s.enabled ? 'متوقف' : (!r ? 'تواريخ غير مكتملة' : ({ before:'لم يبدأ بعد', on:'نشط الآن', after:'انتهى' })[r.status]);
+  return `<div id="p2-season-root"><h3 class="admin-section-title">🌟 المواسم العامة</h3>
+    <div class="admin-help">موسم بمهمة يومية (مثل عشر ذي الحجة). يظهر للطلاب فقط داخل فترة التواريخ، ويختفي تلقائياً بعدها. الحالة الآن: <b>${st}</b></div>
+    <div class="admin-actions"><button class="btn admin-mini admin-secondary" data-season-preset="dhul">قالب: عشر ذي الحجة</button><button class="btn admin-mini admin-secondary" data-season-preset="seerah">قالب: السيرة النبوية</button></div>
+    <input class="admin-input" id="ss-title" placeholder="اسم الموسم" value="${adminEsc(s.title || '')}" style="margin-top:10px">
+    <input class="admin-input" id="ss-icon" placeholder="أيقونة (إيموجي)" value="${adminEsc(s.icon || '🌟')}">
+    <label><span>أول يوم</span><input type="date" class="admin-input" id="ss-start" value="${adminEsc(s.startDate || '')}"></label>
+    <label><span>آخر يوم</span><input type="date" class="admin-input" id="ss-end" value="${adminEsc(s.endDate || '')}"></label>
+    <textarea class="admin-input" id="ss-items" placeholder="مهمة كل يوم في سطر (تتكرر لو الأيام أكثر من المهام)">${adminEsc((s.items || []).join('\n'))}</textarea>
+    <div class="admin-actions"><button class="btn admin-mini" id="ss-save">💾 حفظ الموسم</button><button class="btn admin-mini ${s.enabled ? 'admin-danger' : 'admin-secondary'}" id="ss-toggle">${s.enabled ? 'إيقاف الموسم' : 'تشغيل الموسم'}</button></div>
+    <div class="success" id="p2-status"></div></div>`;
+}
+function staffAdminHtml(){
+  const list = (role, label) => `<h3 class="admin-section-title" style="margin-top:16px">${label}</h3>${(STAFF[role] || []).length ? STAFF[role].map(u => `<div class="stat-row"><span style="flex:1">${adminEsc(u)}</span><button class="btn admin-mini admin-danger" data-staff-del="${role}|${adminEsc(u)}">إزالة</button></div>`).join('') : '<div class="hint">لا يوجد أحد</div>'}`;
+  return `<div id="p2-staff-root"><h3 class="admin-section-title">🛡️ فريق الإشراف</h3>
+    <div class="admin-help"><b>مشرف محتوى:</b> يضيف ويعدّل الأسئلة ويرد على البلاغات ويدير الإعلانات والصوتيات والفيديوهات والمواسم. <b>مشرف مجتمع:</b> يتابع الشات والمقترحات والرسائل وطلبات تغيير الأسماء. لا أحد منهم يستطيع حذف المستخدمين أو أسئلة جماعياً أو قفل المنصة.</div>
+    <input class="admin-input" id="staff-user" placeholder="اسم الطالب بالضبط">
+    <select class="admin-input" id="staff-role"><option value="content">مشرف محتوى</option><option value="community">مشرف مجتمع</option></select>
+    <button class="btn admin-mini" id="staff-add">➕ إضافة للفريق</button>
+    ${list('content', '✍️ مشرفو المحتوى')}${list('community', '💬 مشرفو المجتمع')}
+    <div class="success" id="p2-status"></div></div>`;
+}
+function bindPhase2Admin(){
+  const say = (m, bad) => { const s = document.getElementById('p2-status'); if(s){ s.className = bad ? 'error' : 'success'; s.textContent = m; } };
+  document.querySelectorAll('[data-feature]').forEach(b => b.onclick = async () => {
+    const k = b.getAttribute('data-feature');
+    try{ await db.collection('settings').doc('features').set({ [k]:!FEATURES[k] }, { merge:true }); FEATURES[k] = !FEATURES[k]; renderControlPanel(true); }
+    catch(e){ say('تعذر الحفظ، تأكد من صلاحيات Firestore.', true); }
+  });
+  document.querySelectorAll('[data-season-preset]').forEach(b => b.onclick = () => {
+    const p = SEASON_PRESETS[b.getAttribute('data-season-preset')];
+    document.getElementById('ss-title').value = p.title; document.getElementById('ss-icon').value = p.icon; document.getElementById('ss-items').value = p.items.join('\n');
+    say('تم تعبئة القالب، اختر التواريخ ثم احفظ.');
+  });
+  const save = document.getElementById('ss-save');
+  const collect = () => ({ title:document.getElementById('ss-title').value.trim(), icon:document.getElementById('ss-icon').value.trim() || '🌟', startDate:document.getElementById('ss-start').value || '', endDate:document.getElementById('ss-end').value || '', items:document.getElementById('ss-items').value.split('\n').map(x => x.trim()).filter(Boolean) });
+  if(save) save.onclick = async () => {
+    const d = collect();
+    if(!d.title){ say('اكتب اسم الموسم.', true); return; }
+    if(!d.startDate || !d.endDate){ say('اختر أول يوم وآخر يوم.', true); return; }
+    if(d.endDate < d.startDate){ say('آخر يوم قبل أول يوم!', true); return; }
+    try{ await db.collection('settings').doc('season').set(d, { merge:true }); Object.assign(SEASON, d); say('تم حفظ الموسم ✅'); }catch(e){ say('تعذر الحفظ.', true); }
+  };
+  const tg = document.getElementById('ss-toggle');
+  if(tg) tg.onclick = async () => { try{ await db.collection('settings').doc('season').set({ enabled:!SEASON.enabled }, { merge:true }); SEASON.enabled = !SEASON.enabled; renderControlPanel(true); }catch(e){ say('تعذر الحفظ.', true); } };
+  const add = document.getElementById('staff-add');
+  if(add) add.onclick = async () => {
+    const u = document.getElementById('staff-user').value.trim(), role = document.getElementById('staff-role').value;
+    if(!u){ say('اكتب اسم الطالب.', true); return; }
+    try{
+      const acc = await fetchAccount(u); if(!acc){ say('لا يوجد طالب بهذا الاسم.', true); return; }
+      const name = acc.username || u;
+      if(name === SUPER_ADMIN_USERNAME){ say('هذا حساب المشرف الأساسي.', true); return; }
+      const next = { content:STAFF.content.filter(x => docId(x) !== docId(name)), community:STAFF.community.filter(x => docId(x) !== docId(name)) };
+      next[role].push(name);
+      await db.collection('settings').doc('staff').set(next); STAFF = next; renderControlPanel(true);
+    }catch(e){ say('تعذر الحفظ.', true); }
+  };
+  document.querySelectorAll('[data-staff-del]').forEach(b => b.onclick = async () => {
+    const [role, name] = b.getAttribute('data-staff-del').split('|');
+    const next = { content:STAFF.content.slice(), community:STAFF.community.slice() }; next[role] = next[role].filter(x => x !== name);
+    try{ await db.collection('settings').doc('staff').set(next); STAFF = next; renderControlPanel(true); }catch(e){ say('تعذر الحفظ.', true); }
+  });
+}
+
 function mainCategoryNavHtml(){
   const bandsHtml = mainGroups().map(g => {
     const open = mainOpenCategory === g.key;
@@ -3067,13 +3429,14 @@ function mainCategoryNavHtml(){
         <span>${currentUser}</span>
       </span>
       <span>
-        ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
+        ${canOpenPanel() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
       </span>
     </div>
     <div class="sync-badge" id="sync-badge"></div>
     <div class="points-badge">✨ XP: ${state.xp} &nbsp;|&nbsp; ${getLevelInfo(state.xp).icon} ${getLevelInfo(state.xp).name} &nbsp;|&nbsp; ✅ ${state.correctAnswers}</div>
+    ${welcomeBackHtml()}${dailyRewardHtml()}
     ${ramadanBannerHtml()}
     <div class="category-nav">${bandsHtml}</div>
   `;
@@ -3083,6 +3446,7 @@ function bindMainCategoryNav(){
   document.getElementById('btn-logout').onclick = logout;
   const profileBtn = document.getElementById('btn-profile');
   if(profileBtn) profileBtn.onclick = () => { prevView = view; view = 'profile'; render(); };
+  bindHomeExtras();
   document.getElementById('btn-admin-contact').onclick = () => { prevView = view; view = 'admin'; render(); };
   const controlPanelBtn = document.getElementById('btn-control-panel');
   if(controlPanelBtn){
@@ -3111,7 +3475,7 @@ function topNavHtml(active){
         <span>${currentUser}</span>
       </span>
       <span>
-        ${isSuperAdmin() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
+        ${canOpenPanel() ? `<span class="admin-link" id="btn-control-panel">لوحة التحكم</span>` : ''}
         <span class="admin-link" id="btn-admin-contact">تواصل مع الأدمن</span>
         <span class="logout" id="btn-logout">تسجيل الخروج</span>
       </span>
@@ -3318,7 +3682,7 @@ function adminEsc(v){
   return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 async function loadAdminData(){
-  if(!isSuperAdmin()) return;
+  if(!canOpenPanel()) return;
   try{
     const [accountsSnap, questionsSnap, tournamentsSnap, siteSnap, adsSnap, groupChatSnap, suggestionsSnap, localDuelSnap, sheikhAudiosSnap, sheikhVideosSnap, personalMessagesSnap, usernameRequestsSnap, pointsAwardsSnap] = await Promise.all([
       db.collection('accounts').get(),
@@ -3359,6 +3723,7 @@ async function loadAdminData(){
     adminCache.personalMessages = personalMessagesSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.usernameRequests = usernameRequestsSnap.docs.map(d=>({id:d.id,...d.data()}));
     adminCache.pointsAwards = pointsAwardsSnap.docs.map(d=>({id:d.id,...d.data()}));
+    try{ const repSnap = await db.collection('question_reports').limit(300).get(); adminCache.reports = repSnap.docs.map(d=>({id:d.id,...d.data()})); }catch(e){ adminCache.reports = []; }
   }catch(e){
     console.error('admin load error',e);
   }
@@ -3407,15 +3772,16 @@ async function adminRejectUsernameRequest(reqId, reason){
 
 let adminUserSearch = '';
 async function renderControlPanel(skipReload){
-  if(!isSuperAdmin()){ view='main'; render(); return; }
+  if(!canOpenPanel()){ view='main'; render(); return; }
   if(!skipReload){
     root.innerHTML = `<div class="loading">جارِ تحميل لوحة التحكم...</div>`;
     await loadAdminData();
-    if(!isSuperAdmin()) return;
+    if(!canOpenPanel()) return;
   }
+  if(!isSuperAdmin()){ const al = STAFF_TABS[STAFF_ROLE] || []; if(al.indexOf(adminTab) === -1) adminTab = al[0] || 'stats'; }
   const active = adminTab;
   const tabs = [
-    ['dashboard','📊 الرئيسية'],['ramadan-admin','🌙 رمضان'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],
+    ['dashboard','📊 الرئيسية'],['ramadan-admin','🌙 رمضان'],['rm-look','🎨 زينة رمضان'],['reports','🚩 بلاغات الأسئلة'],['stats','📈 إحصائيات'],['features','🎛️ مفاتيح الميزات'],['season','🌟 المواسم'],['staff','🛡️ فريق الإشراف'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],
     ['tips-timer','🌙 النصائح والمؤقتات'],['questions','❓ بنك الأسئلة'],
     ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
     ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ'],
@@ -3425,13 +3791,14 @@ async function renderControlPanel(skipReload){
   const pendingNames = adminCache.usernameRequests.filter(r=>r.status==='pending').length;
   const tabMap = {};
   tabs.forEach(([k,l])=>{ const m=String(l).replace(/\s*\(\d+\)\s*$/,'').match(/^(\S+)\s+(.*)$/); tabMap[k]={ico:m?m[1]:'•',lbl:m?m[2]:l}; });
-  const navGroups = [
-    ['🌙 رمضان',['ramadan-admin']],
-    ['⚙️ الإدارة',['dashboard','users','user-tracking','username-requests']],
-    ['📚 المحتوى',['questions','tips-timer','announcements','sheikh-audio','sheikh-video']],
+  let navGroups = [
+    ['🌙 رمضان',['ramadan-admin','rm-look']],
+    ['⚙️ الإدارة',['dashboard','stats','features','staff','users','user-tracking','username-requests']],
+    ['📚 المحتوى',['questions','reports','season','tips-timer','announcements','sheikh-audio','sheikh-video']],
     ['🏆 المنافسات',['local-duel','tournaments']],
     ['💬 التواصل',['chat','suggestions','personal-messages']]
   ];
+  if(!isSuperAdmin()){ const al = STAFF_TABS[STAFF_ROLE] || []; navGroups = navGroups.map(([t,ks]) => [t, ks.filter(k => al.indexOf(k) !== -1)]).filter(([t,ks]) => ks.length); }
   const nav = navGroups.map(([title,keys])=>`
     <div class="admin-nav-group">
       <div class="admin-nav-group-title">${title}</div>
@@ -3701,6 +4068,8 @@ async function renderControlPanel(skipReload){
       <label>نص الإعلان</label><textarea class="admin-input" id="admin-ad-body" placeholder="تفاصيل الإعلان..."></textarea>
       <label>رابط صورة (اختياري)</label><input class="admin-input" id="admin-ad-image" placeholder="https://...">
       <label>أو ارفع صورة من جهازك (اختياري)</label><input class="admin-input" id="admin-ad-image-file" type="file" accept="image/*">
+      <label>يظهر من تاريخ (اختياري)</label><input class="admin-input" id="admin-ad-from" type="date">
+      <label>يختفي بعد تاريخ (اختياري)</label><input class="admin-input" id="admin-ad-until" type="date">
       <button class="btn" id="btn-add-ad">➕ إضافة إعلان</button>
       <div class="admin-help" id="admin-ad-upload-status"></div>
       <div class="admin-scroll" style="margin-top:14px;">${adsRows || '<div class="muted">لا توجد إعلانات حالياً</div>'}</div>`;
@@ -3732,6 +4101,18 @@ async function renderControlPanel(skipReload){
   } else if(active==='suggestions'){
     const rows=adminCache.suggestions.map(x=>`<div class="suggest-card"><div class="suggest-meta">👤 ${adminEsc(x.username||'—')} • ${x.status==='approved'?'منشور':'بانتظار المراجعة'}</div><p><b>${adminEsc(x.question||'')}</b></p><div class="suggest-meta">1) ${adminEsc((x.options||[])[0]||'')} &nbsp; 2) ${adminEsc((x.options||[])[1]||'')} &nbsp; 3) ${adminEsc((x.options||[])[2]||'')}<br>الإجابة الصحيحة: ${(Number(x.correct)||0)+1}</div><div class="admin-actions">${x.status!=='approved'?`<button class="btn admin-mini admin-secondary" data-approve-suggest="${adminEsc(x.id)}">✅ موافقة ونشر</button>`:''}<button class="btn admin-mini admin-danger" data-delete-suggest="${adminEsc(x.id)}">حذف</button></div></div>`).join('');
     content=`<h3 class="admin-section-title">مقترحات الطلاب</h3><div class="admin-help">راجع السؤال ثم وافق عليه ليُضاف تلقائياً إلى بنك الأسئلة ويظهر اسم الطالب كمقترح.</div>${rows||'<div class="muted">لا توجد مقترحات.</div>'}`;
+  } else if(active==='features'){
+    content = featuresAdminHtml();
+  } else if(active==='season'){
+    content = seasonAdminHtml();
+  } else if(active==='staff'){
+    content = staffAdminHtml();
+  } else if(active==='reports'){
+    content = reportsAdminHtml();
+  } else if(active==='stats'){
+    content = statsAdminHtml();
+  } else if(active==='rm-look'){
+    content = window.p4RmPage ? window.p4RmPage() : '';
   } else if(active==='ramadan-admin'){
     content = ramadanAdminHtml();
   } else if(active==='tournaments'){
@@ -3846,6 +4227,8 @@ async function renderControlPanel(skipReload){
   document.getElementById('btn-back-from-panel').onclick=()=>{view=prevView||'main';render();};
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.onclick=()=>{adminTab=b.getAttribute('data-admin-tab');renderControlPanel();});
   bindRamadanAdmin();
+  bindAdminExtras();
+  bindPhase2Admin();
   const saveLocalBtn=document.getElementById('btn-save-local-duel');
   if(saveLocalBtn) saveLocalBtn.onclick=async()=>{
     const round=(document.getElementById('local-duel-round')?.value||'').trim();
@@ -4067,8 +4450,11 @@ async function renderControlPanel(skipReload){
         if(imageUrl.length > 700000) imageUrl = await fileToResizedDataURL(file, 500, 0.6);
         if(imageUrl.length > 900000) throw new Error('حجم الصورة كبير جداً حتى بعد الضغط، جرّب صورة أخف.');
       }
+      const adFrom=(document.getElementById('admin-ad-from')||{}).value, adUntil=(document.getElementById('admin-ad-until')||{}).value;
       await db.collection('ads').add({
         title, body, imageUrl,
+        showFromMs: adFrom ? new Date(adFrom+'T00:00:00').getTime() : null,
+        showUntilMs: adUntil ? new Date(adUntil+'T23:59:59').getTime() : null,
         createdAt: firebase.firestore.FieldValue.serverTimestamp()
       });
       if(statusEl) statusEl.textContent='';
@@ -4355,7 +4741,7 @@ async function renderControlPanel(skipReload){
 }
 
 async function adminAddQuestion(){
-  if(!isSuperAdmin()) return;
+  if(!canContentAdmin()) return;
   const q=prompt('نص السؤال:'); if(!q) return;
   const a=prompt('الخيار الأول:'); const b=prompt('الخيار الثاني:'); const c=prompt('الخيار الثالث:');
   if(!a||!b||!c) return;
@@ -4410,7 +4796,7 @@ async function adminDeleteSelectedQuestions(){
   }
 }
 async function adminEditQuestion(id){
-  if(!isSuperAdmin()) return;
+  if(!canContentAdmin()) return;
   const q=adminCache.questions.find(x=>x.id===id); if(!q) return;
   const text=prompt('تعديل نص السؤال:',q.q); if(text===null) return;
   const opts=q.options||[];
@@ -4423,7 +4809,7 @@ async function adminEditQuestion(id){
 }
 
 async function adminUploadQuestionsFile(){
-  if(!isSuperAdmin()) return;
+  if(!canContentAdmin()) return;
   const fileInput=document.getElementById('admin-questions-file');
   const statusEl=document.getElementById('admin-questions-upload-status');
   const file=fileInput && fileInput.files && fileInput.files[0];
@@ -4563,6 +4949,8 @@ async function handleRegister(){
 }
 
 function enterMain(){
+  try{ if(welcomeGapUser !== currentUser){ welcomeGapUser = currentUser; welcomeBackDismissed = false; const ld = state.streak && state.streak.lastDay; welcomeGapDays = (typeof ld === 'number') ? Math.max(0, getTodayEpochDay() - ld) : 0; } }catch(e){ welcomeGapDays = 0; }
+  try{ weeklyRollover(); computeStaffRole(); }catch(e){}
   view = isSuperAdmin() ? 'control-panel' : 'main'; // حساب المشرف يدخل مباشرة على لوحة التحكم فقط
   render();
   if(tickInterval) clearInterval(tickInterval);
@@ -4660,10 +5048,12 @@ function maybeAdvanceDay(){
 }
 
 function renderAdsSection(){
-  if(!ADS_LIST.length) return '';
+  const nowMs = Date.now();
+  const visibleAds = ADS_LIST.filter(a => (!a.showFromMs || nowMs >= a.showFromMs) && (!a.showUntilMs || nowMs <= a.showUntilMs));
+  if(!visibleAds.length) return '';
   return `
     <div class="ads-section">
-      ${ADS_LIST.map(a => `
+      ${visibleAds.map(a => `
         <div class="ad-card">
           ${a.imageUrl ? `<img src="${adminEsc(a.imageUrl)}" class="ad-image" alt="" onerror="this.style.display='none'">` : ''}
           ${a.title ? `<div class="ad-title">📢 ${adminEsc(a.title)}</div>` : ''}
@@ -5253,10 +5643,13 @@ function renderQuiz(){
         ${quizFeedback==='ok' ? `أحسنت! +${POINTS_PER_CORRECT_ANSWER} نقطة 🎉` : quizFeedback==='err' ? 'إجابة غير صحيحة' : ''}
       </div>
       ${quizAnswered ? `<button class="btn" id="btn-next-q">${remaining.length>1?'السؤال التالي':'إنهاء أسئلة اليوم'}</button>` : ''}
+      ${FEATURES.reportButton ? `<button class="report-q-btn" id="btn-report-q">🚩 بلّغ عن خطأ في هذا السؤال</button>` : ''}
     </div>
   `;
   updateSyncBadge();
   bindTopNav();
+  const reportQBtn = document.getElementById('btn-report-q');
+  if(reportQBtn) reportQBtn.onclick = () => reportQuestion(question, qIndex);
   if(!quizAnswered){
     document.querySelectorAll('[data-opt]').forEach(btn => {
       btn.onclick = () => {
@@ -6765,9 +7158,281 @@ async function tryAutoLogin(){
 }
 
 listenRamadanConfig();
+listenPhase2Config();
 tryAutoLogin();
 loadRuntimeQuestionBank(); // يشتغل في الخلفية، مش شرط لعرض الواجهة
 listenToAds();
+
+// ===================== المرحلة 3: أدوات إسلامية (مسبحة، زكاة، هجري، قبلة، أسماء الله، ملاحظات، نسخ احتياطي) =====================
+(function(){
+const LS=(k,d)=>{try{const v=localStorage.getItem('p3_'+k);return v===null?d:JSON.parse(v);}catch(e){return d;}};
+const SV=(k,v)=>{try{localStorage.setItem('p3_'+k,JSON.stringify(v));}catch(e){}};
+const todayKey=()=>{const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+const NAMES='الرحمن الرحيم الملك القدوس السلام المؤمن المهيمن العزيز الجبار المتكبر الخالق البارئ المصور الغفار القهار الوهاب الرزاق الفتاح العليم القابض الباسط الخافض الرافع المعز المذل السميع البصير الحكم العدل اللطيف الخبير الحليم العظيم الغفور الشكور العلي الكبير الحفيظ المقيت الحسيب الجليل الكريم الرقيب المجيب الواسع الحكيم الودود المجيد الباعث الشهيد الحق الوكيل القوي المتين الولي الحميد المحصي المبدئ المعيد المحيي المميت الحي القيوم الواجد الماجد الواحد الأحد الصمد القادر المقتدر المقدم المؤخر الأول الآخر الظاهر الباطن الوالي المتعالي البر التواب المنتقم العفو الرؤوف مالك_الملك ذو_الجلال_والإكرام المقسط الجامع الغني المغني المانع الضار النافع النور الهادي البديع الباقي الوارث الرشيد الصبور'.split(' ').map(x=>x.replace(/_/g,' '));
+let tl=null, tsbTarget=LS('tsbTarget',33), tsbCount=0, qHeading=null, qBearing=null, qHandler=null;
+const card=(h)=>`<div style="background:rgba(255,255,255,.06);border:1px solid rgba(var(--gold-rgb),.25);border-radius:20px;padding:16px;margin:12px 0">${h}</div>`;
+const inp=(id,ph)=>`<input id="${id}" type="number" min="0" step="any" inputmode="decimal" placeholder="${ph}" style="width:100%;margin:5px 0;padding:11px;border-radius:12px;border:1px solid rgba(var(--gold-rgb),.35);background:rgba(0,0,0,.25);color:var(--text-light);font-family:inherit">`;
+const hij=(d)=>{const p=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(d);const g=t=>+p.find(x=>x.type===t).value;return {d:g('day'),m:g('month'),y:g('year')};};
+const OCC=[[1,1,'🌙 رأس السنة الهجرية'],[10,1,'🕋 عاشوراء (يُسنّ صيام التاسع والعاشر)'],[1,9,'🌟 أول رمضان'],[1,10,'🎉 عيد الفطر'],[9,12,'⛰️ يوم عرفة (يُسنّ صيامه لغير الحاج)'],[10,12,'🐑 عيد الأضحى']];
+function stopQibla(){ if(qHandler){window.removeEventListener('deviceorientationabsolute',qHandler,true);window.removeEventListener('deviceorientation',qHandler,true);qHandler=null;} }
+function body(){
+  if(tl==='tasbih'){ const tot=LS('tsbDay_'+todayKey(),0); return card(`<div style="text-align:center"><div id="tsb-n" style="font-size:64px;font-weight:800;color:var(--gold-light-text)">${tsbCount}</div><div>الهدف: ${tsbTarget} · اليوم: <b id="tsb-t">${tot}</b></div><button class="btn" id="tsb-tap" style="width:100%;height:110px;font-size:26px;margin:14px 0">سبّح 📿</button><div style="display:flex;gap:6px">${[33,100,1000].map(n=>`<button class="btn" data-tg="${n}" style="flex:1">${n}</button>`).join('')}<button class="btn" id="tsb-reset" style="flex:1">تصفير</button></div></div>`); }
+  if(tl==='zakat') return card(`<div style="font-weight:700">🧮 حاسبة الزكاة (تقريبية)</div>${inp('z-gp','سعر جرام الذهب عيار 24 بعملتك')}${inp('z-cash','النقد والمدخرات')}${inp('z-gold','وزن الذهب (جرام، 24 صافي)')}${inp('z-trade','عروض التجارة')}${inp('z-debt','ديون حالّة عليك')}<button class="btn" id="z-go" style="width:100%;margin-top:8px">احسب</button><div id="z-res" style="margin-top:12px;line-height:1.9"></div><div style="font-size:12px;color:var(--text-dim)">النصاب 85 جرام ذهب والمقدار 2.5% بعد مرور الحول. للفتوى الدقيقة راجع أهل العلم.</div>`);
+  if(tl==='hijri'){ const n=new Date(), h=new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{dateStyle:'full'}).format(n), out=[]; for(let i=1;i<=400&&out.length<5;i++){const d=new Date(n.getTime()+i*864e5),x=hij(d);OCC.forEach(o=>{if(x.d===o[0]&&x.m===o[1])out.push(`<div>${o[2]} — بعد ${i} يوم</div>`);});} const x=hij(n), w=n.getDay(), fast=[]; if(w===1||w===4)fast.push('اليوم الإثنين/الخميس: يُسنّ الصيام'); if(x.d>=13&&x.d<=15)fast.push('من الأيام البيض (13-14-15): يُسنّ الصيام'); return card(`<div style="font-size:22px;text-align:center;color:var(--gold-light-text)">${h}</div><div style="text-align:center;margin-top:6px">${fast.join('<br>')||'—'}</div>`)+card(`<b>أقرب المناسبات</b>${out.join('')||'<div>—</div>'}<div style="font-size:12px;color:var(--text-dim);margin-top:8px">التقويم أم القرى وقد يختلف يوماً عن الرؤية المحلية.</div>`); }
+  if(tl==='qibla') return card(`<div style="text-align:center"><button class="btn" id="q-go">تحديد القبلة 🧭</button><div id="q-msg" style="margin:10px 0;color:var(--text-dim)">اسمح بالموقع والحساسات، وأمسك الجوال أفقياً</div><div style="font-size:90px;display:inline-block;transition:transform .2s" id="q-arrow">⬆️</div><div id="q-deg"></div></div>`);
+  if(tl==='names'){ const i=(Math.floor(Date.now()/864e5))%99; return card(`<div style="text-align:center"><div style="color:var(--text-dim)">اسم اليوم (${i+1} من 99)</div><div style="font-family:'Amiri',serif;font-size:48px;color:var(--gold-light-text)">${NAMES[i]}</div></div>`)+card(`<div style="display:flex;flex-wrap:wrap;gap:6px">${NAMES.map((n,k)=>`<span style="padding:4px 10px;border-radius:10px;background:rgba(0,0,0,.25)${k===i?';outline:1px solid var(--gold)':''}">${n}</span>`).join('')}</div>`); }
+  if(tl==='notes') return card(`<textarea id="nt" rows="12" placeholder="دفتر ملاحظاتك الخاص (يُحفظ على جهازك)" style="width:100%;padding:12px;border-radius:12px;border:1px solid rgba(var(--gold-rgb),.35);background:rgba(0,0,0,.25);color:var(--text-light);font-family:inherit">${LS('notes','').replace(/</g,'&lt;')}</textarea>`);
+  if(tl==='backup') return card(`<div style="line-height:1.9">نسخة احتياطية من بيانات هذه الأدوات وإعدادات جهازك المحلية.</div><button class="btn" id="bk-go" style="width:100%;margin-top:8px">⬇️ تنزيل نسخة احتياطية</button>`);
+  const items=[['tasbih','📿 مسبحة إلكترونية'],['zakat','🧮 حاسبة الزكاة'],['hijri','📅 التقويم الهجري والمناسبات'],['qibla','🧭 اتجاه القبلة'],['names','✨ أسماء الله الحسنى'],['notes','📝 دفتر ملاحظاتي'],['backup','💾 نسخة احتياطية']];
+  return items.map(([k,l])=>`<button class="btn" data-tl="${k}" style="width:100%;margin:6px 0;text-align:right">${l}</button>`).join('');
+}
+function bind(){
+  const $=id=>document.getElementById(id), on=(id,f)=>{const e=$(id);if(e)e.onclick=f;};
+  document.querySelectorAll('[data-tl]').forEach(b=>b.onclick=()=>{tl=b.dataset.tl;tsbCount=0;render();});
+  on('tl-back',()=>{stopQibla();if(tl){tl=null;render();}else goBackFromPage();});
+  on('tsb-tap',()=>{tsbCount++;const k='tsbDay_'+todayKey(),t=LS(k,0)+1;SV(k,t);$('tsb-n').textContent=tsbCount;$('tsb-t').textContent=t;if(navigator.vibrate)navigator.vibrate(tsbCount%tsbTarget===0?[80,40,80]:15);});
+  document.querySelectorAll('[data-tg]').forEach(b=>b.onclick=()=>{tsbTarget=+b.dataset.tg;SV('tsbTarget',tsbTarget);tsbCount=0;render();});
+  on('tsb-reset',()=>{tsbCount=0;render();});
+  on('z-go',()=>{const v=id=>parseFloat($(id).value)||0,gp=v('z-gp');if(!gp){$('z-res').textContent='أدخل سعر جرام الذهب أولاً';return;}const tot=v('z-cash')+v('z-gold')*gp+v('z-trade')-v('z-debt'),nis=85*gp;$('z-res').innerHTML=`صافي المال: <b>${tot.toFixed(2)}</b><br>النصاب: <b>${nis.toFixed(2)}</b><br>`+(tot>=nis?`الزكاة الواجبة: <b style="color:var(--ok)">${(tot*0.025).toFixed(2)}</b>`:'لم يبلغ النصاب، لا زكاة عليك الآن.');});
+  on('q-go',()=>{const m=$('q-msg');if(!navigator.geolocation){m.textContent='الجهاز لا يدعم تحديد الموقع';return;}navigator.geolocation.getCurrentPosition(p=>{const r=Math.PI/180,f1=p.coords.latitude*r,f2=21.4225*r,dl=(39.8262-p.coords.longitude)*r;qBearing=(Math.atan2(Math.sin(dl)*Math.cos(f2),Math.cos(f1)*Math.sin(f2)-Math.sin(f1)*Math.cos(f2)*Math.cos(dl))/r+360)%360;m.textContent='القبلة '+Math.round(qBearing)+'° من الشمال';$('q-arrow').style.transform=`rotate(${qBearing}deg)`;const start=()=>{stopQibla();qHandler=e=>{const h=e.webkitCompassHeading!=null?e.webkitCompassHeading:(e.alpha!=null?360-e.alpha:null);if(h==null)return;$('q-arrow').style.transform=`rotate(${qBearing-h}deg)`;$('q-deg').textContent=Math.abs(((qBearing-h+540)%360)-180)<5?'✅ أنت باتجاه القبلة':'';};window.addEventListener('deviceorientationabsolute',qHandler,true);window.addEventListener('deviceorientation',qHandler,true);};if(window.DeviceOrientationEvent&&DeviceOrientationEvent.requestPermission)DeviceOrientationEvent.requestPermission().then(s=>{if(s==='granted')start();});else start();},()=>{m.textContent='لم يُسمح بالموقع';});});
+  const nt=$('nt');if(nt)nt.oninput=()=>SV('notes',nt.value);
+  on('bk-go',()=>{const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k.indexOf('p3_')===0||k.indexOf('rafeeq')===0)o[k]=localStorage.getItem(k);}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(o,null,1)],{type:'application/json'}));a.download='rafeeq-backup-'+todayKey()+'.json';a.click();});
+}
+function renderTools(){
+  const t={tasbih:'📿 المسبحة',zakat:'🧮 الزكاة',hijri:'📅 التقويم الهجري',qibla:'🧭 القبلة',names:'✨ أسماء الله الحسنى',notes:'📝 ملاحظاتي',backup:'💾 نسخة احتياطية'}[tl]||'🧰 أدوات إسلامية';
+  root.innerHTML=`<div class="app"><button class="btn" id="tl-back">← رجوع</button><h2 style="font-family:'Amiri',serif;color:var(--gold-light-text);text-align:center">${t}</h2>${body()}</div>`;
+  bind();
+}
+const _r=render; render=function(){ if(view==='tools'){renderTools();return;} _r(); };
+if(typeof MAIN_CATEGORY_GROUPS!=='undefined') MAIN_CATEGORY_GROUPS[0].items.push({key:'tools',label:'🧰 أدوات إسلامية'});
+})();
+
+// ===================== المرحلة 4: عبادة يومية، ألعاب، قصص، مهام وإنجازات =====================
+(function(){
+const $=id=>document.getElementById(id);
+const P=()=>(state.p4=state.p4||{});
+const td=(o)=>{const d=new Date(Date.now()-(o||0)*864e5);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();};
+const wk=()=>{const d=new Date();return d.getFullYear()+'W'+Math.floor((d-new Date(d.getFullYear(),0,1))/6048e5);};
+const day=()=>Math.floor(Date.now()/864e5);
+let stm=null; const save=()=>{clearTimeout(stm);stm=setTimeout(()=>{persist();},700);};
+const DD=()=>{const p=P();if(!p.d||p.d.k!==td())p.d={k:td(),pr:[0,0,0,0,0],az:{c:{},done:{}},ch:0,dh:{i:0,s:0},cl:{},xp:{}};return p.d;};
+const WW=()=>{const p=P();if(!p.w||p.w.k!==wk())p.w={k:wk(),ch:[],pf:[],cl:{}};return p.w;};
+const rnd=s=>()=>{s=(s*1664525+1013904223)%4294967296;return s/4294967296;};
+const shuf=(a,r)=>{r=r||Math.random;return a.map(v=>[r(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);};
+const pool=()=>{try{if(DUEL_QUESTION_POOL&&DUEL_QUESTION_POOL.length)return DUEL_QUESTION_POOL;}catch(e){}try{return QUIZ_QUESTIONS||[];}catch(e){return[];}};
+const mk=a=>a.map(x=>({q:x.q,o:x.options,c:x.correct}));
+const so=a=>a.map(x=>{const o=x.o.map((t,i)=>[Math.random(),t,i===x.c]).sort((m,n)=>m[0]-n[0]);return{q:x.q,o:o.map(z=>z[1]),c:o.findIndex(z=>z[2])};});
+const award=(k,n)=>{const d=DD();if(d.xp[k])return 0;d.xp[k]=1;addXP(n);save();return n;};
+const hij=d=>{const p=new Intl.DateTimeFormat('en-u-ca-islamic-umalqura',{day:'numeric',month:'numeric',year:'numeric'}).formatToParts(d);const g=t=>+p.find(x=>x.type===t).value;return{d:g('day'),m:g('month'),y:g('year')};};
+const C=h=>`<div class="card">${h}</div>`;
+const B=(id,l,x)=>`<button class="btn" id="${id}" style="${x||''}">${l}</button>`;
+const pushU=(arr,v,max)=>{if(arr.indexOf(v)<0)arr.push(v);return max?arr.slice(-max):arr;};
+
+// ---------- بيانات ----------
+const AZ_COMMON=[['آية الكرسي — سورة البقرة: 255',1],['سورة الإخلاص والمعوذتان (الفلق والناس)',3],['رَضِيتُ بِاللَّهِ رَبًّا وَبِالْإِسْلَامِ دِينًا وَبِمُحَمَّدٍ نَبِيًّا',3],['بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ',3],['حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ',7],['سُبْحَانَ اللَّهِ وَبِحَمْدِهِ',100],['لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',10],['أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ',100]];
+const AZ={
+ m:[['أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',1],['اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ',1]].concat(AZ_COMMON),
+ e:[['أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ',1],['اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ',1]].concat(AZ_COMMON),
+ p:[['أَسْتَغْفِرُ اللَّهَ',3],['اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ',1],['سُبْحَانَ اللَّهِ',33],['الْحَمْدُ لِلَّهِ',33],['اللَّهُ أَكْبَرُ',33],['تمام المائة: لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ',1],['آية الكرسي — سورة البقرة: 255',1]]
+};
+const AYAT=[['إِنَّ مَعَ الْعُسْرِ يُسْرًا','الشرح: 6'],['وَمَن يَتَوَكَّلْ عَلَى اللَّهِ فَهُوَ حَسْبُهُ','الطلاق: 3'],['فَاذْكُرُونِي أَذْكُرْكُمْ وَاشْكُرُوا لِي وَلَا تَكْفُرُونِ','البقرة: 152'],['أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ الْقُلُوبُ','الرعد: 28'],['وَقُل رَّبِّ زِدْنِي عِلْمًا','طه: 114'],['إِنَّ اللَّهَ مَعَ الصَّابِرِينَ','البقرة: 153'],['وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا','الطلاق: 2']];
+const HAD=[['إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ، وَإِنَّمَا لِكُلِّ امْرِئٍ مَا نَوَى','متفق عليه'],['الدِّينُ النَّصِيحَةُ','رواه مسلم'],['لَا يُؤْمِنُ أَحَدُكُمْ حَتَّى يُحِبَّ لِأَخِيهِ مَا يُحِبُّ لِنَفْسِهِ','متفق عليه'],['تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ صَدَقَةٌ','رواه الترمذي'],['مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ','رواه مسلم'],['الْكَلِمَةُ الطَّيِّبَةُ صَدَقَةٌ','متفق عليه'],['خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ','رواه البخاري']];
+const DUAS=[['✈️ دعاء السفر','سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنقَلِبُونَ'],['📝 قبل الامتحان','رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي وَاحْلُلْ عُقْدَةً مِّن لِّسَانِي يَفْقَهُوا قَوْلِي'],['📝 للتيسير','اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا'],['🏠 الخروج من المنزل','بِسْمِ اللَّهِ تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ'],['🌧️ عند المطر','اللَّهُمَّ صَيِّبًا نَافِعًا'],['🍽️ بعد الطعام','الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ'],['😟 عند الكرب','لَا إِلَهَ إِلَّا اللَّهُ الْعَظِيمُ الْحَلِيمُ، لَا إِلَهَ إِلَّا اللَّهُ رَبُّ الْعَرْشِ الْعَظِيمِ']];
+const VERSES=[['إِنَّ مَعَ الْعُسْرِ ____ (الشرح: 6)',['يُسْرًا','خَيْرًا','فَرَجًا']],['فَاذْكُرُونِي ____ وَاشْكُرُوا لِي (البقرة: 152)',['أَذْكُرْكُمْ','أُجِبْكُمْ','أَرْحَمْكُمْ']],['أَلَا بِذِكْرِ اللَّهِ تَطْمَئِنُّ ____ (الرعد: 28)',['الْقُلُوبُ','النُّفُوسُ','الصُّدُورُ']],['وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ ____ (الطلاق: 2)',['مَخْرَجًا','نُورًا','رِزْقًا']],['وَقُل رَّبِّ زِدْنِي ____ (طه: 114)',['عِلْمًا','رِزْقًا','إِيمَانًا']],['إِنَّ اللَّهَ مَعَ ____ (البقرة: 153)',['الصَّابِرِينَ','الْمُتَّقِينَ','الْمُحْسِنِينَ']],['فَبِأَيِّ آلَاءِ رَبِّكُمَا ____ (الرحمن: 13)',['تُكَذِّبَانِ','تَشْكُرَانِ','تَعْلَمَانِ']],['وَلَقَدْ يَسَّرْنَا الْقُرْآنَ لِلذِّكْرِ فَهَلْ مِن ____ (القمر: 17)',['مُّدَّكِرٍ','مُّعْتَبِرٍ','مُتَّعِظٍ']]].map(v=>({q:v[0],o:v[1],c:0}));
+const WHO=[['أول من أسلم من الرجال الأحرار، وصاحب النبي ﷺ في الهجرة',['أبو بكر الصديق','عمر بن الخطاب','عثمان بن عفان']],['لقبه «الفاروق»',['عمر بن الخطاب','علي بن أبي طالب','أبو بكر الصديق']],['لقبه «ذو النورين»',['عثمان بن عفان','علي بن أبي طالب','طلحة بن عبيد الله']],['لقبه «سيف الله المسلول»',['خالد بن الوليد','سعد بن أبي وقاص','عمرو بن العاص']],['أول مؤذن في الإسلام',['بلال بن رباح','عبد الله بن أم مكتوم','أبو هريرة']],['لقبه «أمين هذه الأمة»',['أبو عبيدة بن الجراح','أنس بن مالك','الزبير بن العوام']],['ابن عم النبي ﷺ وزوج فاطمة رضي الله عنها',['علي بن أبي طالب','جعفر بن أبي طالب','العباس بن عبد المطلب']]].map(v=>({q:v[0],o:v[1],c:0}));
+const MEAN=[['«الصمد» في سورة الإخلاص',['الذي تقصده الخلائق في حاجاتها','الكثير الرزق','الشديد القوة']],['«ضنكاً» في قوله: فإن له معيشة ضنكاً',['ضيقة وشدة','واسعة','طويلة']],['«هلوعاً» في سورة المعارج',['شديد الجزع والحرص','كثير النوم','قليل الكلام']],['«سجى» في قوله: والليل إذا سجى',['سكن واشتد ظلامه','طلع وأضاء','أقبل بالمطر']],['«الفلق» في سورة الفلق',['الصبح','الليل','البحر']],['«العهن» في قوله: كالعهن المنفوش',['الصوف','القطن','الرمل']]].map(v=>({q:'ما معنى '+v[0]+'؟',o:v[1],c:0}));
+const TAJ=[['الإظهار','ستة حروف حلقية: ء ه ع ح غ خ، وتُنطق النون واضحة بلا غنة.'],['الإدغام','حروفه «يرملون»؛ بغنة في (ي ن م و) وبلا غنة في (ل ر).'],['الإقلاب','عند حرف الباء تُقلب النون ميماً مخفاة بغنة.'],['الإخفاء','عند الحروف الخمسة عشر الباقية، نطق بين الإظهار والإدغام مع غنة.'],['المد الطبيعي','مقداره حركتان، بحروف المد (ا و ي) من غير سبب.']];
+const TAJQ=[['عدد حروف الإظهار الحلقي',['ستة','أربعة','خمسة عشر']],['حكم النون الساكنة عند الباء',['إقلاب','إدغام','إظهار']],['عدد حروف «يرملون»',['ستة','ثلاثة','عشرة']],['مقدار المد الطبيعي',['حركتان','أربع حركات','ست حركات']],['عدد حروف الإخفاء',['خمسة عشر','ستة','أربعة']]].map(v=>({q:v[0]+'؟',o:v[1],c:0}));
+const STORY=[['🌍 آدم عليه السلام','خلقه الله من طين وأمر الملائكة بالسجود له فسجدوا إلا إبليس. أسكنه الجنة مع زوجه، ثم أُهبطا إلى الأرض بعد الأكل من الشجرة فتاب الله عليهما.','من الذي أبى السجود لآدم؟',['إبليس','جبريل','ميكائيل']],['🚢 نوح عليه السلام','دعا قومه ليلاً ونهاراً، ولبث فيهم ألف سنة إلا خمسين عاماً، وأمره الله بصنع السفينة فنجا هو ومن آمن معه.','كم لبث نوح في قومه؟',['ألف سنة إلا خمسين عاماً','مئة عام','أربعين عاماً']],['🔥 إبراهيم عليه السلام','حطّم الأصنام وحاجّ قومه، فألقوه في النار فقال الله: يا نار كوني برداً وسلاماً على إبراهيم، ثم رفع القواعد من البيت مع ابنه إسماعيل.','ماذا قال الله للنار التي أُلقي فيها إبراهيم؟',['كوني برداً وسلاماً','انطفئي','أحرقيه']],['🌟 يوسف عليه السلام','رأى أحد عشر كوكباً والشمس والقمر له ساجدين، فألقاه إخوته في الجب، ثم صار على خزائن الأرض بمصر بعد صبره.','ماذا رأى يوسف في منامه؟',['أحد عشر كوكباً والشمس والقمر ساجدين','نهراً من لبن','سفينة في البحر']],['🌊 موسى عليه السلام','كلّمه الله وأرسله إلى فرعون، وأيّده بالعصا واليد البيضاء، وأمره الله أن يضرب بعصاه البحر فانفلق ونجا بنو إسرائيل.','بماذا ضرب موسى البحر فانفلق؟',['بعصاه','بيده','بحجر']]];
+const JOUR=[['مولد النبي ﷺ','مكة المكرمة — عام الفيل'],['نزول الوحي الأول','غار حراء — وعمره 40 سنة'],['الهجرة إلى المدينة','من مكة إلى المدينة — سنة 1هـ'],['غزوة بدر الكبرى','17 رمضان — 2هـ'],['غزوة أحد','المدينة — 3هـ'],['غزوة الخندق','المدينة — 5هـ'],['صلح الحديبية','بين مكة والمدينة — 6هـ'],['فتح مكة','رمضان — 8هـ'],['حجة الوداع','مكة — 10هـ'],['وفاة النبي ﷺ','المدينة المنورة — 11هـ']];
+const WORDS=['رحمة','جنات','تقوى','صلاة','زكاة','سجود','ركوع','توبة','صدقة','ذكرى'];
+const nz=s=>s.replace(/[أإآ]/g,'ا').replace(/ى/g,'ي').replace(/[^\u0621-\u064A]/g,'');
+const TOP={'سيرة':/النبي|محمد|الرسول|غزوة|الهجرة|صحاب|ﷺ|صلى الله/,'قرآن':/سورة|آية|القرآن|قرآن|نزل/,'فقه':/صلاة|الصلاة|زكاة|صيام|الصيام|حج|وضوء|الوضوء|فرض|يجوز/,'عقيدة':/الإيمان|أركان|الملائكة|اليوم الآخر|القدر|التوحيد|الكتب|الرسل/};
+const topicOf=q=>q.cat||q.category||q.topic||Object.keys(TOP).find(k=>TOP[k].test(q.q))||'عام';
+const THEMES=[['def','🌿 الأخضر الذهبي',0,{}],['sea','🌊 البحر',300,{'--bg-deep':'#071a2b','--bg-deep2':'#0d2f4d','--gold':'#5fb8e8','--gold-light':'#bfe6fa','--gold-rgb':'95,184,232'}],['night','🌌 الليل',700,{'--bg-deep':'#140a24','--bg-deep2':'#2a1450','--gold':'#c9a7ff','--gold-light':'#e6d6ff','--gold-rgb':'201,167,255'}],['heritage','🏺 التراث',1200,{'--bg-deep':'#2a170b','--bg-deep2':'#4a2b14','--gold':'#e0b070','--gold-light':'#f5dcb0','--gold-rgb':'224,176,112'}]];
+const MIS=[['az','🌅 أتمّ أذكار الصباح أو المساء',()=>Object.keys(DD().az.done).length>=1,5],['ch','🔥 أنهِ التحدي اليومي',()=>!!DD().ch,5],['pr','🕋 سجّل 3 صلوات',()=>DD().pr.filter(Boolean).length>=3,5],['dh','📿 100 استغفار أو صلاة على النبي',()=>DD().dh.i+DD().dh.s>=100,5]];
+const WMIS=[['wch','🔥 التحدي اليومي 5 أيام',()=>WW().ch.length>=5,30],['wpr','🕋 الصلوات الخمس كاملة 3 أيام',()=>WW().pf.length>=3,30]];
+const HUBS={
+ p4a:['🕌 عبادتي اليومية',[['azkar','🌅 الأذكار'],['ayah','📜 آية وحديث اليوم'],['prayer','🕋 متتبع الصلاة'],['fast','🌙 متتبع الصيام'],['khatma','📖 جدول الختمة'],['dua','🤲 أدعية المناسبات'],['dh','📿 استغفار وصلاة على النبي'],['set','⚙️ حجم الخط']]],
+ p4b:['🎮 ألعاب جديدة',[['daily','🔥 التحدي اليومي'],['topic','🗂️ أسئلة حسب المجال'],['verse','✍️ كمّل الآية'],['who','🧑‍🏫 مين الصحابي'],['word','🔤 كلمة اليوم'],['order','🔢 رتّب الأحداث'],['tf','⚡ صح أم خطأ']]],
+ p4c:['📚 قصص وتعلّم',[['story','🕊️ قصص الأنبياء'],['journey','🗺️ رحلة السيرة'],['mean','🔎 معاني القرآن'],['taj','🎙️ تجويد مبسّط']]],
+ p4d:['🎯 مهام وإنجازات',[['mis','✅ المهام'],['wall','🏅 حائط الإنجازات'],['theme','🎨 الثيمات'],['wkc','🏆 المسابقة الأسبوعية']]]
+};
+
+// ---------- محرك الأسئلة ----------
+let LOOK={pal:'def',deco:[],anim:true},lookSub=null;
+let Qs=null,qt=null,scr=null,lastView=null,azSet='m',dhTab='i';
+const endQ=()=>{clearInterval(qt);qt=null;};
+function qStart(o){
+  const b=$('p4-body'); if(!b)return;
+  if(!o.list||!o.list.length){b.innerHTML=C('مفيش أسئلة كفاية حالياً 🙏');return;}
+  Qs=Object.assign({i:0,s:0,a:false},o); qDraw();
+}
+function qDraw(){
+  const b=$('p4-body'); if(!b||!Qs)return; endQ();
+  if(Qs.i>=Qs.list.length){
+    const xp=Qs.end?Qs.end(Qs.s):0;
+    b.innerHTML=C(`<div style="text-align:center"><div style="font-size:48px">${Qs.s===Qs.list.length?'🏆':'👏'}</div><div style="font-size:22px">${Qs.s} / ${Qs.list.length}</div>${xp?`<div style="color:var(--ok)">+${xp} XP</div>`:''}${B('q-again','🔁 مرة تانية')}</div>`);
+    $('q-again').onclick=()=>{Qs=null;rp4();}; return;
+  }
+  const q=Qs.list[Qs.i];
+  b.innerHTML=C(`<div style="color:var(--text-dim);font-size:13px">${Qs.i+1}/${Qs.list.length}${Qs.t?` · ⏱️ <span id="q-t">${Qs.t}</span>`:''}</div><div style="font-size:18px;line-height:1.9;margin:10px 0">${q.q}</div>${q.o.map((o,i)=>`<button class="btn" data-o="${i}" style="margin:6px 0;background:rgba(255,255,255,.08);color:var(--text-light);box-shadow:none">${o}</button>`).join('')}`);
+  b.querySelectorAll('[data-o]').forEach(x=>x.onclick=()=>qPick(+x.dataset.o));
+  if(Qs.t){let n=Qs.t;qt=setInterval(()=>{n--;const e=$('q-t');if(e)e.textContent=n;if(n<=0)qPick(-1);},1000);}
+}
+function qPick(i){
+  if(!Qs||Qs.a)return; Qs.a=true; endQ();
+  const q=Qs.list[Qs.i]; if(i===q.c)Qs.s++;
+  document.querySelectorAll('[data-o]').forEach(x=>{const k=+x.dataset.o;x.disabled=true;x.style.background=k===q.c?'var(--ok)':(k===i?'var(--danger)':'rgba(255,255,255,.05)');x.style.color=(k===q.c||k===i)?'#04180f':'var(--text-dim)';});
+  setTimeout(()=>{if(!Qs)return;Qs.i++;Qs.a=false;qDraw();},Qs.t?700:1200);
+}
+const dailyEnd=s=>{const p=P(),w=WW();DD().ch=1;p.chDays=pushU(p.chDays||[],td(),90);if(new Date().getDay()===5)p.friCh=pushU(p.friCh||[],td(),30);w.ch=pushU(w.ch,td());return award('ch',5+s*2);};
+
+// ---------- الشاشات ----------
+const SCR={
+ azkar:{t:'🌅 الأذكار',h:()=>{const d=DD(),L=AZ[azSet];return `<div style="display:flex;gap:6px">${[['m','☀️ الصباح'],['e','🌙 المساء'],['p','🕌 بعد الصلاة']].map(([k,l])=>`<button class="btn" data-az="${k}" style="margin:0;${k===azSet?'':'background:rgba(255,255,255,.08);color:var(--text-light);box-shadow:none'}">${l}</button>`).join('')}</div>`+L.map((z,i)=>{const n=d.az.c[azSet+i]||0,dn=n>=z[1];return `<div class="card" data-zi="${i}" style="cursor:pointer;padding:14px;${dn?'opacity:.45':''}"><div style="line-height:2;font-family:'Amiri',serif;font-size:18px">${z[0]}</div><div style="text-align:left;color:var(--gold-light-text);font-weight:800">${dn?'✅':n+' / '+z[1]}</div></div>`;}).join('')+(d.az.done[azSet]?'<div style="text-align:center;color:var(--ok)">🎉 أتممت هذه المجموعة</div>':'');},
+  b:()=>{document.querySelectorAll('[data-az]').forEach(b=>b.onclick=()=>{azSet=b.dataset.az;rp4();});document.querySelectorAll('[data-zi]').forEach(c=>c.onclick=()=>{const d=DD(),L=AZ[azSet],i=+c.dataset.zi,k=azSet+i;if((d.az.c[k]||0)>=L[i][1])return;d.az.c[k]=(d.az.c[k]||0)+1;if(navigator.vibrate)navigator.vibrate(10);if(L.every((z,j)=>(d.az.c[azSet+j]||0)>=z[1])&&!d.az.done[azSet]){d.az.done[azSet]=1;const p=P();p.azDays=pushU(p.azDays||[],td(),90);award('az'+azSet,5);}save();rp4();});}},
+ ayah:{t:'📜 آية وحديث اليوم',h:()=>{const a=AYAT[day()%AYAT.length],h=HAD[day()%HAD.length];return C(`<div style="color:var(--text-dim);text-align:center">آية اليوم</div><div style="font-family:'Amiri',serif;font-size:24px;line-height:2;text-align:center;color:var(--gold-light-text)">﴿${a[0]}﴾</div><div style="text-align:center;color:var(--text-dim)">${a[1]}</div>`)+C(`<div style="color:var(--text-dim);text-align:center">حديث اليوم</div><div style="font-family:'Amiri',serif;font-size:22px;line-height:2;text-align:center">«${h[0]}»</div><div style="text-align:center;color:var(--text-dim)">${h[1]}</div>`);}},
+ prayer:{t:'🕋 متتبع الصلاة',h:()=>{const d=DD(),p=P(),fl=p.pfull||[];let s=0;for(let i=0;i<90;i++){if(fl.indexOf(td(i))>=0)s++;else if(i>0)break;else if(i===0)continue;}return C(`<div style="text-align:center;font-size:18px">🔥 أيام متتالية بالصلوات الخمس: <b>${s}</b></div>`)+['الفجر','الظهر','العصر','المغرب','العشاء'].map((n,i)=>`<button class="btn" data-pr="${i}" style="margin:6px 0;${d.pr[i]?'':'background:rgba(255,255,255,.08);color:var(--text-light);box-shadow:none'}">${d.pr[i]?'✅':'⬜'} ${n}</button>`).join('');},
+  b:()=>{document.querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{const d=DD(),p=P(),i=+b.dataset.pr;d.pr[i]=d.pr[i]?0:1;const full=d.pr.every(Boolean);p.pfull=p.pfull||[];if(full){p.pfull=pushU(p.pfull,td(),90);WW().pf=pushU(WW().pf,td());}else{p.pfull=p.pfull.filter(x=>x!==td());WW().pf=WW().pf.filter(x=>x!==td());}save();rp4();});}},
+ fast:{t:'🌙 متتبع الصيام',h:()=>{const p=P(),f=p.fast||[],n=new Date(),w=n.getDay(),x=hij(n),tips=[];if(w===1||w===4)tips.push('النهاردة الإثنين/الخميس: يُسنّ الصيام');if(x.d>=13&&x.d<=15)tips.push('من الأيام البيض (13-14-15): يُسنّ الصيام');const on=f.indexOf(td())>=0;return C(`<div style="text-align:center;line-height:2">${tips.join('<br>')||'مفيش مناسبة صيام نافلة النهاردة'}<div style="margin-top:8px">إجمالي أيام صيامك المسجّلة: <b>${f.length}</b></div></div>`)+B('fs-t',on?'✅ سجّلت صيام النهاردة (اضغط للإلغاء)':'🌙 صمت النهاردة');},
+  b:()=>{$('fs-t').onclick=()=>{const p=P();p.fast=p.fast||[];const i=p.fast.indexOf(td()),ram=hij(new Date()).m===9;if(i>=0){p.fast.splice(i,1);if(ram)p.ramFast=Math.max(0,(p.ramFast||0)-1);}else{p.fast.push(td());if(ram)p.ramFast=(p.ramFast||0)+1;}p.fast=p.fast.slice(-400);save();rp4();};}},
+ khatma:{t:'📖 جدول الختمة',h:()=>{const d=Math.max(1,Math.min(365,P().khd||30)),p=Math.ceil(604/d);return C(`<label>عايز تختم في كام يوم؟</label><input type="number" id="kh-d" min="1" max="365" value="${d}" style="width:100%;padding:13px;border-radius:14px;border:1px solid rgba(var(--gold-rgb),.35);background:rgba(4,24,19,.55);color:var(--text-light);font-family:inherit"><div id="kh-r" style="margin-top:14px;line-height:2;text-align:center"></div><div style="font-size:12px;color:var(--text-dim)">حسابياً على 604 صفحة (مصحف المدينة).</div>`);},
+  b:()=>{const f=()=>{const d=Math.max(1,Math.min(365,+$('kh-d').value||30)),p=Math.ceil(604/d);P().khd=d;$('kh-r').innerHTML=`كل يوم: <b>${p}</b> صفحة<br>يعني تقريباً <b>${Math.ceil(p/5)}</b> صفحة بعد كل صلاة`;save();};$('kh-d').oninput=f;f();}},
+ dua:{t:'🤲 أدعية المناسبات',h:()=>DUAS.map(d=>C(`<div style="color:var(--gold-light-text);font-weight:700">${d[0]}</div><div style="font-family:'Amiri',serif;font-size:19px;line-height:2;margin-top:6px">${d[1]}</div>`)).join('')},
+ dh:{t:'📿 استغفار وصلاة على النبي',h:()=>{const d=DD(),p=P();p.dhH=p.dhH||{};const hist=[0,1,2,3,4,5,6].map(i=>`<div>${i?td(i):'اليوم'}: <b>${p.dhH[td(i)]||0}</b></div>`).join('');return `<div style="display:flex;gap:6px">${[['i','🤲 استغفار'],['s','🌹 صلاة على النبي']].map(([k,l])=>`<button class="btn" data-dt="${k}" style="margin:0;${k===dhTab?'':'background:rgba(255,255,255,.08);color:var(--text-light);box-shadow:none'}">${l}</button>`).join('')}</div>`+C(`<div style="text-align:center"><div id="dh-n" style="font-size:64px;font-weight:800;color:var(--gold-light-text)">${d.dh[dhTab]}</div>${B('dh-tap','اضغط 👆','height:100px;font-size:24px')}</div>`)+C(`<b>آخر 7 أيام (استغفار + صلاة)</b><div style="line-height:1.9;margin-top:6px;font-size:14px">${hist}</div>`);},
+  b:()=>{document.querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>{dhTab=b.dataset.dt;rp4();});$('dh-tap').onclick=()=>{const d=DD(),p=P();d.dh[dhTab]++;p.dhH=p.dhH||{};p.dhH[td()]=d.dh.i+d.dh.s;Object.keys(p.dhH).sort().slice(0,-14).forEach(k=>delete p.dhH[k]);$('dh-n').textContent=d.dh[dhTab];if(navigator.vibrate)navigator.vibrate(10);save();};}},
+ set:{t:'⚙️ حجم الخط',h:()=>C(`<div style="text-align:center;line-height:2">حجم الواجهة الحالي: <b id="z-v">${Math.round((P().zoom||1)*100)}%</b><div style="display:flex;gap:8px">${B('z-m','A−','margin-top:8px')}${B('z-p','A+','margin-top:8px')}</div></div><div style="font-size:12px;color:var(--text-dim);margin-top:8px">بيتحفظ على حسابك وبيتطبّق على كل الشاشات.</div>`),
+  b:()=>{const f=d=>{P().zoom=Math.max(.9,Math.min(1.4,Math.round(((P().zoom||1)+d)*100)/100));$('z-v').textContent=Math.round(P().zoom*100)+'%';look();save();};$('z-m').onclick=()=>f(-.1);$('z-p').onclick=()=>f(.1);}},
+ daily:{t:'🔥 التحدي اليومي',h:()=>DD().ch?C('<div style="text-align:center">✅ خلّصت تحدي النهاردة 🎉<br>تعالى بكرة لتحدي جديد</div>'):'',b:()=>{if(!DD().ch)qStart({list:mk(shuf(pool(),rnd(day())).slice(0,5)),end:dailyEnd});}},
+ topic:{t:'🗂️ أسئلة حسب المجال',h:()=>{const c={};pool().forEach(q=>{const k=topicOf(q);c[k]=(c[k]||0)+1;});return Object.keys(c).map(k=>`<button class="btn" data-tp="${k}" style="margin:6px 0">${k} (${c[k]})</button>`).join('')||C('مفيش أسئلة حالياً');},b:()=>{document.querySelectorAll('[data-tp]').forEach(b=>b.onclick=()=>{const k=b.dataset.tp;qStart({list:mk(shuf(pool().filter(q=>topicOf(q)===k)).slice(0,10))});});}},
+ verse:{t:'✍️ كمّل الآية',h:()=>'',b:()=>qStart({list:so(shuf(VERSES)).slice(0,5),end:s=>award('vs',s*2)})},
+ who:{t:'🧑‍🏫 مين الصحابي',h:()=>'',b:()=>qStart({list:so(shuf(WHO)).slice(0,5),end:s=>award('who',s*2)})},
+ mean:{t:'🔎 معاني القرآن',h:()=>'',b:()=>qStart({list:so(shuf(MEAN)).slice(0,5),end:s=>award('mn',s*2)})},
+ taj:{t:'🎙️ تجويد مبسّط',h:()=>TAJ.map(t=>C(`<b style="color:var(--gold-light-text)">${t[0]}</b><div style="line-height:1.9;margin-top:4px">${t[1]}</div>`)).join('')+B('tj-q','اختبر نفسك ✍️'),b:()=>{$('tj-q').onclick=()=>{$('p4-body').innerHTML='';qStart({list:so(shuf(TAJQ)),end:s=>award('tj',s*2)});};}},
+ tf:{t:'⚡ صح أم خطأ',h:()=>'',b:()=>{const L=shuf(pool()).slice(0,10).map(q=>{const ok=Math.random()<.5,wr=q.options.map((_,i)=>i).filter(i=>i!==q.correct),i=ok?q.correct:wr[Math.floor(Math.random()*wr.length)];return{q:q.q+'<br><b style="color:var(--gold-light-text)">'+q.options[i]+'</b>',o:['✅ صح','❌ خطأ'],c:ok?0:1};});qStart({list:L,t:6,end:s=>award('tf',Math.min(15,s*2))});}},
+ story:{t:'🕊️ قصص الأنبياء',h:()=>STORY.map(s=>C(`<b style="color:var(--gold-light-text)">${s[0]}</b><div style="line-height:1.9;margin-top:6px">${s[1]}</div>`)).join('')+B('st-q','اختبر نفسك ✍️'),b:()=>{$('st-q').onclick=()=>{$('p4-body').innerHTML='';qStart({list:so(STORY.map(s=>({q:s[2],o:s[3],c:0}))),end:s=>award('st',s*2)});};}},
+ journey:{t:'🗺️ رحلة السيرة',h:()=>JOUR.map((j,i)=>C(`<div style="display:flex;gap:12px;align-items:center"><div style="min-width:34px;height:34px;border-radius:50%;background:var(--gold);color:#0a2a22;display:flex;align-items:center;justify-content:center;font-weight:800">${i+1}</div><div><b>${j[0]}</b><div style="color:var(--text-dim);font-size:13px">${j[1]}</div></div></div>`)).join('')},
+ order:{t:'🔢 رتّب الأحداث',h:()=>'<div id="od"></div>',b:()=>{let it=shuf(JOUR.map((j,i)=>({n:j[0],i}))).slice(0,4),nx=0,pk={};const sorted=it.map(x=>x.i).sort((a,b)=>a-b);const dr=()=>{$('od').innerHTML=C(`<div style="margin-bottom:8px">اضغط الأحداث بترتيبها الزمني من الأقدم للأحدث</div>`)+it.map((x,k)=>`<button class="btn" data-od="${k}" style="margin:6px 0;${pk[k]?'background:var(--ok)':'background:rgba(255,255,255,.08);color:var(--text-light);box-shadow:none'}">${pk[k]||''} ${x.n}</button>`).join('')+(nx>=4?C(`<div style="text-align:center">🎉 ممتاز! ${award('od',8)?'+8 XP':''}</div>`)+B('od-n','جولة جديدة'):'');document.querySelectorAll('[data-od]').forEach(b=>b.onclick=()=>{const k=+b.dataset.od;if(pk[k]||nx>=4)return;if(it[k].i===sorted[nx]){pk[k]=++nx;dr();}else{b.style.background='var(--danger)';nx=0;pk={};setTimeout(dr,500);}});const n=$('od-n');if(n)n.onclick=()=>SCR.order.b();};dr();}},
+ word:{t:'🔤 كلمة اليوم',h:()=>'<div id="wd"></div>',b:()=>{const w=WORDS[day()%WORDS.length],p=P();if(!p.wd||p.wd.k!==td())p.wd={k:td(),g:[]};const dr=()=>{const g=p.wd.g,won=g.some(x=>x===nz(w)),over=won||g.length>=6;const col=x=>{const r=[...x].map(()=>'g'),t=[...nz(w)];[...x].forEach((c,i)=>{if(c===t[i]){r[i]='c';t[i]=null;}});[...x].forEach((c,i)=>{if(r[i]==='c')return;const j=t.indexOf(c);if(j>=0){r[i]='p';t[j]=null;}});return r;};const bg={c:'var(--ok)',p:'var(--gold)',g:'rgba(255,255,255,.1)'};$('wd').innerHTML=C(`<div style="text-align:center;margin-bottom:8px;color:var(--text-dim)">خمّن كلمة من 4 حروف (اسم أو معنى إسلامي) — ${6-g.length} محاولات</div>`+g.map(x=>`<div style="display:flex;gap:6px;justify-content:center;margin:5px 0">${[...x].map((c,i)=>`<div style="width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#04180f;background:${bg[col(x)[i]]}">${c}</div>`).join('')}</div>`).join(''))+(over?C(`<div style="text-align:center">${won?'🎉 صح! '+(award('wd',10)?'+10 XP':''):'الكلمة كانت: <b>'+w+'</b>'}</div>`):C(`<input id="wd-i" maxlength="4" placeholder="اكتب 4 حروف" style="width:100%;padding:13px;border-radius:14px;border:1px solid rgba(var(--gold-rgb),.35);background:rgba(4,24,19,.55);color:var(--text-light);font-family:inherit;text-align:center;font-size:18px">`+B('wd-g','تخمين')));const gb=$('wd-g');if(gb)gb.onclick=()=>{const v=nz($('wd-i').value);if([...v].length!==4){$('wd-i').style.borderColor='var(--danger)';return;}p.wd.g.push(v);save();dr();};};dr();}},
+ mis:{t:'✅ المهام',h:()=>{const d=DD(),w=WW(),row=(m,c,cl)=>{const ok=m[2](),got=cl[m[0]];return `<div class="card" style="padding:14px"><div>${m[1]}</div><div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px"><span style="color:${ok?'var(--ok)':'var(--text-dim)'}">${ok?'✔ تمت':'لسه'}</span><button class="btn" data-ms="${m[0]}" ${(!ok||got)?'disabled':''} style="width:auto;margin:0;padding:8px 14px">${got?'تم الاستلام':'استلم +'+m[3]+' XP'}</button></div></div>`;};return '<b>مهام اليوم</b>'+MIS.map(m=>row(m,0,d.cl)).join('')+'<b>مهام الأسبوع</b>'+WMIS.map(m=>row(m,0,w.cl)).join('');},
+  b:()=>{document.querySelectorAll('[data-ms]').forEach(b=>b.onclick=()=>{const k=b.dataset.ms,m=MIS.concat(WMIS).find(x=>x[0]===k),cl=k[0]==='w'?WW().cl:DD().cl;if(!m||!m[2]()||cl[k])return;cl[k]=1;addXP(m[3]);save();rp4();});}},
+ wall:{t:'🏅 حائط الإنجازات',h:()=>C('<div style="text-align:center">جارِ التحميل...</div>'),b:async()=>{const list=[currentUser].concat((state.friends||[]).map(f=>f&&f.username?f.username:f)).filter(Boolean).slice(0,15);let rows=[];try{rows=await Promise.all(list.map(async u=>{try{const a=u===currentUser?{username:u,state}:await fetchAccount(u);return a?a:null;}catch(e){return null;}}));}catch(e){}const el=$('p4-body');if(!el||scr!=='wall')return;el.innerHTML=rows.filter(Boolean).map(a=>{const bd=Object.keys((a.state&&a.state.badges)||{}).map(id=>(BADGE_DEFS.find(x=>x.id===id)||{}).icon||'').join(' ');return C(`<b>${a.username===currentUser?'أنا':a.username}</b> <span style="color:var(--text-dim)">· ${(a.state&&a.state.xp)||0} XP</span><div style="margin-top:6px;font-size:22px;line-height:1.8">${bd||'<span style="font-size:13px;color:var(--text-dim)">لسه مفيش أوسمة</span>'}</div>`);}).join('')||C('أضف أصدقاء عشان تظهر إنجازاتهم هنا');}},
+ theme:{t:'🎨 الثيمات',h:()=>{const xp=state.xp||0,cur=P().theme||'def';return THEMES.map(t=>`<button class="btn" data-th="${t[0]}" ${xp<t[2]?'disabled':''} style="margin:6px 0;${t[0]===cur?'outline:2px solid var(--gold-light)':''}">${t[1]} ${xp<t[2]?'🔒 '+t[2]+' XP':''}</button>`).join('');},b:()=>{document.querySelectorAll('[data-th]').forEach(b=>b.onclick=()=>{P().theme=b.dataset.th;look();save();rp4();});}},
+ wkc:{t:'🏆 المسابقة الأسبوعية',h:()=>C('<div id="wk-b" style="text-align:center">جارِ التحميل...</div>'),b:async()=>{const el=()=>$('wk-b');let cfg=null;try{const s=await db.collection('p4_config').doc('weekly').get();cfg=s.exists?s.data():null;}catch(e){}if(!el()||scr!=='wkc')return;const p=P(),done=p.wkp===wk();let h='';if(isSuperAdmin())h+=`<div style="border-bottom:1px solid rgba(255,255,255,.1);padding-bottom:10px;margin-bottom:10px"><b>لوحة المشرف</b><input id="wk-t" placeholder="عنوان المسابقة" value="${cfg&&cfg.title||''}" style="width:100%;margin:6px 0;padding:10px;border-radius:12px;background:rgba(4,24,19,.55);color:var(--text-light);border:1px solid rgba(var(--gold-rgb),.35)"><input id="wk-p" placeholder="الجائزة" value="${cfg&&cfg.prize||''}" style="width:100%;margin:6px 0;padding:10px;border-radius:12px;background:rgba(4,24,19,.55);color:var(--text-light);border:1px solid rgba(var(--gold-rgb),.35)">${B('wk-s','حفظ وتفعيل هذا الأسبوع')}</div>`;if(cfg&&cfg.active&&cfg.wk===wk()){h+=`<div style="font-size:20px;font-weight:800;color:var(--gold-light-text)">${cfg.title||'مسابقة الأسبوع'}</div><div style="margin:6px 0">🎁 الجائزة: ${cfg.prize||'—'}</div>`+(done?`<div>لعبت هذا الأسبوع — نتيجتك: <b>${p.wks}</b>/10</div>`:B('wk-go','ابدأ (10 أسئلة، مرة واحدة)'))+'<div id="wk-l" style="margin-top:12px;text-align:right"></div>';}else h+='مفيش مسابقة مفعّلة الأسبوع ده.';el().innerHTML=h;if($('wk-s'))$('wk-s').onclick=async()=>{try{await db.collection('p4_config').doc('weekly').set({title:$('wk-t').value,prize:$('wk-p').value,active:true,wk:wk()});SCR.wkc.b();}catch(e){alert('تعذّر الحفظ (راجع قواعد Firestore)');}};if($('wk-go'))$('wk-go').onclick=()=>{let sd=0;[...wk()].forEach(c=>sd+=c.charCodeAt(0));$('p4-body').innerHTML='';qStart({list:mk(shuf(pool(),rnd(sd*7)).slice(0,10)),end:s=>{p.wkp=wk();p.wks=s;db.collection('p4_weekly').doc(wk()+'_'+currentUser).set({u:currentUser,score:s,week:wk()}).catch(()=>{});return award('wk',s);}});};try{const q=await db.collection('p4_weekly').where('week','==',wk()).get();const L=q.docs.map(x=>x.data()).sort((a,b)=>b.score-a.score).slice(0,10);if($('wk-l'))$('wk-l').innerHTML='<b>🏅 المتصدرون</b>'+L.map((x,i)=>`<div>${i+1}. ${x.u} — ${x.score}</div>`).join('');}catch(e){}}}
+};
+
+// ---------- التشغيل ----------
+const on=k=>FEATURES[k]!==false;
+function rp4(){
+  endQ(); if(lastView!==view){scr=null;Qs=null;lastView=view;}
+  const hub=HUBS[view];
+  const back=()=>{endQ();Qs=null;if(scr){scr=null;rp4();}else{lastView=null;goBackFromPage();}};
+  if(!on(view)){root.innerHTML=`<div class="app"><button class="btn" id="p4-back">← رجوع</button>${C('<div style="text-align:center">القسم ده مقفول حالياً 🔒</div>')}</div>`;$('p4-back').onclick=back;return;}
+  if(scr&&!on('p4_'+scr))scr=null;
+  const S=scr&&SCR[scr];
+  root.innerHTML=`<div class="app"><button class="btn" id="p4-back">← رجوع</button><h2 style="font-family:'Amiri',serif;color:var(--gold-light-text);text-align:center">${S?S.t:hub[0]}</h2><div id="p4-body">${S?S.h():hub[1].filter(([k])=>on('p4_'+k)).map(([k,l])=>`<button class="btn" data-s="${k}" style="margin:6px 0;text-align:right">${l}</button>`).join('')}</div></div>`;
+  $('p4-back').onclick=back;
+  document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{scr=b.dataset.s;Qs=null;rp4();});
+  if(S&&S.b)S.b();
+}
+function look(){const p=P(),b=document.body,r=document.documentElement.style;b.style.zoom=p.zoom||1;const light=b.getAttribute('data-mode')==='light',th=THEMES.find(x=>x[0]===p.theme)||THEMES[0],pl=(on('p4_rmdecor')&&LOOK.pal&&LOOK.pal!=='def')?PAL.find(x=>x[0]===LOOK.pal):null,v=light?{}:(pl||th)[3];THEMES.concat(PAL).forEach(x=>Object.keys(x[3]).forEach(k=>{b.style.removeProperty(k);r.removeProperty(k);}));Object.keys(v).forEach(k=>b.style.setProperty(k,v[k]));}
+try{new MutationObserver(()=>{try{look();}catch(e){}}).observe(document.body,{attributes:true,attributeFilter:['data-mode']});}catch(e){}
+const _r4=render; render=function(){ if(view==='login'||view==='register'){const e=$('p4-deco');if(e)e.remove();document.body.style.zoom=1;}else if(state&&!$('p4-deco')&&(LOOK.deco||[]).length&&on('p4_rmdecor')){try{look();deco();}catch(e){}} if(HUBS[view]){rp4();return;} _r4(); };
+const _e4=enterMain; enterMain=function(){ _e4.apply(this,arguments); try{look();deco();lookWatch();}catch(e){} };
+const _mg=mainGroups; mainGroups=function(){const g=_mg(),it=Object.keys(HUBS).filter(on).map(k=>({key:k,label:HUBS[k][0]}));return g.map(x=>x.key==='learn'?Object.assign({},x,{items:x.items.concat(it)}):x);};
+BADGE_DEFS.push(
+ {id:'p4_az7',icon:'🌅',name:'مواظب على الأذكار',desc:'أتمّ أذكار 7 أيام',check:s=>((s.p4&&s.p4.azDays)||[]).length>=7},
+ {id:'p4_pr7',icon:'🕌',name:'محافظ على الصلاة',desc:'سجّل الصلوات الخمس 7 أيام',check:s=>((s.p4&&s.p4.pfull)||[]).length>=7},
+ {id:'p4_fast',icon:'🌙',name:'صائم النوافل',desc:'سجّل 8 أيام صيام نافلة',check:s=>((s.p4&&s.p4.fast)||[]).length>=8},
+ {id:'p4_ram',icon:'🌟',name:'صائم رمضان',desc:'سجّل 10 أيام صيام في رمضان',check:s=>((s.p4&&s.p4.ramFast)||0)>=10},
+ {id:'p4_fri',icon:'🕋',name:'جمعة مباركة',desc:'أتمّ التحدي اليومي في 4 أيام جمعة',check:s=>((s.p4&&s.p4.friCh)||[]).length>=4},
+ {id:'p4_ch10',icon:'🎯',name:'متحدّي الأيام',desc:'أتمّ التحدي اليومي 10 أيام',check:s=>((s.p4&&s.p4.chDays)||[]).length>=10}
+);
+
+// ---------- زينة وثيمات رمضان ----------
+const PAL=[['def','🌿 الأخضر الذهبي',0,{}],
+['qadr','🌌 ليلة القدر',0,{'--bg-deep':'#0a1030','--bg-deep2':'#1a2660','--gold':'#f5c542','--gold-light':'#ffe8a3','--gold-rgb':'245,197,66'}],
+['fanoos','🏮 فانوس ذهبي',0,{'--bg-deep':'#2a170b','--bg-deep2':'#4a2b14','--gold':'#f0a030','--gold-light':'#ffd98a','--gold-rgb':'240,160,48'}],
+['emerald','💚 زمرد',0,{'--bg-deep':'#05281f','--bg-deep2':'#0b4a38','--gold':'#6fe3b0','--gold-light':'#c4f7df','--gold-rgb':'111,227,176'}],
+['ruby','❤️ ياقوت',0,{'--bg-deep':'#2b0a12','--bg-deep2':'#5a1424','--gold':'#ff8a9a','--gold-light':'#ffd0d6','--gold-rgb':'255,138,154'}],
+['royal','💜 بنفسجي ملكي',0,{'--bg-deep':'#1a0d30','--bg-deep2':'#34196a','--gold':'#d6b3ff','--gold-light':'#efdcff','--gold-rgb':'214,179,255'}],
+['teal','🩵 فيروزي',0,{'--bg-deep':'#032a30','--bg-deep2':'#06515c','--gold':'#5ee6e6','--gold-light':'#bdf7f7','--gold-rgb':'94,230,230'}],
+['rose','🌸 وردي',0,{'--bg-deep':'#2e0f22','--bg-deep2':'#5c1e45','--gold':'#ff9fd0','--gold-light':'#ffd6ec','--gold-rgb':'255,159,208'}],
+['sunset','🌇 غروب',0,{'--bg-deep':'#2d1208','--bg-deep2':'#6a2a12','--gold':'#ff9f5a','--gold-light':'#ffd2ad','--gold-rgb':'255,159,90'}],
+['silver','🌙 فضي',0,{'--bg-deep':'#0f1620','--bg-deep2':'#1f2b3a','--gold':'#c9d6e6','--gold-light':'#eef3f9','--gold-rgb':'201,214,230'}],
+['black','🖤 أسود وذهب',0,{'--bg-deep':'#070707','--bg-deep2':'#17130a','--gold':'#e6b83c','--gold-light':'#ffe08a','--gold-rgb':'230,184,60'}],
+['oasis','🌴 واحة',0,{'--bg-deep':'#10240f','--bg-deep2':'#24491a','--gold':'#b6e36a','--gold-light':'#e2f7bd','--gold-rgb':'182,227,106'}]];
+const mp=(id,l,a,b,g,gl)=>[id,l,0,{'--bg-deep':a,'--bg-deep2':b,'--gold':g,'--gold-light':gl,'--gold-rgb':[1,3,5].map(i=>parseInt(g.substr(i,2),16)).join(',')}];
+[['sky','☁️ سماوي','#06203a','#0d4a7a','#7fcfff','#cdeeff'],['lime','🍏 أخضر فاتح','#0c2410','#1d5a1f','#9be564','#d8f8b8'],['coffee','☕ قهوة','#1e120c','#3d2418','#d9a273','#f2d3b8'],['plum','🍇 برقوق','#220c24','#4a1a52','#e08cf0','#f6cffc'],['coral','🪸 مرجاني','#2b1010','#5e2323','#ff7f6e','#ffc9c0'],['mint','🍃 نعناع','#07261f','#0f5445','#8ff0d0','#d0fbee'],['gold','🌟 ذهبي كامل','#241a05','#4d3a0b','#ffd24d','#fff0b3'],['navy','🌊 كحلي','#050c24','#0f1f55','#6f9bff','#c9d9ff'],['olive','🫒 زيتوني','#1b1d09','#3b4112','#c9d256','#eef2b0'],['crimson','🍷 عنابي','#240812','#511228','#ff6f91','#ffc7d4'],['aqua','🧊 أكوا','#041f27','#0a4b5c','#4de0ff','#c0f4ff'],['sand','🏜️ رمال','#2a2112','#564526','#e8c98a','#f8e8c6'],['ice','❄️ ثلجي','#0b1824','#1a3550','#b3e5ff','#e8f7ff']].forEach(x=>PAL.push(mp(...x)));
+const DEC=[['stars','✨ نجوم متلألئة'],['lanterns','🏮 فوانيس معلّقة'],['crescent','🌙 هلال كبير'],['fall','⭐ نجوم متساقطة'],['geo','🔷 زخرفة إسلامية'],['mosque','🕌 مسجد في الأسفل'],['bunting','🎏 زينة معلّقة'],['sparkle','💫 بريق'],['rise','🫧 فقاعات صاعدة'],['palm','🌴 نخيل'],['books','📖 مصاحف متساقطة'],['tasbih','📿 مسابح معلّقة'],['hearts','💛 قلوب صاعدة'],['domes','🕌 قباب في الزوايا'],['kaaba','🕋 كعبة'],['camel','🐪 قافلة جمال'],['flowers','🌸 زهور متساقطة'],['diamonds','🔶 ألماس دوّار'],['frame','🖼️ إطار ذهبي'],['glow','🌅 توهّج علوي']];
+const GEO="<svg xmlns='http://www.w3.org/2000/svg' width='90' height='90'><g fill='none' stroke='#ffd98a' stroke-width='2'><rect x='20' y='20' width='50' height='50'/><rect x='20' y='20' width='50' height='50' transform='rotate(45 45 45)'/><circle cx='45' cy='45' r='10'/></g></svg>";
+const BUNT="<svg xmlns='http://www.w3.org/2000/svg' width='80' height='30'><path d='M0 2Q20 9 40 2Q60 9 80 2' fill='none' stroke='#d4a843' stroke-width='1.2'/><path d='M10 6L30 6L20 24Z' fill='#d4a843'/><path d='M50 6L70 6L60 24Z' fill='#2fa37a'/></svg>";
+const MOSQUE="<svg viewBox='0 0 400 100' preserveAspectRatio='none' style='width:100%;height:100%;display:block' fill='currentColor'><rect x='0' y='88' width='400' height='12'/><rect x='30' y='30' width='8' height='60'/><polygon points='30,30 34,14 38,30'/><rect x='362' y='30' width='8' height='60'/><polygon points='362,30 366,14 370,30'/><rect x='110' y='62' width='180' height='28'/><ellipse cx='200' cy='62' rx='46' ry='34'/><rect x='198' y='18' width='4' height='12'/><ellipse cx='125' cy='68' rx='18' ry='14'/><ellipse cx='275' cy='68' rx='18' ry='14'/></svg>";
+function deco(){
+  let e=$('p4-deco'); if(e)e.remove();
+  const L=on('p4_rmdecor')?(LOOK.deco||[]):[]; if(!L.length)return;
+  if(!$('p4-deco-css')){const s=document.createElement('style');s.id='p4-deco-css';s.textContent='@keyframes p4tw{0%,100%{opacity:.15}50%{opacity:.95}}@keyframes p4sw{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(7deg)}}@keyframes p4fl{0%{transform:translateY(-10vh);opacity:0}10%{opacity:.85}100%{transform:translateY(110vh);opacity:0}}@keyframes p4pl{0%,100%{filter:drop-shadow(0 0 6px var(--gold))}50%{filter:drop-shadow(0 0 18px var(--gold))}}@keyframes p4rs{0%{transform:translateY(0);opacity:0}10%{opacity:.8}100%{transform:translateY(-110vh);opacity:0}}@keyframes p4wk{0%{transform:translateX(-12vw)}100%{transform:translateX(112vw)}}@keyframes p4sp{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}#p4-deco.noanim *{animation:none!important}';document.head.appendChild(s);}
+  const r=rnd(7),R=(a,b)=>a+r()*(b-a);let h='';
+  if(L.includes('stars'))for(let i=0;i<24;i++)h+=`<span style="position:absolute;left:${R(0,98)}%;top:${R(0,96)}%;font-size:${R(8,18)}px;color:var(--gold-light);animation:p4tw ${R(2,5)}s infinite ${R(0,3)}s">✦</span>`;
+  if(L.includes('fall'))for(let i=0;i<14;i++)h+=`<span style="position:absolute;left:${R(0,98)}%;top:0;font-size:${R(12,20)}px;animation:p4fl ${R(8,14)}s linear infinite -${R(0,12)}s">✨</span>`;
+  if(L.includes('lanterns'))[8,28,50,72,90].forEach((x,i)=>{const ln=24+i%3*22;h+=`<div style="position:absolute;top:0;left:${x}%;transform-origin:top center;animation:p4sw ${3+i*.4}s ease-in-out infinite"><div style="width:1px;height:${ln}px;background:var(--gold);margin:0 auto"></div><div style="font-size:30px;line-height:1">🏮</div></div>`;});
+  if(L.includes('crescent'))h+=`<div style="position:absolute;top:80px;left:14px;font-size:64px;animation:p4pl 4s ease-in-out infinite">🌙</div>`;
+  if(L.includes('mosque'))h+=`<div style="position:absolute;bottom:0;left:0;right:0;height:90px;color:var(--gold);opacity:.35">${MOSQUE}</div>`;
+  const fl=(e,n,s1,s2)=>{for(let i=0;i<n;i++)h+=`<span style="position:absolute;left:${R(0,98)}%;top:0;font-size:${R(s1,s2)}px;animation:p4fl ${R(9,16)}s linear infinite -${R(0,14)}s">${e}</span>`;};
+  const rs=(e,n)=>{for(let i=0;i<n;i++)h+=`<span style="position:absolute;left:${R(0,98)}%;bottom:0;color:var(--gold-light);font-size:${R(12,22)}px;animation:p4rs ${R(9,16)}s linear infinite -${R(0,14)}s">${e}</span>`;};
+  const U=s=>"url('data:image/svg+xml,"+encodeURIComponent(s).replace(/'/g,'%27')+"')";
+  const has=k=>L.includes(k);
+  if(has('bunting'))h+=`<div style="position:absolute;top:0;left:0;right:0;height:30px;background:${U(BUNT)} repeat-x;background-size:80px 30px"></div>`;
+  if(has('sparkle'))for(let i=0;i<14;i++)h+=`<span style="position:absolute;left:${R(0,96)}%;top:${R(0,92)}%;font-size:${R(14,24)}px;animation:p4tw ${R(2,5)}s infinite ${R(0,3)}s">💫</span>`;
+  if(has('rise'))rs('○',14);
+  if(has('hearts'))rs('💛',12);
+  if(has('books'))fl('📖',8,16,24);
+  if(has('flowers'))fl('🌸',10,14,22);
+  if(has('palm'))h+=`<div style="position:absolute;bottom:0;left:4px;font-size:58px;transform-origin:bottom center;animation:p4sw 5s ease-in-out infinite">🌴</div><div style="position:absolute;bottom:0;right:4px;font-size:58px;transform-origin:bottom center;animation:p4sw 6s ease-in-out infinite">🌴</div>`;
+  if(has('tasbih'))[12,46,86].forEach((x,i)=>{h+=`<div style="position:absolute;top:0;left:${x}%;transform-origin:top center;animation:p4sw ${3.5+i*.5}s ease-in-out infinite"><div style="width:1px;height:${30+i*18}px;background:var(--gold);margin:0 auto"></div><div style="font-size:28px;line-height:1">📿</div></div>`;});
+  if(has('domes'))h+=`<div style="position:absolute;bottom:0;left:0;font-size:72px;opacity:.5;line-height:1">🕌</div><div style="position:absolute;bottom:0;right:0;font-size:72px;opacity:.5;line-height:1">🕌</div>`;
+  if(has('kaaba'))h+=`<div style="position:absolute;bottom:6px;left:50%;margin-left:-32px;font-size:64px;line-height:1;animation:p4pl 4s ease-in-out infinite">🕋</div>`;
+  if(has('camel'))h+=`<div style="position:absolute;bottom:4px;left:0;font-size:30px;animation:p4wk 32s linear infinite">🐪</div>`;
+  if(has('diamonds'))for(let i=0;i<12;i++)h+=`<span style="position:absolute;left:${R(0,96)}%;top:${R(0,92)}%;color:var(--gold-light);font-size:${R(10,20)}px;animation:p4tw ${R(2,4)}s infinite ${R(0,3)}s,p4sp ${R(6,12)}s linear infinite">◆</span>`;
+  if(has('frame'))h+=`<div style="position:absolute;inset:6px;border:2px solid var(--gold);border-radius:18px;opacity:.55;animation:p4pl 4s ease-in-out infinite"></div>`;
+  if(has('glow'))h+=`<div style="position:absolute;top:-20%;left:5%;right:5%;height:60%;background:radial-gradient(ellipse at top,rgba(var(--gold-rgb),.4),transparent 70%);animation:p4tw 6s ease-in-out infinite"></div>`;
+  const d=document.createElement('div');d.id='p4-deco';d.className=LOOK.anim===false?'noanim':'';d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:.6';d.innerHTML=h;
+  if(L.includes('geo')){const g=document.createElement('div');g.style.cssText='position:absolute;inset:0;opacity:.12;background-size:90px;background-image:url("data:image/svg+xml,'+encodeURIComponent(GEO)+'")';d.insertBefore(g,d.firstChild);}
+  document.body.appendChild(d);
+}
+function rmHtml(){const pl=LOOK.pal||'def',dc=LOOK.deco||[];
+ return `<div style="color:var(--text-dim);font-size:13px;margin-bottom:6px">اختار الألوان:</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${PAL.map(x=>{const v=x[3],a=v['--bg-deep2']||'#14594a',g=v['--gold']||'#d4af37';return `<button class="btn" data-pal="${x[0]}" style="margin:0;padding:10px;background:linear-gradient(135deg,${a},${v['--bg-deep']||'#0b3d33'});color:${v['--gold-light']||'#fff'};border:2px solid ${x[0]===pl?g:'transparent'};box-shadow:none">${x[1]}${x[0]===pl?' ✔':''}</button>`;}).join('')}</div>
+ <div style="color:var(--text-dim);font-size:13px;margin:14px 0 6px">اختار الأشكال (تقدر تجمع أكتر من واحد):</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">${DEC.map(x=>`<button class="btn" data-dec="${x[0]}" style="margin:0;padding:10px;box-shadow:none;${dc.includes(x[0])?'':'background:rgba(255,255,255,.08);color:var(--text-light)'}">${x[1]}${dc.includes(x[0])?' ✔':''}</button>`).join('')}</div>
+ <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" id="rm-an" style="margin:0;box-shadow:none;background:rgba(255,255,255,.08);color:var(--text-light)">${LOOK.anim===false?'▶️ تشغيل الحركة':'⏸️ إيقاف الحركة'}</button><button class="btn" id="rm-rs" style="margin:0;box-shadow:none;background:rgba(255,255,255,.08);color:var(--text-light)">↩️ رجوع للأصلي</button></div>`;}
+function rmBind(){
+ if(!isSuperAdmin())return;
+ const go=async()=>{look();deco();try{await db.collection('settings').doc('look').set(LOOK);}catch(e){alert('تعذّر الحفظ، راجع صلاحيات Firestore للمستند settings/look');}if(view==='control-panel')renderControlPanel(true);};
+ document.querySelectorAll('[data-pal]').forEach(b=>b.onclick=()=>{LOOK.pal=b.dataset.pal;go();});
+ document.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{const k=b.dataset.dec,L=LOOK.deco||[];LOOK.deco=L.includes(k)?L.filter(x=>x!==k):L.concat(k);go();});
+ const a=$('rm-an');if(a)a.onclick=()=>{LOOK.anim=LOOK.anim===false;go();};
+ const z=$('rm-rs');if(z)z.onclick=()=>{LOOK={pal:'def',deco:[],anim:true};go();};
+}
+function lookWatch(){if(lookSub)return;try{lookSub=db.collection('settings').doc('look').onSnapshot(s=>{LOOK=Object.assign({pal:'def',deco:[],anim:true},s.exists?s.data():{});look();deco();},()=>{});}catch(e){}}
+
+// ---------- مفاتيح التشغيل والإيقاف في لوحة المشرف ----------
+const FL={};
+Object.keys(HUBS).forEach(h=>{FL[h]=HUBS[h][0]+' (القسم كله)';HUBS[h][1].forEach(([k,l])=>FL['p4_'+k]=l);});
+FL.p4_rmdecor='🎨 زينة رمضان';
+Object.keys(FL).forEach(k=>{if(!(k in FEATURES_DEFAULT))FEATURES_DEFAULT[k]=true;if(!(k in FEATURES))FEATURES[k]=true;});
+const _fa=featuresAdminHtml;
+featuresAdminHtml=function(){
+ const row=(k,l,sub)=>{const o=on(k);return `<div class="admin-chat-status" style="${sub?'margin-right:18px':''}"><span>${l}: <b>${o?'مفتوحة ✅':'مقفولة ⛔'}</b></span><button class="btn admin-mini ${o?'admin-danger':'admin-secondary'}" data-feature="${k}">${o?'إيقاف':'تشغيل'}</button></div>`;};
+ let h='<h3 class="admin-section-title">✨ ميزات المرحلة 4</h3><div class="admin-help">اقفل قسم كامل أو ميزة واحدة، وتختفي من عند الطلاب فوراً.</div>';
+ Object.keys(HUBS).forEach(hk=>{h+=row(hk,FL[hk]);HUBS[hk][1].forEach(([k])=>h+=row('p4_'+k,FL['p4_'+k],1));});
+ h+=row('p4_rmdecor','🎨 تطبيق زينة رمضان على الطلاب');
+ return _fa().replace('<div class="success" id="p2-status">',h+'<div class="success" id="p2-status">');
+};
+
+window.p4RmPage=()=>isSuperAdmin()?`<h3 class="admin-section-title">🎨 زينة وثيمات رمضان (25 لون و20 شكل)</h3><div class="admin-help">اللي تختاره هنا بيتطبق على كل الطلاب، والطلاب مش بيشوفوا أي اختيارات.</div>${rmHtml()}`:'<div class="admin-help">الصفحة دي للمشرف الأعلى فقط.</div>';
+const _rb=bindRamadanAdmin; bindRamadanAdmin=function(){_rb.apply(this,arguments);rmBind();};
+})();
+
 </script>
 </body>
 </html>
