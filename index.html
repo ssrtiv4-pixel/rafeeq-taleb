@@ -599,8 +599,8 @@ const RELIGIOUS_QUESTIONS_BANK = [
 
 
   /* ===== أجواء رمضان ===== */
-  .app{ position:relative; z-index:2; padding-top:44px; padding-bottom:110px; }
-  .ramadan-deco{ position:fixed; top:0; left:0; right:0; height:130px; z-index:1; pointer-events:none; overflow:hidden; }
+  body.ramadan-theme .app{ position:relative; z-index:2; padding-top:84px; padding-bottom:110px; }
+  .ramadan-deco{ position:absolute; top:0; left:0; right:0; height:130px; z-index:1; pointer-events:none; overflow:hidden; }
   .rd-fanous{ position:absolute; top:14px; transform-origin:50% 0; animation:rdSway 4.6s ease-in-out infinite; animation-delay:var(--d,0s); }
   .rd-fanous i{ display:block; width:1px; height:var(--s,18px); margin:0 auto; background:linear-gradient(var(--gold),rgba(var(--gold-rgb),.35)); }
   .rd-fanous svg{ display:block; width:var(--w,28px); height:auto; animation:rdGlow 3.2s ease-in-out infinite; animation-delay:var(--d,0s); }
@@ -611,7 +611,7 @@ const RELIGIOUS_QUESTIONS_BANK = [
   @keyframes rdFloat{ 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(5px); } }
   @keyframes rdTwinkle{ 0%,100%{ opacity:.15; transform:scale(.7); } 50%{ opacity:.9; transform:scale(1.15); } }
   @media (prefers-reduced-motion:reduce){ .rd-fanous,.rd-fanous svg,.rd-moon,.rd-star{ animation:none; } }
-  .ramadan-badge{ display:inline-block; margin-bottom:8px; padding:4px 18px; border-radius:20px; font-family:'Amiri',serif; font-size:16px; font-weight:700; color:var(--gold-light-text); border:1px solid rgba(var(--gold-rgb),.45); background:rgba(var(--gold-rgb),.1); text-shadow:0 0 12px rgba(var(--gold-rgb),.4); }
+  .ramadan-badge{ display:none; margin-bottom:8px; padding:4px 18px; border-radius:20px; font-family:'Amiri',serif; font-size:16px; font-weight:700; color:var(--gold-light-text); border:1px solid rgba(var(--gold-rgb),.45); background:rgba(var(--gold-rgb),.1); text-shadow:0 0 12px rgba(var(--gold-rgb),.4); }
 
   /* ===== تحديد وحذف الأسئلة جماعياً ===== */
   .admin-q-toolbar{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:14px; }
@@ -621,9 +621,9 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .admin-table tr.q-selected td{ background:rgba(var(--gold-rgb),.13); }
 
   /* ===== أجواء رمضان — المرحلة 2 ===== */
-  body::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.07; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%23d4a843' stroke-width='1'%3E%3Crect x='14' y='14' width='36' height='36'/%3E%3Crect x='14' y='14' width='36' height='36' transform='rotate%2845 32 32%29'/%3E%3Ccircle cx='0' cy='0' r='2.5'/%3E%3Ccircle cx='64' cy='0' r='2.5'/%3E%3Ccircle cx='0' cy='64' r='2.5'/%3E%3Ccircle cx='64' cy='64' r='2.5'/%3E%3C/g%3E%3C/svg%3E"); background-size:64px 64px; }
+  body.ramadan-theme::before{ content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.07; background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cg fill='none' stroke='%23d4a843' stroke-width='1'%3E%3Crect x='14' y='14' width='36' height='36'/%3E%3Crect x='14' y='14' width='36' height='36' transform='rotate%2845 32 32%29'/%3E%3Ccircle cx='0' cy='0' r='2.5'/%3E%3Ccircle cx='64' cy='0' r='2.5'/%3E%3Ccircle cx='0' cy='64' r='2.5'/%3E%3Ccircle cx='64' cy='64' r='2.5'/%3E%3C/g%3E%3C/svg%3E"); background-size:64px 64px; }
   .rd-bunting{ position:absolute; top:0; left:0; right:0; height:30px; background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='30'%3E%3Cpath d='M0 2 Q20 9 40 2 Q60 9 80 2' fill='none' stroke='%23d4a843' stroke-width='1.2'/%3E%3Cpath d='M10 5.6 L30 5.6 L20 24Z' fill='%23d4a843' fill-opacity='.9'/%3E%3Cpath d='M50 5.6 L70 5.6 L60 24Z' fill='%232fa37a' fill-opacity='.9'/%3E%3Ccircle cx='20' cy='11' r='1.6' fill='%23fff3bf'/%3E%3Ccircle cx='60' cy='11' r='1.6' fill='%23fff3bf'/%3E%3C/svg%3E") repeat-x; background-size:80px 30px; opacity:.95; filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)); }
-  .rd-mosque{ position:fixed; bottom:0; left:0; right:0; width:100%; height:120px; z-index:1; pointer-events:none; color:var(--gold); opacity:.2; }
+  .rd-mosque{ position:fixed; bottom:0; left:0; right:0; width:100%; height:120px; z-index:1; pointer-events:none; color:var(--gold); opacity:.15; }
   .rd-mosque .rd-win{ fill:#fff3bf; animation:rdTwinkle 3.4s ease-in-out infinite; animation-delay:var(--d,0s); transform-box:fill-box; transform-origin:center; }
   body[data-mode="light"] .rd-mosque{ color:#7a5608; opacity:.14; }
   .ramadan-banner{ display:flex; align-items:center; justify-content:center; gap:12px; margin:0 0 14px; padding:12px 14px; border-radius:20px; text-align:center; border:1px solid rgba(var(--gold-rgb),.5); background:linear-gradient(120deg,rgba(var(--gold-rgb),.16),rgba(47,163,122,.12),rgba(var(--gold-rgb),.16)); background-size:200% 100%; animation:rbShimmer 7s linear infinite; box-shadow:0 0 18px rgba(var(--gold-rgb),.18); }
@@ -632,6 +632,78 @@ const RELIGIOUS_QUESTIONS_BANK = [
   .ramadan-banner span.rb-dua{ display:block; margin-top:2px; font-family:'Amiri',serif; font-size:15px; line-height:1.7; color:var(--text-light); opacity:.92; }
   @keyframes rbShimmer{ 0%{ background-position:0% 0; } 100%{ background-position:200% 0; } }
   @media (prefers-reduced-motion:reduce){ .ramadan-banner,.ramadan-banner .rb-ico,.rd-mosque .rd-win{ animation:none; } }
+
+  /* ===== ثيم رمضان (يُفعَّل من لوحة المشرف) ===== */
+  .ramadan-deco,.rd-mosque{ display:none; }
+  body.ramadan-theme .ramadan-deco,body.ramadan-theme .rd-mosque{ display:block; }
+  body.ramadan-theme .ramadan-badge{ display:inline-block; }
+  body.ramadan-theme{
+    --bg-deep:#0b0e2e; --bg-deep2:#231650;
+    --gold:#e0b44a; --gold-light:#ffe08a;
+    --text-light:#f6f1ff; --text-dim:#b7b4dc;
+    --ok:#62e0c2; --danger:#ff7b8a;
+    --gold-rgb:224,180,74; --bg2-rgb:8,8,34;
+    background:
+      radial-gradient(circle at 15% 6%, #3b2a8a 0%, transparent 46%),
+      radial-gradient(circle at 90% 10%, #e0b44a24 0%, transparent 40%),
+      radial-gradient(circle at 85% 92%, #2dd4bf1c 0%, transparent 42%),
+      linear-gradient(165deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
+  }
+  body.ramadan-theme input[type=text],body.ramadan-theme input[type=password],body.ramadan-theme input[type=search],body.ramadan-theme input[type=number],body.ramadan-theme input[type=date],body.ramadan-theme .admin-input{ background:rgba(8,8,34,.62); border-color:rgba(224,180,74,.4); }
+  body.ramadan-theme .card{ border-color:rgba(224,180,74,.34); background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(130,100,255,.05)); box-shadow:0 14px 34px rgba(5,4,30,.5); }
+  body.ramadan-theme .btn{ background:linear-gradient(var(--btn-angle),#e0b44a,#ffe08a); color:#1b1247; box-shadow:0 10px 24px rgba(224,180,74,.3); }
+  body.ramadan-theme .btn:disabled{ background:#2c2a5a; color:#8a88b8; box-shadow:none; }
+  body.ramadan-theme .progress-bar-fill{ background:linear-gradient(90deg,#e0b44a,#62e0c2); }
+  body.ramadan-theme .category-band.cat-learn{ background:linear-gradient(120deg,#6a4be0,#1a1250); box-shadow:0 10px 24px rgba(106,75,224,.35); }
+  body.ramadan-theme .category-band.cat-social{ background:linear-gradient(120deg,#d2538f,#3a1140); box-shadow:0 10px 24px rgba(210,83,143,.3); }
+  body.ramadan-theme .category-band.cat-account{ background:linear-gradient(120deg,#e0b44a,#6a3b8a); box-shadow:0 10px 24px rgba(224,180,74,.3); }
+  body.ramadan-theme .category-band.cat-ramadan,.category-band.cat-ramadan{ background:linear-gradient(120deg,#ffcf5a,#7b3fe4); color:#1b1247; border-radius:24px; box-shadow:0 10px 26px rgba(255,207,90,.35); animation:rbShimmer 6s linear infinite; background-size:200% 100%; }
+  body.ramadan-theme .stack-item:nth-child(6n+1){ background:linear-gradient(100deg,#ffe08a,#f6c85f); color:#2b1a05; }
+  body.ramadan-theme .stack-item:nth-child(6n+2){ background:linear-gradient(100deg,#8f7bff,#c3b8ff); color:#140c3a; }
+  body.ramadan-theme .stack-item:nth-child(6n+3){ background:linear-gradient(100deg,#2dd4bf,#8ef0e2); color:#052a26; }
+  body.ramadan-theme .stack-item:nth-child(6n+4){ background:linear-gradient(100deg,#ff8fb8,#ffc4da); color:#3a0a22; }
+  body.ramadan-theme .stack-item:nth-child(6n+5){ background:linear-gradient(100deg,#7cc4ff,#c6e5ff); color:#08243d; }
+  body.ramadan-theme .stack-item:nth-child(6n+0){ background:linear-gradient(100deg,#ffb36b,#ffd9b0); color:#3a1a04; }
+  body.ramadan-theme[data-mode="light"]{
+    --bg-deep:#fff4dc; --bg-deep2:#f1e9ff;
+    --text-light:#2a1b55; --text-dim:#6a5e92;
+    --gold:#c8962a; --gold-light:#e8c46a; --gold-text:#7a5200; --gold-light-text:#7a5200;
+    --ok:#1f9d83; --danger:#c8434e; --gold-rgb:200,150,42;
+    background:
+      radial-gradient(circle at 12% 8%, #ffffff 0%, transparent 48%),
+      radial-gradient(circle at 92% 12%, #b9a3ff33 0%, transparent 44%),
+      radial-gradient(circle at 88% 90%, #ffd77a44 0%, transparent 42%),
+      linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-deep2) 100%);
+  }
+  body.ramadan-theme[data-mode="light"] input[type=text],body.ramadan-theme[data-mode="light"] input[type=password],body.ramadan-theme[data-mode="light"] input[type=search],body.ramadan-theme[data-mode="light"] input[type=number],body.ramadan-theme[data-mode="light"] input[type=date],body.ramadan-theme[data-mode="light"] .admin-input{ background:rgba(255,255,255,.88); color:var(--text-light); }
+  body.ramadan-theme[data-mode="light"] .card{ background:linear-gradient(160deg,rgba(255,255,255,.85),rgba(255,255,255,.6)); box-shadow:0 12px 28px rgba(90,60,160,.14); }
+
+  .ramadan-banner .rb-day{ display:block; font-size:11px; color:var(--text-dim); margin-top:2px; }
+
+  /* ===== صفحة رمضان ===== */
+  .rm-tabs{ display:flex; flex-wrap:wrap; gap:6px; margin:12px 0 14px; }
+  .rm-tab{ flex:1 0 30%; padding:9px 12px; border-radius:14px; border:1px solid rgba(var(--gold-rgb),.35); background:rgba(255,255,255,.04); color:var(--text-light); font-family:'Cairo',sans-serif; font-weight:700; font-size:13px; cursor:pointer; white-space:nowrap; }
+  .rm-tab.active{ background:linear-gradient(120deg,var(--gold),var(--gold-light)); color:#1b1247; border-color:transparent; }
+  .rm-sec{ border:1px solid rgba(var(--gold-rgb),.25); border-radius:18px; padding:16px; margin-bottom:14px; background:rgba(255,255,255,.03); }
+  .rm-sec h3{ font-family:'Amiri',serif; color:var(--gold-light-text); margin:0 0 10px; font-size:18px; text-align:center; }
+  .rm-dua{ text-align:center; font-family:'Amiri',serif; font-size:18px; line-height:2; color:var(--text-light); }
+  .rm-dua small{ display:block; color:var(--text-dim); font-size:14px; margin-top:8px; line-height:1.9; }
+  .rm-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px; }
+  .rm-check{ display:flex; align-items:center; justify-content:center; gap:6px; padding:11px 10px; border-radius:14px; border:1px solid rgba(var(--gold-rgb),.3); background:rgba(255,255,255,.04); color:var(--text-light); font-family:'Cairo',sans-serif; font-weight:700; font-size:14px; cursor:pointer; }
+  .rm-check.on{ border-color:var(--ok); background:rgba(98,224,194,.15); color:var(--ok); }
+  .rm-juz{ grid-template-columns:repeat(6,1fr); }
+  .rm-juz .rm-check{ padding:10px 0; }
+  .rm-stats{ display:flex; gap:10px; margin-bottom:10px; }
+  .rm-stats > div{ flex:1; text-align:center; padding:10px; border-radius:14px; background:rgba(var(--gold-rgb),.1); border:1px solid rgba(var(--gold-rgb),.3); }
+  .rm-stats b{ display:block; font-size:18px; color:var(--gold-light-text); }
+  .rm-stats span{ font-size:11px; color:var(--text-dim); }
+  .rm-badges{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+  .rm-badge{ text-align:center; padding:10px 4px; border-radius:14px; border:1px dashed rgba(var(--gold-rgb),.35); opacity:.42; filter:grayscale(1); }
+  .rm-badge.on{ opacity:1; filter:none; border:1px solid var(--gold); background:rgba(var(--gold-rgb),.1); }
+  .rm-badge b{ display:block; font-size:12px; margin-top:4px; color:var(--text-light); }
+  .rm-badge small{ display:block; font-size:10px; color:var(--text-dim); }
+  .rm-sec select.admin-input{ margin-bottom:6px; }
+  .rm-sec input[type=text]{ margin-bottom:6px; }
 </style>
 </head>
 <body>
@@ -654,10 +726,10 @@ const RELIGIOUS_QUESTIONS_BANK = [
 </svg>
 <div class="ramadan-deco" aria-hidden="true">
   <div class="rd-bunting"></div>
-  <div class="rd-fanous" style="left:16%;--s:14px;--w:26px;--d:0s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
-  <div class="rd-fanous" style="left:31%;--s:30px;--w:30px;--d:-1.2s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
-  <div class="rd-fanous" style="left:50%;--s:16px;--w:24px;--d:-2.4s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
-  <div class="rd-fanous" style="left:66%;--s:34px;--w:28px;--d:-.6s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:16%;--s:8px;--w:26px;--d:0s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:31%;--s:20px;--w:30px;--d:-1.2s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:50%;--s:10px;--w:24px;--d:-2.4s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
+  <div class="rd-fanous" style="left:66%;--s:22px;--w:28px;--d:-.6s"><i></i><svg viewBox="0 0 40 62"><use href="#rd-fanous"/></svg></div>
   <svg class="rd-moon" viewBox="0 0 60 60"><circle cx="28" cy="30" r="22" fill="url(#rdG)" mask="url(#rdM)"/><polygon points="46,14 48,19.5 53.5,19.5 49,23 50.8,28.5 46,25.2 41.2,28.5 43,23 38.5,19.5 44,19.5" fill="#f1d98f"/></svg>
   <span class="rd-star" style="left:9%;top:42px;--d:-.4s">✦</span>
   <span class="rd-star" style="left:24%;top:78px;--d:-1.6s">✦</span>
@@ -2264,6 +2336,7 @@ function render(){
   if(view === 'quiz'){ renderQuiz(); return; }
   if(view === 'timerace'){ renderTimeRace(); return; }
   if(view === 'review'){ renderReview(); return; }
+  if(view === 'ramadan'){ renderRamadan(); return; }
   if(view === 'leaderboard'){ renderLeaderboard(); return; }
   if(view === 'profile'){ renderProfile(); return; }
   if(view === 'friends'){ renderFriends(); return; }
@@ -2282,6 +2355,7 @@ function render(){
 }
 
 function navigateToPage(target){
+  if(typeof target === 'string' && target.indexOf('ramadan:') === 0){ ramadanOpen(target.split(':')[1]); return; }
   if(target === 'quiz'){ ensureQuizDay(); quizAnswered=false; quizSelected=null; quizFeedback=''; quizCurrentIndex=null; }
   if(target === 'timerace'){ stopTimeRace(); trRace = { phase:'idle' }; trTop = null; }
   if(target === 'review'){ reviewAnswered=false; reviewSelected=null; reviewCurrentKey=null; }
@@ -2328,8 +2402,654 @@ const MAIN_CATEGORY_GROUPS = [
     ]}
 ];
 
+// ===================== وضع رمضان: مسابقات وميزات موسمية (يتحكم فيها المشرف) =====================
+const RAMADAN_DEFAULT_CFG = {
+  enabled:false, themeEnabled:false, startDate:'', dayOverride:'', daysCount:30, seasonId:'1',
+  ptsQuiz:10, ptsRiddle:15, ptsDeed:5, ptsWorship:2, ptsJuz:10, ptsDuelWin:20, days:{}, winners:[]
+};
+let RAMADAN_CFG = Object.assign({}, RAMADAN_DEFAULT_CFG);
+let ramadanCfgLoaded = false;
+let ramadanCfgUnsub = null;
+let ramadanTab = 'today';
+let ramadanBoard = null, ramadanBoardLoading = false;
+let ramadanDuels = null, ramadanDuelsLoading = false;
+let ramadanDuelPlay = null;
+let ramadanMsg = '';
+let ramadanWorshipDay = null;
+let ramadanAdminDay = 1;
+
+// ---- محتوى افتراضي (لأي يوم لم يكتب المشرف له محتوى) ----
+// [السؤال، الإجابة الصحيحة، خطأ1، خطأ2]
+const RAMADAN_QS = [
+  ['في أي شهر أُنزل القرآن الكريم؟','رمضان','شعبان','ذو الحجة'],
+  ['في أي سنة هجرية فُرض صيام رمضان؟','السنة الثانية','السنة الأولى','السنة العاشرة'],
+  ['ما اسم الباب في الجنة المخصص للصائمين؟','الريان','الفردوس','السلام'],
+  ['ما الغزوة التي وقعت في رمضان في السنة الثانية للهجرة؟','غزوة بدر الكبرى','غزوة أحد','غزوة الخندق'],
+  ['في أي سنة هجرية كان فتح مكة في رمضان؟','السنة الثامنة','السنة الخامسة','السنة الثانية'],
+  ['ما اسم الصلاة الخاصة بليالي رمضان بعد العشاء؟','التراويح','الاستسقاء','الكسوف'],
+  ['كم عدد أجزاء القرآن الكريم؟','ثلاثون جزءاً','عشرون جزءاً','أربعون جزءاً'],
+  ['ما اسم الليلة التي هي خير من ألف شهر؟','ليلة القدر','ليلة الإسراء','ليلة النصف من شعبان'],
+  ['ما السورة التي سُميت باسم ليلة نزول القرآن؟','سورة القدر','سورة الفاتحة','سورة الكوثر'],
+  ['ما أول ما نزل من القرآن الكريم؟','اقرأ باسم ربك الذي خلق','يا أيها المدثر','الحمد لله رب العالمين'],
+  ['من الملك الذي نزل بالقرآن على النبي ﷺ؟','جبريل عليه السلام','ميكائيل عليه السلام','إسرافيل عليه السلام'],
+  ['ما اسم الغار الذي نزل فيه الوحي أول مرة؟','غار حراء','غار ثور','غار أحد'],
+  ['كم عدد أركان الإسلام؟','خمسة','أربعة','ستة'],
+  ['ما الركن الرابع من أركان الإسلام؟','صوم رمضان','الزكاة','الحج'],
+  ['ماذا تسمى الوجبة التي قبل الفجر في رمضان؟','السحور','الغداء','العشاء'],
+  ['ما اسم العيد الذي يأتي بعد رمضان؟','عيد الفطر','عيد الأضحى','يوم عرفة'],
+  ['ما مقدار زكاة الفطر عن الفرد؟','صاع من طعام','نصف العشر','ربع العشر'],
+  ['من أول من أذّن في الإسلام؟','بلال بن رباح رضي الله عنه','أبو بكر الصديق رضي الله عنه','عمر بن الخطاب رضي الله عنه'],
+  ['ما الدعاء المأثور عند الإفطار؟','ذهب الظمأ وابتلت العروق وثبت الأجر إن شاء الله','دعاء الاستخارة','دعاء دخول المسجد'],
+  ['ما الاعتكاف؟','لزوم المسجد بنية التقرب إلى الله','السفر للعمرة','الصيام الدائم'],
+  ['ما الذي يُستحب في العشر الأواخر من رمضان؟','الاجتهاد في العبادة وقيام الليل','الإكثار من النوم','السفر الطويل'],
+  ['ما الذي نزل في ليلة القدر؟','القرآن الكريم','التوراة','الإنجيل'],
+  ['ماذا يفعل من أفطر في رمضان بعذر المرض؟','يقضي الأيام بعد رمضان','لا شيء عليه','يصوم يومين فقط'],
+  ['ما الشهر الذي يسبق رمضان؟','شعبان','رجب','شوال'],
+  ['ما الشهر الذي يلي رمضان؟','شوال','شعبان','ذو القعدة'],
+  ['ما حكم صيام رمضان على المسلم البالغ القادر؟','فرض','سنة','مستحب'],
+  ['ماذا يقول الصائم لمن شاتمه أو قاتله؟','إني امرؤ صائم','أنت أسوأ مني','لا أبالي'],
+  ['ما سن التكليف بالصيام؟','البلوغ','خمس سنوات','عشر سنوات فقط'],
+  ['في أي ليالي رمضان تُلتمس ليلة القدر؟','في العشر الأواخر وأرجاها الأوتار','في أول ليلة فقط','في العشر الأول فقط'],
+  ['ما الدعاء المأثور عند رؤية الهلال؟','اللهم أهلّه علينا بالأمن والإيمان','اللهم اغفر لي ذنبي','سبحان الله العظيم']
+];
+// [اللغز، [كلمات مقبولة للإجابة]، الإجابة المعروضة]
+const RAMADAN_RIDDLES = [
+  ['شهر في السنة نصوم فيه نهاراً ونقوم فيه ليلاً، فما هو؟',['رمضان'],'رمضان'],
+  ['ليلة خير من ألف شهر، فما هي؟',['القدر','ليلةالقدر'],'ليلة القدر'],
+  ['أمنع الطعام والشراب من الفجر إلى الغروب، فمن أنا؟',['الصيام','الصوم','صيام','صوم'],'الصيام'],
+  ['وجبة تؤكل قبل الفجر وفيها بركة، فما هي؟',['السحور','سحور'],'السحور'],
+  ['أضيء الشوارع في رمضان وأتدلى من الأسقف، فمن أنا؟',['فانوس','الفانوس','فوانيس'],'الفانوس'],
+  ['صلاة تكون في ليالي رمضان بعد العشاء، فما هي؟',['التراويح','تراويح','القيام'],'التراويح'],
+  ['من لُقّب بأمين هذه الأمة؟',['عبيده','ابوعبيده'],'أبو عبيدة بن الجراح'],
+  ['من هو مؤذن رسول الله ﷺ؟',['بلال'],'بلال بن رباح'],
+  ['ما الكتاب الذي نزل في شهر رمضان؟',['القران','قران','القرآن'],'القرآن الكريم'],
+  ['من الخليفة الذي لُقّب بالفاروق؟',['عمر'],'عمر بن الخطاب'],
+  ['من الصحابي الملقب بسيف الله المسلول؟',['خالد'],'خالد بن الوليد'],
+  ['ما الغزوة التي سُمّيت يوم الفرقان؟',['بدر'],'غزوة بدر'],
+  ['من أول من آمن برسول الله ﷺ من النساء؟',['خديجه'],'خديجة رضي الله عنها'],
+  ['من أول الرجال الأحرار إسلاماً؟',['ابوبكر','بكر'],'أبو بكر الصديق'],
+  ['ما السورة التي تعدل ثلث القرآن؟',['الاخلاص','اخلاص'],'سورة الإخلاص'],
+  ['ما أعظم آية في القرآن الكريم؟',['الكرسي','ايهالكرسي','اية الكرسي'],'آية الكرسي'],
+  ['كم عدد سور القرآن الكريم؟',['114','١١٤','مئهواربعهعشر'],'114 سورة'],
+  ['ما أطول سورة في القرآن؟',['البقره','بقره'],'سورة البقرة'],
+  ['ما أقصر سورة في القرآن؟',['الكوثر','كوثر'],'سورة الكوثر'],
+  ['من النبي الذي رفع قواعد الكعبة مع ابنه إسماعيل؟',['ابراهيم'],'إبراهيم عليه السلام'],
+  ['من النبي الذي ابتلعه الحوت؟',['يونس','ذاالنون'],'يونس عليه السلام'],
+  ['من النبي الذي صنع السفينة بأمر الله؟',['نوح'],'نوح عليه السلام'],
+  ['ما اسم ناقة النبي ﷺ؟',['القصواء','قصواء'],'القصواء'],
+  ['من عمّ النبي ﷺ الملقب بأسد الله؟',['حمزه'],'حمزة بن عبد المطلب'],
+  ['في أي مدينة وُلد النبي ﷺ؟',['مكه','مكة'],'مكة المكرمة'],
+  ['إلى أي مدينة هاجر النبي ﷺ؟',['المدينه','مدينه','يثرب','طيبه'],'المدينة المنورة'],
+  ['ما اسم أول مسجد بُني في الإسلام؟',['قباء'],'مسجد قباء'],
+  ['ما القبلة الأولى للمسلمين؟',['المقدس','بيتالمقدس','الاقصي'],'بيت المقدس'],
+  ['ما الجبل الذي يقف عنده الحجاج في التاسع من ذي الحجة؟',['عرفه','عرفات'],'جبل عرفة'],
+  ['ما اسم البئر المباركة التي بجوار الكعبة؟',['زمزم'],'بئر زمزم']
+];
+const RAMADAN_DEEDS = [
+  'اتصل بقريب لم تكلمه منذ فترة','تصدّق بما تستطيع ولو كان قليلاً','أفطِر صائماً أو شارك في إفطار جماعي','ابتسم في وجه ثلاثة أشخاص اليوم',
+  'اقرأ صفحة من القرآن وأهدِ ثوابها لوالديك','تعلّم دعاءً جديداً واحفظه','ساعد زميلاً في مذاكرة مادة ما','اتصل بمريض أو زره',
+  'اعتذر لمن أخطأت في حقه','تصدّق بشيء غير مستخدم من أغراضك','صلِّ ركعتين في جوف الليل','أصلح بين اثنين متخاصمين',
+  'اكتب ثلاث نعم تشكر الله عليها','احفظ آية جديدة','أرسل رسالة خير لصديق','اجلس مع جدك أو جدتك',
+  'نظّف مكاناً عاماً أو اغرس شيئاً','أكثر من الاستغفار مئة مرة','صلِّ على النبي ﷺ مئة مرة','تصدّق في السر',
+  'ادعُ لثلاثة أشخاص بظهر الغيب','ساعد في أعمال البيت دون أن يُطلب منك','اقرأ تفسير آية تحبها','أطعم مسكيناً أو حيواناً جائعاً',
+  'اشكر معلماً على جهده','تجنّب الغيبة طوال اليوم','صلِّ الفجر في جماعة','اكتب أهدافك للعام القادم',
+  'اعفُ عمّن ظلمك والتمس له عذراً','احمد الله على إتمام الشهر وادعُ بقبول الأعمال'
+];
+const RAMADAN_HADITHS = [
+  'قال ﷺ: «من صام رمضان إيماناً واحتساباً غُفر له ما تقدّم من ذنبه»',
+  'قال ﷺ: «الصيام جُنّة»',
+  'قال ﷺ: «للصائم فرحتان: فرحة عند فطره، وفرحة عند لقاء ربه»',
+  'قال ﷺ: «من قام رمضان إيماناً واحتساباً غُفر له ما تقدّم من ذنبه»',
+  'قال ﷺ: «من فطّر صائماً كان له مثل أجره»',
+  'قال ﷺ: «تسحّروا فإن في السحور بركة»',
+  'قال ﷺ: «إذا جاء رمضان فُتّحت أبواب الجنة وغُلّقت أبواب النار وصُفّدت الشياطين»',
+  'قال ﷺ: «من قام ليلة القدر إيماناً واحتساباً غُفر له ما تقدّم من ذنبه»',
+  'قال ﷺ: «من لم يدع قول الزور والعمل به فليس لله حاجة في أن يدع طعامه وشرابه»',
+  'عن ابن عباس رضي الله عنهما: كان النبي ﷺ أجود الناس، وكان أجود ما يكون في رمضان'
+];
+const RAMADAN_DUAS_ALL = [
+  'اللهم بلّغنا رمضان وأعنّا على صيامه وقيامه','اللهم إنك عفوّ تحب العفو فاعف عنا','اللهم تقبّل منا الصيام والقيام وصالح الأعمال',
+  'ذهب الظمأ وابتلّت العروق وثبت الأجر إن شاء الله','اللهم اجعلنا فيه من عتقائك من النار','تقبّل الله منا ومنكم صالح الأعمال',
+  'اللهم أعنّا على ذكرك وشكرك وحسن عبادتك','اللهم اغفر لنا ولوالدينا وللمسلمين','ربنا آتنا في الدنيا حسنة وفي الآخرة حسنة وقنا عذاب النار',
+  'اللهم اجعل القرآن ربيع قلوبنا ونور صدورنا','اللهم ارزقنا العلم النافع والعمل الصالح','اللهم بارك لنا في أوقاتنا وأعمالنا',
+  'اللهم اهدنا فيمن هديت وعافنا فيمن عافيت','اللهم ثبّتنا على دينك حتى نلقاك','اللهم لك صمنا وعلى رزقك أفطرنا فتقبّل منا'
+];
+
+// ---- أدوات ----
+function ramadanNorm(s){
+  return String(s||'').replace(/[٠-٩]/g,c=>String(c.charCodeAt(0)-1632))
+    .replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه')
+    .replace(/[^\u0600-\u06FFa-zA-Z0-9]/g,'').replace(/^ال/,'').toLowerCase();
+}
+function ramadanActive(){ return ramadanCfgLoaded && RAMADAN_CFG.enabled === true; }
+function applyRamadanTheme(){
+  try{ document.body.classList.toggle('ramadan-theme', ramadanCfgLoaded && RAMADAN_CFG.themeEnabled === true); }catch(e){}
+}
+function listenRamadanConfig(){
+  if(ramadanCfgUnsub) return;
+  try{
+    ramadanCfgUnsub = db.collection('settings').doc('ramadan').onSnapshot(snap => {
+      const d = snap.exists ? snap.data() : {};
+      RAMADAN_CFG = Object.assign({}, RAMADAN_DEFAULT_CFG, d, { days: d.days || {}, winners: Array.isArray(d.winners) ? d.winners : [] });
+      ramadanCfgLoaded = true;
+      applyRamadanTheme();
+      if(['main','login','register','ramadan'].indexOf(view) !== -1 && !(view==='ramadan' && ramadanDuelPlay)) render();
+    }, e => { console.warn('ramadan config listen error', e); ramadanCfgLoaded = true; applyRamadanTheme(); });
+  }catch(e){ console.warn(e); }
+}
+function ramadanToday(){
+  const N = Number(RAMADAN_CFG.daysCount) || 30;
+  const ov = parseInt(RAMADAN_CFG.dayOverride, 10);
+  if(ov >= 1) return { status: ov > N ? 'after' : 'on', dayNo: Math.min(ov, N), N };
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(RAMADAN_CFG.startDate || ''));
+  if(!m) return { status:'unset', dayNo:0, N };
+  const start = new Date(+m[1], +m[2]-1, +m[3]);
+  const now = new Date();
+  const t0 = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const diff = Math.round((t0 - start) / 864e5);
+  if(diff < 0) return { status:'before', dayNo:0, N, daysLeft:-diff };
+  if(diff >= N) return { status:'after', dayNo:N, N };
+  return { status:'on', dayNo:diff+1, N };
+}
+function ramadanOptionsFor(day, right, wrongs){
+  const pos = (day * 2 + 1) % 3;
+  const o = wrongs.slice(0, 2); o.splice(pos, 0, right);
+  return { options:o, correct:pos };
+}
+function ramadanDayQuestion(n){
+  const c = (RAMADAN_CFG.days || {})[String(n)];
+  if(c && c.q && Array.isArray(c.options) && c.options.length === 3 && c.options.every(Boolean)){
+    return { q:String(c.q), options:c.options.map(String), correct:Math.min(2, Math.max(0, Number(c.correct) || 0)) };
+  }
+  const d = RAMADAN_QS[(n-1) % RAMADAN_QS.length];
+  const r = ramadanOptionsFor(n, d[1], [d[2], d[3]]);
+  return { q:d[0], options:r.options, correct:r.correct };
+}
+function ramadanDayRiddle(n){
+  const c = (RAMADAN_CFG.days || {})[String(n)];
+  if(c && c.riddleQ && c.riddleA){
+    const parts = String(c.riddleA).split(/[,،]/).map(x => x.trim()).filter(Boolean);
+    return { q:String(c.riddleQ), keys:parts.map(ramadanNorm).filter(Boolean), show:parts[0] || '' };
+  }
+  const d = RAMADAN_RIDDLES[(n-1) % RAMADAN_RIDDLES.length];
+  return { q:d[0], keys:d[1].map(ramadanNorm), show:d[2] };
+}
+function ramadanDayInfo(n){
+  const c = (RAMADAN_CFG.days || {})[String(n)] || {};
+  return {
+    deed: c.deed || RAMADAN_DEEDS[(n-1) % RAMADAN_DEEDS.length],
+    dua: c.dua || RAMADAN_DUAS_ALL[(n-1) % RAMADAN_DUAS_ALL.length],
+    hadith: c.hadith || RAMADAN_HADITHS[(n-1) % RAMADAN_HADITHS.length]
+  };
+}
+function ramadanBannerHtml(){
+  if(!(ramadanCfgLoaded && RAMADAN_CFG.themeEnabled)) return '';
+  const t = ramadanToday();
+  const dua = (ramadanActive() && t.status === 'on') ? ramadanDayInfo(t.dayNo).dua : ramadanDua();
+  const sub = (ramadanActive() && t.status === 'on') ? `<small class="rb-day">اليوم ${t.dayNo} من ${t.N}</small>` : '';
+  return `<div class="ramadan-banner"><span class="rb-ico">🌙</span><div><b>رمضان كريم</b>${sub}<span class="rb-dua">${adminEsc(dua)}</span></div><span class="rb-ico">🏮</span></div>`;
+}
+function mainGroups(){
+  if(!ramadanActive()) return MAIN_CATEGORY_GROUPS;
+  return [{ key:'ramadan', cls:'cat-ramadan', label:'🌙 رمضان', items:[
+    { key:'ramadan:today', label:'❓ سؤال وفزورة اليوم' },
+    { key:'ramadan:worship', label:'🕌 متتبع العبادات' },
+    { key:'ramadan:khatma', label:'📖 ختمة القرآن' },
+    { key:'ramadan:duel', label:'⚔️ دويلو رمضان' },
+    { key:'ramadan:board', label:'🏆 متصدرو رمضان' }
+  ]}].concat(MAIN_CATEGORY_GROUPS);
+}
+function ramadanOpen(tab){
+  ramadanTab = tab || 'today';
+  ramadanBoard = null; ramadanDuels = null; ramadanDuelPlay = null; ramadanMsg = ''; ramadanWorshipDay = null;
+  prevView = view; view = 'ramadan'; render();
+}
+
+// ---- حالة الطالب ----
+function ensureRamadanState(){
+  if(!ramadanCfgLoaded || !state) return null;
+  const seas = String(RAMADAN_CFG.seasonId || '1');
+  if(!state.ramadan || state.ramadan.season !== seas){
+    state.ramadan = { season:seas };
+  }
+  const r = state.ramadan;
+  r.quiz = r.quiz || {}; r.quizPick = r.quizPick || {}; r.riddle = r.riddle || {}; r.riddleTry = r.riddleTry || {};
+  r.deed = r.deed || {}; r.worship = r.worship || {}; r.wAw = r.wAw || {};
+  if(!Array.isArray(r.juz) || r.juz.length !== 30) r.juz = new Array(30).fill(0);
+  r.juzAw = r.juzAw || {};
+  r.rPoints = Number(r.rPoints) || 0; r.khatmas = Number(r.khatmas) || 0;
+  r.duelWins = Number(r.duelWins) || 0; r.duelPlayed = Number(r.duelPlayed) || 0;
+  return r;
+}
+function ramadanAward(p){
+  p = Number(p) || 0; if(p <= 0) return;
+  const r = ensureRamadanState(); if(!r) return;
+  addXP(p); r.rPoints += p;
+}
+const RAMADAN_WORSHIP = [
+  ['fajr','🌅 الفجر'],['dhuhr','☀️ الظهر'],['asr','🌤️ العصر'],['maghrib','🌇 المغرب'],['isha','🌙 العشاء'],
+  ['fast','🕋 الصيام'],['tarawih','✨ التراويح'],['wird','📖 ورد القرآن'],['adhkar','📿 الأذكار'],['sadaqa','💝 صدقة']
+];
+function ramadanDayComplete(r, d){
+  const w = r.worship[d] || {};
+  return ['fajr','dhuhr','asr','maghrib','isha','fast'].every(k => w[k]);
+}
+function ramadanStreak(r, today){
+  let s = 0, d = today;
+  if(d >= 1 && !ramadanDayComplete(r, d)) d--;
+  while(d >= 1 && ramadanDayComplete(r, d)){ s++; d--; }
+  return s;
+}
+function ramadanBadges(r, N){
+  const fullDays = Object.keys(r.worship).filter(d => ramadanDayComplete(r, d)).length;
+  const riddles = Object.keys(r.riddle).filter(d => r.riddle[d] === 'ok').length;
+  const quizOk = Object.keys(r.quiz).filter(d => r.quiz[d] === 'ok').length;
+  const deeds = Object.keys(r.deed).length;
+  const juz = r.juz.filter(Boolean).length;
+  return [
+    { ico:'🌱', name:'بداية موفقة', ok:fullDays >= 3, hint:'٣ أيام مكتملة' },
+    { ico:'🌙', name:'أسبوع النور', ok:fullDays >= 7, hint:'٧ أيام مكتملة' },
+    { ico:'⭐', name:'منتصف الشهر', ok:fullDays >= 15, hint:'١٥ يوماً مكتملاً' },
+    { ico:'🏅', name:'صائم متميز', ok:fullDays >= N, hint:'كل أيام الشهر' },
+    { ico:'📖', name:'ختمت القرآن', ok:juz >= 30, hint:'٣٠ جزءاً' },
+    { ico:'🧩', name:'فوّاز رمضان', ok:riddles >= 10, hint:'١٠ فوازير' },
+    { ico:'🎓', name:'عالم رمضان', ok:quizOk >= 15, hint:'١٥ سؤالاً صحيحاً' },
+    { ico:'💝', name:'فاعل خير', ok:deeds >= 15, hint:'١٥ عملاً' },
+    { ico:'⚔️', name:'فارس التحدي', ok:r.duelWins >= 3, hint:'٣ انتصارات' }
+  ];
+}
+
+// ---- أفعال الطالب ----
+function ramadanAnswerQuiz(i){
+  const r = ensureRamadanState(), t = ramadanToday(); if(!r || t.status !== 'on') return;
+  const d = t.dayNo; if(r.quiz[d]) return;
+  const q = ramadanDayQuestion(d);
+  r.quizPick[d] = i;
+  if(i === q.correct){ r.quiz[d] = 'ok'; state.correctAnswers = (state.correctAnswers || 0) + 1; ramadanAward(RAMADAN_CFG.ptsQuiz); }
+  else r.quiz[d] = 'bad';
+  persist(); render();
+}
+function ramadanSubmitRiddle(){
+  const r = ensureRamadanState(), t = ramadanToday(); if(!r || t.status !== 'on') return;
+  const d = t.dayNo; if(r.riddle[d]) return;
+  const inp = document.getElementById('rm-riddle-input'); const u = ramadanNorm(inp ? inp.value : '');
+  if(!u){ ramadanMsg = 'اكتب إجابتك أولاً'; render(); return; }
+  const rd = ramadanDayRiddle(d);
+  const hit = rd.keys.some(k => u === k || (k.length >= 3 && u.indexOf(k) !== -1) || (u.length >= 3 && k.indexOf(u) !== -1));
+  if(hit){ r.riddle[d] = 'ok'; ramadanMsg = ''; ramadanAward(RAMADAN_CFG.ptsRiddle); }
+  else {
+    r.riddleTry[d] = (r.riddleTry[d] || 0) + 1;
+    if(r.riddleTry[d] >= 3){ r.riddle[d] = 'bad'; ramadanMsg = ''; }
+    else ramadanMsg = 'إجابة غير صحيحة، حاول مرة أخرى (' + (3 - r.riddleTry[d]) + ' محاولات متبقية)';
+  }
+  persist(); render();
+}
+function ramadanDoDeed(){
+  const r = ensureRamadanState(), t = ramadanToday(); if(!r || t.status !== 'on') return;
+  const d = t.dayNo; if(r.deed[d]) return;
+  r.deed[d] = 1; ramadanAward(RAMADAN_CFG.ptsDeed); persist(); render();
+}
+function ramadanToggleWorship(day, key){
+  const r = ensureRamadanState(); if(!r) return;
+  r.worship[day] = r.worship[day] || {};
+  const nowOn = !r.worship[day][key];
+  r.worship[day][key] = nowOn ? 1 : 0;
+  const awKey = day + '_' + key;
+  if(nowOn && !r.wAw[awKey]){ r.wAw[awKey] = 1; ramadanAward(RAMADAN_CFG.ptsWorship); }
+  persist(); render();
+}
+function ramadanToggleJuz(i){
+  const r = ensureRamadanState(); if(!r) return;
+  const nowOn = !r.juz[i];
+  r.juz[i] = nowOn ? 1 : 0;
+  if(nowOn && !r.juzAw[i]){ r.juzAw[i] = 1; ramadanAward(RAMADAN_CFG.ptsJuz); }
+  if(r.juz.every(Boolean) && !r.khatmaAw){ r.khatmaAw = 1; r.khatmas += 1; ramadanAward((Number(RAMADAN_CFG.ptsJuz) || 0) * 5); }
+  persist(); render();
+}
+
+// ---- المتصدرون ----
+async function loadRamadanBoard(){
+  ramadanBoardLoading = true;
+  try{
+    const snap = await db.collection('accounts').get();
+    const seas = String(RAMADAN_CFG.seasonId || '1');
+    const rows = [];
+    snap.forEach(doc => {
+      const d = doc.data(); const name = d.username || doc.id;
+      if(name === SUPER_ADMIN_USERNAME) return;
+      const rs = (d.state || {}).ramadan;
+      if(!rs || rs.season !== seas) return;
+      const p = Number(rs.rPoints) || 0; if(p <= 0) return;
+      rows.push({ username:name, points:p, juz:(rs.juz || []).filter(Boolean).length });
+    });
+    rows.sort((a, b) => b.points - a.points);
+    ramadanBoard = rows.slice(0, 50);
+  }catch(e){ console.error(e); ramadanBoard = []; }
+  ramadanBoardLoading = false;
+  if(view === 'ramadan') render();
+}
+
+// ---- دويلو رمضان (تحدٍّ غير متزامن بين اثنين، 5 أسئلة) ----
+function ramadanPickDuelQs(){
+  const idx = Array.from({ length:30 }, (_, i) => i);
+  for(let i = idx.length - 1; i > 0; i--){ const j = Math.floor(Math.random() * (i + 1)); const t = idx[i]; idx[i] = idx[j]; idx[j] = t; }
+  return idx.slice(0, 5);
+}
+async function loadRamadanDuels(){
+  ramadanDuelsLoading = true;
+  try{
+    const seas = String(RAMADAN_CFG.seasonId || '1');
+    const [a, b] = await Promise.all([
+      db.collection('ramadan_duels').where('to', '==', currentUser).get(),
+      db.collection('ramadan_duels').where('from', '==', currentUser).get()
+    ]);
+    const map = {};
+    [a, b].forEach(s => s.forEach(doc => { map[doc.id] = Object.assign({ id:doc.id }, doc.data()); }));
+    ramadanDuels = Object.keys(map).map(k => map[k]).filter(x => String(x.season || '') === seas)
+      .sort((x, y) => (y.createdAtMs || 0) - (x.createdAtMs || 0)).slice(0, 30);
+    for(const x of ramadanDuels){
+      if(x.status === 'done' && x.winner === currentUser && !x.claimed){
+        try{
+          await db.collection('ramadan_duels').doc(x.id).update({ claimed:true }); x.claimed = true;
+          const r = ensureRamadanState();
+          if(r){ r.duelWins += 1; ramadanAward(RAMADAN_CFG.ptsDuelWin); persist(); }
+        }catch(e){ console.warn(e); }
+      }
+    }
+  }catch(e){ console.error(e); ramadanDuels = []; }
+  ramadanDuelsLoading = false;
+  if(view === 'ramadan' && !ramadanDuelPlay) render();
+}
+function ramadanDuelStart(opponent, existing){
+  ramadanDuelPlay = { opponent, existing:existing || null, qs:existing ? existing.qs : ramadanPickDuelQs(), idx:0, score:0, picked:null, done:false, result:'' };
+  render();
+}
+async function ramadanDuelFinish(){
+  const p = ramadanDuelPlay; if(!p) return;
+  const seas = String(RAMADAN_CFG.seasonId || '1');
+  try{
+    if(p.existing){
+      let winner = 'draw';
+      if(p.score > Number(p.existing.fromScore || 0)) winner = currentUser;
+      else if(p.score < Number(p.existing.fromScore || 0)) winner = p.existing.from;
+      await db.collection('ramadan_duels').doc(p.existing.id).update({ toScore:p.score, status:'done', winner });
+      p.result = winner === 'draw' ? 'تعادل! 🤝' : (winner === currentUser ? 'فزت بالتحدي! 🎉 ستصلك نقاط الفوز' : 'خسرت هذه الجولة، حظاً أوفر 💪');
+    }else{
+      await db.collection('ramadan_duels').add({ from:currentUser, to:p.opponent, qs:p.qs, fromScore:p.score, toScore:null, status:'pending', winner:null, claimed:false, season:seas, createdAtMs:Date.now() });
+      p.result = 'أُرسل التحدي إلى ' + p.opponent + ' — نتيجتك ' + p.score + '/5. سيظهر الفائز بعد أن يلعب.';
+    }
+    const r = ensureRamadanState(); if(r){ r.duelPlayed += 1; persist(); }
+  }catch(e){ console.error(e); p.result = 'تعذر حفظ التحدي، تأكد من الاتصال وحاول مرة أخرى.'; }
+  p.done = true; ramadanDuels = null; render();
+}
+
+// ---- الواجهة ----
+function ramadanDuelPlayHtml(){
+  const p = ramadanDuelPlay;
+  if(p.done) return `<div class="rm-sec"><h3>نتيجة التحدي</h3><div class="quiz-feedback ok" style="font-size:15px">النتيجة: ${p.score} / 5</div><div class="locked-note">${adminEsc(p.result)}</div><button class="btn" id="rm-duel-exit">رجوع للتحديات</button></div>`;
+  const q = ramadanDayQuestion(p.qs[p.idx] + 1);
+  const answered = p.picked !== null;
+  return `<div class="rm-sec">
+    <h3>⚔️ تحدي ${p.existing ? adminEsc(p.existing.from) : adminEsc(p.opponent)} — سؤال ${p.idx + 1} من 5</h3>
+    <div class="quiz-q">${adminEsc(q.q)}</div>
+    ${q.options.map((o, i) => { let cls = 'quiz-opt'; if(answered){ if(i === q.correct) cls += ' correct'; else if(i === p.picked) cls += ' wrong'; } return `<button class="${cls}" data-dq="${i}" ${answered ? 'disabled' : ''}>${adminEsc(o)}</button>`; }).join('')}
+    ${answered ? `<button class="btn" id="rm-duel-next">${p.idx >= 4 ? 'إنهاء التحدي' : 'السؤال التالي'}</button>` : ''}
+  </div>`;
+}
+function ramadanTodayHtml(r, t){
+  if(t.status === 'unset') return `<div class="rm-sec"><div class="locked-note">لم يحدد المشرف موعد بداية رمضان بعد 🌙<br>ترقّب افتتاح المسابقات قريباً.</div></div>`;
+  if(t.status === 'before') return `<div class="rm-sec"><div class="locked-note">ستبدأ مسابقات رمضان بعد <b>${t.daysLeft}</b> يوم 🌙<br>استعد بالدعاء: «اللهم بلّغنا رمضان».</div></div>`;
+  if(t.status === 'after') return `<div class="rm-sec"><div class="locked-note">انتهى شهر رمضان، تقبّل الله منا ومنكم 🤲<br>يمكنك مشاهدة ترتيب المتصدرين.</div></div>`;
+  const d = t.dayNo, q = ramadanDayQuestion(d), rd = ramadanDayRiddle(d), info = ramadanDayInfo(d);
+  const qs = r.quiz[d], rs = r.riddle[d];
+  const qHtml = `<div class="rm-sec"><h3>❓ سؤال اليوم</h3><div class="quiz-q">${adminEsc(q.q)}</div>
+    ${q.options.map((o, i) => { let cls = 'quiz-opt'; if(qs){ if(i === q.correct) cls += ' correct'; else if(i === Number(r.quizPick[d])) cls += ' wrong'; } return `<button class="${cls}" data-rq="${i}" ${qs ? 'disabled' : ''}>${adminEsc(o)}</button>`; }).join('')}
+    <div class="quiz-feedback ${qs === 'ok' ? 'ok' : qs === 'bad' ? 'err' : ''}">${qs === 'ok' ? 'أحسنت! +' + RAMADAN_CFG.ptsQuiz + ' نقطة 🎉' : qs === 'bad' ? 'إجابة غير صحيحة، عُد غداً بسؤال جديد' : ''}</div></div>`;
+  let rHtml = `<div class="rm-sec"><h3>🧩 فزورة اليوم</h3><div class="quiz-q">${adminEsc(rd.q)}</div>`;
+  if(rs === 'ok') rHtml += `<div class="quiz-feedback ok">إجابة صحيحة! +${RAMADAN_CFG.ptsRiddle} نقطة 🎉</div>`;
+  else if(rs === 'bad') rHtml += `<div class="quiz-feedback err">الإجابة: <b>${adminEsc(rd.show)}</b></div>`;
+  else rHtml += `<input type="text" id="rm-riddle-input" placeholder="اكتب إجابتك هنا"><button class="btn" id="rm-riddle-btn">تحقق من الإجابة</button><div class="quiz-feedback err">${adminEsc(ramadanMsg)}</div>`;
+  rHtml += `</div>`;
+  const dHtml = `<div class="rm-sec"><h3>💝 تحدي الخير اليومي</h3><div class="rm-dua" style="font-size:16px">${adminEsc(info.deed)}</div>
+    ${r.deed[d] ? `<div class="quiz-feedback ok">بارك الله فيك! +${RAMADAN_CFG.ptsDeed} نقطة ✅</div>` : `<button class="btn" id="rm-deed-btn">✅ عملتها اليوم</button>`}</div>`;
+  const cHtml = `<div class="rm-sec"><h3>🌙 دعاء وحديث اليوم</h3><div class="rm-dua">${adminEsc(info.dua)}<small>${adminEsc(info.hadith)}</small></div></div>`;
+  return qHtml + rHtml + dHtml + cHtml;
+}
+function ramadanWorshipHtml(r, t){
+  if(t.status !== 'on' && t.status !== 'after') return `<div class="rm-sec"><div class="locked-note">يُفتح متتبع العبادات مع بداية رمضان 🌙</div></div>`;
+  const maxDay = t.dayNo;
+  const day = Math.min(ramadanWorshipDay || maxDay, maxDay);
+  const w = r.worship[day] || {};
+  const daysOpts = Array.from({ length:maxDay }, (_, i) => `<option value="${i + 1}" ${i + 1 === day ? 'selected' : ''}>اليوم ${i + 1}${ramadanDayComplete(r, i + 1) ? ' ✅' : ''}</option>`).join('');
+  const streak = ramadanStreak(r, t.status === 'on' ? t.dayNo : 0);
+  const badges = ramadanBadges(r, t.N);
+  return `<div class="rm-sec"><h3>🕌 عباداتي</h3>
+    <div class="rm-stats"><div><b>🔥 ${streak}</b><span>أيام متتالية</span></div><div><b>✨ ${r.rPoints}</b><span>نقاط رمضان</span></div></div>
+    <select id="rm-wday" class="admin-input">${daysOpts}</select>
+    <div class="rm-grid">${RAMADAN_WORSHIP.map(([k, l]) => `<button class="rm-check ${w[k] ? 'on' : ''}" data-wk="${k}">${w[k] ? '✅' : '⬜'} ${l}</button>`).join('')}</div>
+    <div class="hint">اليوم المكتمل = الصلوات الخمس + الصيام. كل عبادة جديدة تعطيك ${RAMADAN_CFG.ptsWorship} نقطة.</div></div>
+    <div class="rm-sec"><h3>🏅 شاراتي</h3><div class="rm-badges">${badges.map(b => `<div class="rm-badge ${b.ok ? 'on' : ''}"><span style="font-size:26px">${b.ico}</span><b>${b.name}</b><small>${b.hint}</small></div>`).join('')}</div></div>`;
+}
+function ramadanKhatmaHtml(r){
+  const done = r.juz.filter(Boolean).length;
+  return `<div class="rm-sec"><h3>📖 ختمة القرآن</h3>
+    <div class="progress-wrap"><div class="progress-label"><span>تقدمك في الختمة</span><span>${done} / 30</span></div><div class="progress-bar"><div class="progress-bar-fill" style="width:${(done / 30) * 100}%"></div></div></div>
+    <div class="rm-grid rm-juz">${r.juz.map((v, i) => `<button class="rm-check ${v ? 'on' : ''}" data-juz="${i}">${i + 1}</button>`).join('')}</div>
+    <div class="hint">اضغط على رقم الجزء بعد إتمامه. كل جزء ${RAMADAN_CFG.ptsJuz} نقطة${r.khatmas ? ' • ختمت القرآن ' + r.khatmas + ' مرة 🎉' : ''}.</div></div>`;
+}
+function ramadanBoardHtml(){
+  const wins = RAMADAN_CFG.winners || [];
+  const winHtml = wins.length ? `<div class="rm-sec rm-winners"><h3>🎖️ فائزو رمضان</h3>${wins.map((w, i) => `<div class="rank-item rank-medal-${i + 1}"><div class="rank-left"><span class="rank-pos">${['🥇', '🥈', '🥉'][i] || i + 1}</span><span class="rank-name">${adminEsc(w.username)}</span></div><div class="rank-stats"><b>${Number(w.points) || 0}</b> نقطة</div></div>`).join('')}</div>` : '';
+  let list;
+  if(ramadanBoard === null) list = `<div class="loading">جارِ تحميل الترتيب...</div>`;
+  else if(!ramadanBoard.length) list = `<div class="hint">لا توجد نقاط بعد، كن أول المتصدرين! 🌙</div>`;
+  else list = ramadanBoard.map((x, i) => { const pos = i + 1; const medal = pos <= 3 ? ['🥇', '🥈', '🥉'][i] : null;
+    return `<div class="rank-item ${x.username === currentUser ? 'me' : ''} ${medal ? 'rank-medal-' + pos : ''}"><div class="rank-left"><span class="rank-pos">${medal || pos}</span><span class="rank-name">${adminEsc(x.username)}${x.username === currentUser ? ' (أنت)' : ''}</span></div><div class="rank-stats"><b>${x.points}</b> نقطة • ${x.juz} جزء</div></div>`; }).join('');
+  return winHtml + `<div class="rm-sec"><h3>🏆 متصدرو رمضان</h3>${list}</div>`;
+}
+function ramadanDuelHtml(r){
+  if(ramadanDuelPlay) return ramadanDuelPlayHtml();
+  let list;
+  if(ramadanDuels === null) list = `<div class="loading">جارِ تحميل التحديات...</div>`;
+  else if(!ramadanDuels.length) list = `<div class="hint">لا توجد تحديات بعد. تحدَّ صديقاً الآن! ⚔️</div>`;
+  else list = ramadanDuels.map(x => {
+    const mine = x.from === currentUser; const other = mine ? x.to : x.from;
+    if(x.status === 'pending'){
+      return mine
+        ? `<div class="rank-item"><div class="rank-left"><span class="rank-name">⏳ بانتظار ${adminEsc(other)}</span></div><div class="rank-stats">نتيجتك <b>${Number(x.fromScore) || 0}</b>/5</div></div>`
+        : `<div class="rank-item me"><div class="rank-left"><span class="rank-name">⚔️ ${adminEsc(other)} يتحداك</span></div><button class="admin-mini btn" data-duel-accept="${adminEsc(x.id)}">العب الآن</button></div>`;
+    }
+    const my = mine ? x.fromScore : x.toScore, his = mine ? x.toScore : x.fromScore;
+    const res = x.winner === 'draw' ? 'تعادل 🤝' : (x.winner === currentUser ? 'فزت 🎉' : 'خسرت 💪');
+    return `<div class="rank-item"><div class="rank-left"><span class="rank-name">${adminEsc(other)}</span></div><div class="rank-stats">${Number(my) || 0} - ${Number(his) || 0} • <b>${res}</b></div></div>`;
+  }).join('');
+  return `<div class="rm-sec"><h3>⚔️ تحدَّ صديقاً</h3>
+    <input type="text" id="rm-duel-opp" placeholder="اسم صديقك في المنصة">
+    <button class="btn" id="rm-duel-go">ابدأ التحدي (5 أسئلة رمضانية)</button>
+    <div class="quiz-feedback err">${adminEsc(ramadanMsg)}</div>
+    <div class="hint">تلعب أنت أولاً، ثم يلعب صديقك نفس الأسئلة. الفائز يحصل على ${RAMADAN_CFG.ptsDuelWin} نقطة.</div></div>
+    <div class="rm-sec"><h3>تحدياتي</h3>${list}</div>`;
+}
+function renderRamadan(){
+  const r = ensureRamadanState(); const t = ramadanToday();
+  if(!r || !ramadanActive()){ root.innerHTML = `${topNavHtml('ramadan')}<div class="card"><div class="locked-note">مسابقات رمضان غير مفعّلة حالياً 🌙</div></div>`; updateSyncBadge(); bindTopNav(); return; }
+  const tabs = [['today', '❓ اليوم'], ['worship', '🕌 العبادات'], ['khatma', '📖 الختمة'], ['duel', '⚔️ دويلو'], ['board', '🏆 المتصدرون']];
+  const head = t.status === 'on' ? `<span class="day-badge">🌙 اليوم ${t.dayNo} من ${t.N}</span>` : '';
+  let body = '';
+  if(ramadanTab === 'today') body = ramadanTodayHtml(r, t);
+  else if(ramadanTab === 'worship') body = ramadanWorshipHtml(r, t);
+  else if(ramadanTab === 'khatma') body = ramadanKhatmaHtml(r);
+  else if(ramadanTab === 'duel'){ if(ramadanDuels === null && !ramadanDuelsLoading && !ramadanDuelPlay) loadRamadanDuels(); body = ramadanDuelHtml(r); }
+  else if(ramadanTab === 'board'){ if(ramadanBoard === null && !ramadanBoardLoading) loadRamadanBoard(); body = ramadanBoardHtml(); }
+  root.innerHTML = `${topNavHtml('ramadan')}
+    <div class="card"><h2>🌙 رمضان كريم</h2><div style="text-align:center">${head}</div>
+      <div class="rm-tabs">${tabs.map(([k, l]) => `<button class="rm-tab ${ramadanTab === k ? 'active' : ''}" data-rtab="${k}">${l}</button>`).join('')}</div>
+      ${body}</div>`;
+  updateSyncBadge(); bindTopNav(); bindRamadan();
+}
+function bindRamadan(){
+  document.querySelectorAll('[data-rtab]').forEach(b => b.onclick = () => { ramadanTab = b.getAttribute('data-rtab'); ramadanMsg = ''; if(ramadanTab === 'board') ramadanBoard = null; if(ramadanTab === 'duel'){ ramadanDuels = null; ramadanDuelPlay = null; } render(); });
+  document.querySelectorAll('[data-rq]').forEach(b => b.onclick = () => ramadanAnswerQuiz(Number(b.getAttribute('data-rq'))));
+  const rb = document.getElementById('rm-riddle-btn'); if(rb) rb.onclick = ramadanSubmitRiddle;
+  const ri = document.getElementById('rm-riddle-input'); if(ri) ri.onkeydown = e => { if(e.key === 'Enter') ramadanSubmitRiddle(); };
+  const db1 = document.getElementById('rm-deed-btn'); if(db1) db1.onclick = ramadanDoDeed;
+  const wd = document.getElementById('rm-wday'); if(wd) wd.onchange = () => { ramadanWorshipDay = Number(wd.value); render(); };
+  document.querySelectorAll('[data-wk]').forEach(b => b.onclick = () => { const t = ramadanToday(); const sel = document.getElementById('rm-wday'); ramadanToggleWorship(sel ? Number(sel.value) : t.dayNo, b.getAttribute('data-wk')); });
+  document.querySelectorAll('[data-juz]').forEach(b => b.onclick = () => ramadanToggleJuz(Number(b.getAttribute('data-juz'))));
+  const go = document.getElementById('rm-duel-go');
+  if(go) go.onclick = async () => {
+    const opp = (document.getElementById('rm-duel-opp').value || '').trim();
+    if(!opp){ ramadanMsg = 'اكتب اسم صديقك'; render(); return; }
+    if(docId(opp) === docId(currentUser)){ ramadanMsg = 'لا يمكنك تحدي نفسك 😄'; render(); return; }
+    go.disabled = true; go.textContent = 'جارِ التحقق...';
+    try{ const acc = await fetchAccount(opp); if(!acc){ ramadanMsg = 'لا يوجد طالب بهذا الاسم'; render(); return; } ramadanMsg = ''; ramadanDuelStart(acc.username || opp, null); }
+    catch(e){ ramadanMsg = 'تعذر الاتصال، حاول مرة أخرى'; render(); }
+  };
+  document.querySelectorAll('[data-duel-accept]').forEach(b => b.onclick = () => { const x = (ramadanDuels || []).find(d => d.id === b.getAttribute('data-duel-accept')); if(x) ramadanDuelStart(x.from, x); });
+  document.querySelectorAll('[data-dq]').forEach(b => b.onclick = () => {
+    const p = ramadanDuelPlay; if(!p || p.picked !== null) return;
+    const i = Number(b.getAttribute('data-dq')); const q = ramadanDayQuestion(p.qs[p.idx] + 1);
+    p.picked = i; if(i === q.correct) p.score += 1; render();
+  });
+  const nx = document.getElementById('rm-duel-next');
+  if(nx) nx.onclick = () => { const p = ramadanDuelPlay; if(!p) return; if(p.idx >= 4){ nx.disabled = true; ramadanDuelFinish(); } else { p.idx += 1; p.picked = null; render(); } };
+  const ex = document.getElementById('rm-duel-exit'); if(ex) ex.onclick = () => { ramadanDuelPlay = null; ramadanDuels = null; render(); };
+}
+
+// ---- لوحة المشرف ----
+async function ramadanSaveCfg(patch){
+  await db.collection('settings').doc('ramadan').set(patch, { merge:true });
+  Object.keys(patch).forEach(k => { if(k !== 'days') RAMADAN_CFG[k] = patch[k]; });
+  if(patch.days) RAMADAN_CFG.days = Object.assign({}, RAMADAN_CFG.days, patch.days);
+  ramadanCfgLoaded = true; applyRamadanTheme();
+}
+function ramadanAdminHtml(){
+  const c = RAMADAN_CFG, d = ramadanAdminDay, cur = (c.days || {})[String(d)] || {};
+  const defQ = RAMADAN_QS[(d - 1) % RAMADAN_QS.length], defR = RAMADAN_RIDDLES[(d - 1) % RAMADAN_RIDDLES.length];
+  const t = ramadanToday();
+  const statusTxt = { unset:'لم يُحدد تاريخ البداية', before:'قبل رمضان (باقي ' + (t.daysLeft || 0) + ' يوم)', on:'اليوم ' + t.dayNo + ' من ' + t.N, after:'انتهى الشهر' }[t.status];
+  const opts = Array.from({ length:30 }, (_, i) => `<option value="${i + 1}" ${i + 1 === d ? 'selected' : ''}>اليوم ${i + 1}${(c.days || {})[String(i + 1)] ? ' ✏️' : ''}</option>`).join('');
+  const num = (id, label, v) => `<label><span>${label}</span><input type="number" dir="ltr" class="admin-input" id="${id}" value="${Number(v) || 0}" style="text-align:center"></label>`;
+  return `<div id="rm-adm-root">
+    <h3 class="admin-section-title">🌙 وضع رمضان</h3>
+    <div class="admin-chat-status"><span>ميزات رمضان (المسابقات والعبادات والختمة): <b>${c.enabled ? 'مفعّلة ✅' : 'متوقفة ⛔'}</b></span><button class="btn admin-mini ${c.enabled ? 'admin-danger' : 'admin-secondary'}" id="rm-toggle-enabled">${c.enabled ? 'إيقاف' : 'تشغيل'}</button></div>
+    <div class="admin-chat-status"><span>ثيم رمضان (الألوان والزينة والبانر): <b>${c.themeEnabled ? 'مفعّل ✅' : 'متوقف ⛔'}</b></span><button class="btn admin-mini ${c.themeEnabled ? 'admin-danger' : 'admin-secondary'}" id="rm-toggle-theme">${c.themeEnabled ? 'إيقاف' : 'تشغيل'}</button></div>
+    <div class="admin-actions"><button class="btn admin-mini" id="rm-all-on">🌙 تشغيل رمضان بالكامل</button><button class="btn admin-mini admin-danger" id="rm-all-off">إيقاف رمضان بالكامل</button></div>
+
+    <h3 class="admin-section-title" style="margin-top:22px">📅 موعد الشهر</h3>
+    <div class="admin-help">الحالة الآن: <b>${statusTxt}</b>. اختر تاريخ أول يوم في رمضان فيحسب التطبيق «اليوم كام» تلقائياً. للتجربة اكتب رقم يوم في الخانة الثانية (واتركها فاضية بعد التجربة).</div>
+    <label><span>أول يوم رمضان</span><input type="date" class="admin-input" id="rm-start" value="${adminEsc(c.startDate || '')}"></label>
+    <label><span>تجاهل التاريخ واعتبر اليوم رقم (اختياري)</span><input type="number" dir="ltr" class="admin-input" id="rm-override" min="1" max="30" value="${adminEsc(String(c.dayOverride || ''))}" style="text-align:center"></label>
+    <button class="btn admin-mini" id="rm-save-date">حفظ الموعد</button>
+
+    <h3 class="admin-section-title" style="margin-top:22px">🎯 النقاط</h3>
+    <div class="admin-grid" style="grid-template-columns:repeat(2,1fr)">${num('rm-p-quiz', 'سؤال اليوم', c.ptsQuiz)}${num('rm-p-riddle', 'الفزورة', c.ptsRiddle)}${num('rm-p-deed', 'تحدي الخير', c.ptsDeed)}${num('rm-p-worship', 'كل عبادة', c.ptsWorship)}${num('rm-p-juz', 'كل جزء', c.ptsJuz)}${num('rm-p-duel', 'الفوز بدويلو', c.ptsDuelWin)}</div>
+    <button class="btn admin-mini" id="rm-save-pts">حفظ النقاط</button>
+
+    <h3 class="admin-section-title" style="margin-top:22px">✏️ محتوى الأيام</h3>
+    <div class="admin-help">الأيام التي لا تكتب لها محتوى تستخدم محتوى افتراضياً جاهزاً (سؤال + فزورة + تحدي خير + دعاء + حديث). اكتب هنا فقط ما تريد تغييره.</div>
+    <select class="admin-input" id="rm-adm-day">${opts}</select>
+    <input type="text" class="admin-input" id="rm-f-q" placeholder="سؤال اليوم (الافتراضي: ${adminEsc(defQ[0])})" value="${adminEsc(cur.q || '')}">
+    <input type="text" class="admin-input" id="rm-f-o1" placeholder="الاختيار 1" value="${adminEsc((cur.options || [])[0] || '')}">
+    <input type="text" class="admin-input" id="rm-f-o2" placeholder="الاختيار 2" value="${adminEsc((cur.options || [])[1] || '')}">
+    <input type="text" class="admin-input" id="rm-f-o3" placeholder="الاختيار 3" value="${adminEsc((cur.options || [])[2] || '')}">
+    <select class="admin-input" id="rm-f-correct"><option value="0" ${Number(cur.correct) === 0 ? 'selected' : ''}>الإجابة الصحيحة: 1</option><option value="1" ${Number(cur.correct) === 1 ? 'selected' : ''}>الإجابة الصحيحة: 2</option><option value="2" ${Number(cur.correct) === 2 ? 'selected' : ''}>الإجابة الصحيحة: 3</option></select>
+    <input type="text" class="admin-input" id="rm-f-rq" placeholder="الفزورة (الافتراضي: ${adminEsc(defR[0])})" value="${adminEsc(cur.riddleQ || '')}">
+    <input type="text" class="admin-input" id="rm-f-ra" placeholder="إجابات الفزورة المقبولة مفصولة بفاصلة (مثال: رمضان, شهر رمضان)" value="${adminEsc(cur.riddleA || '')}">
+    <input type="text" class="admin-input" id="rm-f-deed" placeholder="تحدي الخير لهذا اليوم" value="${adminEsc(cur.deed || '')}">
+    <input type="text" class="admin-input" id="rm-f-dua" placeholder="دعاء اليوم" value="${adminEsc(cur.dua || '')}">
+    <input type="text" class="admin-input" id="rm-f-hadith" placeholder="حديث اليوم" value="${adminEsc(cur.hadith || '')}">
+    <div class="admin-actions"><button class="btn admin-mini" id="rm-save-day">حفظ اليوم ${d}</button><button class="btn admin-mini admin-danger" id="rm-reset-day">رجوع للافتراضي</button></div>
+    <div class="admin-help" style="margin-top:12px">رفع محتوى الأيام دفعة واحدة (ملف JSON مصفوفة عناصر، كل عنصر بهذا الشكل:</div><code dir="ltr" style="display:block;white-space:pre-wrap;word-break:break-all;font-size:10px;margin:6px 0;padding:8px;border-radius:8px;background:rgba(0,0,0,.25)">{"day":1,"q":"..","options":["..","..",".."],"correct":0,"riddleQ":"..","riddleA":"..","deed":"..","dua":"..","hadith":".."}</code>
+    <input type="file" accept="application/json,.json" class="admin-input" id="rm-days-file">
+
+    <h3 class="admin-section-title" style="margin-top:22px">🏆 المتصدرون والفائزون</h3>
+    <div class="admin-help">الفائزون المنشورون حالياً: <b>${(c.winners || []).length ? c.winners.map(w => adminEsc(w.username) + ' (' + (Number(w.points) || 0) + ')').join(' • ') : 'لا يوجد'}</b></div>
+    <div class="admin-actions"><button class="btn admin-mini" id="rm-publish-winners">🎖️ نشر أول 3 فائزين الآن</button><button class="btn admin-mini admin-secondary" id="rm-clear-winners">إخفاء الفائزين</button><button class="btn admin-mini admin-danger" id="rm-new-season">🔄 بدء موسم جديد (تصفير الكل)</button></div>
+    <div class="admin-help">«موسم جديد» يصفّر ترتيب رمضان وتقدّم كل الطلاب في العبادات والختمة والتحديات. نقاط الـ XP العامة التي حصلوا عليها لا تُمسّ.</div>
+    <div class="success" id="rm-adm-status"></div>
+  </div>`;
+}
+function bindRamadanAdmin(){
+  const root0 = document.getElementById('rm-adm-root'); if(!root0) return;
+  const $ = id => document.getElementById(id);
+  const say = (m, bad) => { const s = $('rm-adm-status'); if(s){ s.className = bad ? 'error' : 'success'; s.textContent = m; } };
+  const guard = fn => async () => { try{ await fn(); }catch(e){ console.error(e); say('تعذر الحفظ: تأكد من صلاحيات Firestore وحاول مرة أخرى.', true); } };
+  $('rm-toggle-enabled').onclick = guard(async () => { await ramadanSaveCfg({ enabled:!RAMADAN_CFG.enabled }); renderControlPanel(true); });
+  $('rm-toggle-theme').onclick = guard(async () => { await ramadanSaveCfg({ themeEnabled:!RAMADAN_CFG.themeEnabled }); renderControlPanel(true); });
+  $('rm-all-on').onclick = guard(async () => { await ramadanSaveCfg({ enabled:true, themeEnabled:true }); renderControlPanel(true); });
+  $('rm-all-off').onclick = guard(async () => { await ramadanSaveCfg({ enabled:false, themeEnabled:false }); renderControlPanel(true); });
+  $('rm-save-date').onclick = guard(async () => {
+    const ov = ($('rm-override').value || '').trim();
+    await ramadanSaveCfg({ startDate:$('rm-start').value || '', dayOverride:ov === '' ? '' : Math.min(31, Math.max(1, parseInt(ov, 10) || 1)) });
+    say('تم حفظ الموعد ✅');
+  });
+  $('rm-save-pts').onclick = guard(async () => {
+    const g = id => Math.max(0, Math.min(1000, parseInt($(id).value, 10) || 0));
+    await ramadanSaveCfg({ ptsQuiz:g('rm-p-quiz'), ptsRiddle:g('rm-p-riddle'), ptsDeed:g('rm-p-deed'), ptsWorship:g('rm-p-worship'), ptsJuz:g('rm-p-juz'), ptsDuelWin:g('rm-p-duel') });
+    say('تم حفظ النقاط ✅');
+  });
+  $('rm-adm-day').onchange = () => { ramadanAdminDay = Number($('rm-adm-day').value) || 1; renderControlPanel(true); };
+  $('rm-save-day').onclick = guard(async () => {
+    const d = ramadanAdminDay, v = id => ($(id).value || '').trim();
+    const o = [v('rm-f-o1'), v('rm-f-o2'), v('rm-f-o3')];
+    const obj = {};
+    if(v('rm-f-q') || o.some(Boolean)){
+      if(!v('rm-f-q') || !o.every(Boolean)){ say('لو هتكتب سؤالاً فاكتب نصه والاختيارات الثلاثة كلها.', true); return; }
+      obj.q = v('rm-f-q'); obj.options = o; obj.correct = Number($('rm-f-correct').value) || 0;
+    }
+    if(v('rm-f-rq') || v('rm-f-ra')){
+      if(!v('rm-f-rq') || !v('rm-f-ra')){ say('الفزورة تحتاج نصاً وإجابة.', true); return; }
+      obj.riddleQ = v('rm-f-rq'); obj.riddleA = v('rm-f-ra');
+    }
+    if(v('rm-f-deed')) obj.deed = v('rm-f-deed');
+    if(v('rm-f-dua')) obj.dua = v('rm-f-dua');
+    if(v('rm-f-hadith')) obj.hadith = v('rm-f-hadith');
+    await db.collection('settings').doc('ramadan').set({ days:{ [String(d)]:obj } }, { merge:true });
+    RAMADAN_CFG.days = Object.assign({}, RAMADAN_CFG.days); RAMADAN_CFG.days[String(d)] = obj;
+    renderControlPanel(true); setTimeout(() => say('تم حفظ محتوى اليوم ' + d + ' ✅'), 50);
+  });
+  $('rm-reset-day').onclick = guard(async () => {
+    const d = ramadanAdminDay;
+    await db.collection('settings').doc('ramadan').update({ ['days.' + d]: firebase.firestore.FieldValue.delete() }).catch(() => {});
+    const nd = Object.assign({}, RAMADAN_CFG.days); delete nd[String(d)]; RAMADAN_CFG.days = nd;
+    renderControlPanel(true);
+  });
+  $('rm-days-file').onchange = guard(async () => {
+    const f = $('rm-days-file').files[0]; if(!f) return;
+    let arr; try{ arr = JSON.parse(await f.text()); }catch(e){ say('الملف ليس JSON صالحاً.', true); return; }
+    if(!Array.isArray(arr)){ say('يجب أن يكون الملف مصفوفة.', true); return; }
+    const days = {}; let n = 0;
+    arr.forEach(it => {
+      const d = parseInt(it && it.day, 10); if(!(d >= 1 && d <= 30)) return;
+      const o = {};
+      if(it.q && Array.isArray(it.options) && it.options.length === 3 && it.options.every(Boolean)){ o.q = String(it.q); o.options = it.options.map(String); o.correct = Math.min(2, Math.max(0, Number(it.correct) || 0)); }
+      if(it.riddleQ && it.riddleA){ o.riddleQ = String(it.riddleQ); o.riddleA = String(it.riddleA); }
+      ['deed', 'dua', 'hadith'].forEach(k => { if(it[k]) o[k] = String(it[k]); });
+      if(Object.keys(o).length){ days[String(d)] = o; n++; }
+    });
+    if(!n){ say('لم أجد أياماً صالحة في الملف.', true); return; }
+    await ramadanSaveCfg({ days });
+    renderControlPanel(true); setTimeout(() => say('تم رفع محتوى ' + n + ' يوماً ✅'), 50);
+  });
+  $('rm-publish-winners').onclick = guard(async () => {
+    say('جارِ حساب الفائزين...');
+    await loadRamadanBoard();
+    const top = (ramadanBoard || []).slice(0, 3).map(x => ({ username:x.username, points:x.points }));
+    if(!top.length){ say('لا توجد نقاط رمضان بعد.', true); return; }
+    await ramadanSaveCfg({ winners:top });
+    renderControlPanel(true); setTimeout(() => say('تم نشر الفائزين ✅'), 50);
+  });
+  $('rm-clear-winners').onclick = guard(async () => { await ramadanSaveCfg({ winners:[] }); renderControlPanel(true); });
+  $('rm-new-season').onclick = guard(async () => {
+    if(!confirm('بدء موسم جديد سيصفّر ترتيب رمضان وتقدّم كل الطلاب في العبادات والختمة والتحديات. متأكد؟')) return;
+    await ramadanSaveCfg({ seasonId:String(Date.now()), winners:[] });
+    renderControlPanel(true); setTimeout(() => say('تم بدء موسم جديد ✅'), 50);
+  });
+}
+
 function mainCategoryNavHtml(){
-  const bandsHtml = MAIN_CATEGORY_GROUPS.map(g => {
+  const bandsHtml = mainGroups().map(g => {
     const open = mainOpenCategory === g.key;
     const stackHtml = open ? `
       <div class="category-stack">
@@ -2354,7 +3074,7 @@ function mainCategoryNavHtml(){
     </div>
     <div class="sync-badge" id="sync-badge"></div>
     <div class="points-badge">✨ XP: ${state.xp} &nbsp;|&nbsp; ${getLevelInfo(state.xp).icon} ${getLevelInfo(state.xp).name} &nbsp;|&nbsp; ✅ ${state.correctAnswers}</div>
-    <div class="ramadan-banner"><span class="rb-ico">🌙</span><div><b>رمضان كريم</b><span class="rb-dua">${ramadanDua()}</span></div><span class="rb-ico">🏮</span></div>
+    ${ramadanBannerHtml()}
     <div class="category-nav">${bandsHtml}</div>
   `;
 }
@@ -2695,7 +3415,7 @@ async function renderControlPanel(skipReload){
   }
   const active = adminTab;
   const tabs = [
-    ['dashboard','📊 الرئيسية'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],
+    ['dashboard','📊 الرئيسية'],['ramadan-admin','🌙 رمضان'],['users','👥 المستخدمون'],['user-tracking','📡 تتبع المستخدمين'],
     ['tips-timer','🌙 النصائح والمؤقتات'],['questions','❓ بنك الأسئلة'],
     ['announcements','📢 الإعلانات'],['local-duel','⚔️ بطولة التحدي'],['tournaments','🏅 البطولات'],
     ['chat','💬 الشات العام'],['suggestions','💡 مقترحات الطلاب'],['sheikh-audio','🎙️ صوتيات المشايخ'],
@@ -2706,6 +3426,7 @@ async function renderControlPanel(skipReload){
   const tabMap = {};
   tabs.forEach(([k,l])=>{ const m=String(l).replace(/\s*\(\d+\)\s*$/,'').match(/^(\S+)\s+(.*)$/); tabMap[k]={ico:m?m[1]:'•',lbl:m?m[2]:l}; });
   const navGroups = [
+    ['🌙 رمضان',['ramadan-admin']],
     ['⚙️ الإدارة',['dashboard','users','user-tracking','username-requests']],
     ['📚 المحتوى',['questions','tips-timer','announcements','sheikh-audio','sheikh-video']],
     ['🏆 المنافسات',['local-duel','tournaments']],
@@ -3011,6 +3732,8 @@ async function renderControlPanel(skipReload){
   } else if(active==='suggestions'){
     const rows=adminCache.suggestions.map(x=>`<div class="suggest-card"><div class="suggest-meta">👤 ${adminEsc(x.username||'—')} • ${x.status==='approved'?'منشور':'بانتظار المراجعة'}</div><p><b>${adminEsc(x.question||'')}</b></p><div class="suggest-meta">1) ${adminEsc((x.options||[])[0]||'')} &nbsp; 2) ${adminEsc((x.options||[])[1]||'')} &nbsp; 3) ${adminEsc((x.options||[])[2]||'')}<br>الإجابة الصحيحة: ${(Number(x.correct)||0)+1}</div><div class="admin-actions">${x.status!=='approved'?`<button class="btn admin-mini admin-secondary" data-approve-suggest="${adminEsc(x.id)}">✅ موافقة ونشر</button>`:''}<button class="btn admin-mini admin-danger" data-delete-suggest="${adminEsc(x.id)}">حذف</button></div></div>`).join('');
     content=`<h3 class="admin-section-title">مقترحات الطلاب</h3><div class="admin-help">راجع السؤال ثم وافق عليه ليُضاف تلقائياً إلى بنك الأسئلة ويظهر اسم الطالب كمقترح.</div>${rows||'<div class="muted">لا توجد مقترحات.</div>'}`;
+  } else if(active==='ramadan-admin'){
+    content = ramadanAdminHtml();
   } else if(active==='tournaments'){
     const rows=adminCache.tournaments.map(t=>{
       const status=t.status||'unknown';
@@ -3122,6 +3845,7 @@ async function renderControlPanel(skipReload){
     </div>`;
   document.getElementById('btn-back-from-panel').onclick=()=>{view=prevView||'main';render();};
   document.querySelectorAll('[data-admin-tab]').forEach(b=>b.onclick=()=>{adminTab=b.getAttribute('data-admin-tab');renderControlPanel();});
+  bindRamadanAdmin();
   const saveLocalBtn=document.getElementById('btn-save-local-duel');
   if(saveLocalBtn) saveLocalBtn.onclick=async()=>{
     const round=(document.getElementById('local-duel-round')?.value||'').trim();
@@ -6040,6 +6764,7 @@ async function tryAutoLogin(){
   }
 }
 
+listenRamadanConfig();
 tryAutoLogin();
 loadRuntimeQuestionBank(); // يشتغل في الخلفية، مش شرط لعرض الواجهة
 listenToAds();
