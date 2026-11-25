@@ -7339,11 +7339,19 @@ function rp4(){
   document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{scr=b.dataset.s;Qs=null;rp4();});
   if(S&&S.b)S.b();
 }
-function look(){const p=P(),b=document.body,r=document.documentElement.style;b.style.zoom=p.zoom||1;const light=b.getAttribute('data-mode')==='light',th=THEMES.find(x=>x[0]===p.theme)||THEMES[0],pl=(on('p4_rmdecor')&&LOOK.pal&&LOOK.pal!=='def')?PAL.find(x=>x[0]===LOOK.pal):null,v=light?{}:(pl||th)[3];THEMES.concat(PAL).forEach(x=>Object.keys(x[3]).forEach(k=>{b.style.removeProperty(k);r.removeProperty(k);}));Object.keys(v).forEach(k=>b.style.setProperty(k,v[k]));}
+const PALCSS="body[data-p4pal] .btn:not(:disabled){background:linear-gradient(var(--btn-angle,135deg),var(--gold),var(--gold-light));box-shadow:0 10px 24px rgba(var(--gold-rgb),.3)}body[data-p4pal] .card{border-color:rgba(var(--gold-rgb),.34)}body[data-p4pal] .progress-bar-fill{background:linear-gradient(90deg,var(--gold),var(--gold-light))}body[data-p4pal] .category-band.cat-learn{background:linear-gradient(120deg,rgba(var(--gold-rgb),.35),var(--bg-deep2))}body[data-p4pal] .category-band.cat-social{background:linear-gradient(120deg,var(--bg-deep2),rgba(var(--gold-rgb),.28))}body[data-p4pal] .category-band.cat-account{background:linear-gradient(120deg,rgba(var(--gold-rgb),.5),var(--bg-deep))}body[data-p4pal] .category-band.cat-ramadan{background:linear-gradient(120deg,var(--gold-light),var(--gold))}";
+const hx=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16)).join(',');
+function look(){const p=P(),b=document.body,r=document.documentElement.style;b.style.zoom=p.zoom||1;
+ if(!document.getElementById('p4-pal-css')){const s=document.createElement('style');s.id='p4-pal-css';s.textContent=PALCSS;document.head.appendChild(s);}
+ const light=b.getAttribute('data-mode')==='light',th=THEMES.find(x=>x[0]===p.theme)||THEMES[0],pl=(on('p4_rmdecor')&&LOOK.pal&&LOOK.pal!=='def')?PAL.find(x=>x[0]===LOOK.pal):null,act=light?null:(pl||th),v=act?act[3]:{},ks=Object.keys(v);
+ THEMES.concat(PAL).forEach(x=>Object.keys(x[3]).forEach(k=>{b.style.removeProperty(k);r.removeProperty(k);}));
+ ['--bg2-rgb','background','background-attachment'].forEach(k=>b.style.removeProperty(k));b.removeAttribute('data-p4pal');
+ ks.forEach(k=>b.style.setProperty(k,v[k]));
+ if(ks.length){const g=v['--gold-rgb'];b.style.setProperty('--bg2-rgb',hx(v['--bg-deep']));b.style.setProperty('background',`radial-gradient(circle at 15% 6%, rgba(${g},.30) 0%, transparent 46%), radial-gradient(circle at 90% 10%, rgba(${g},.14) 0%, transparent 40%), radial-gradient(circle at 85% 92%, rgba(${g},.10) 0%, transparent 42%), linear-gradient(165deg, ${v['--bg-deep']} 0%, ${v['--bg-deep2']} 100%)`);b.style.setProperty('background-attachment','fixed');b.setAttribute('data-p4pal','1');}}
 try{new MutationObserver(()=>{try{look();}catch(e){}}).observe(document.body,{attributes:true,attributeFilter:['data-mode']});}catch(e){}
-const _r4=render; render=function(){ if(view==='login'||view==='register'){const e=$('p4-deco');if(e)e.remove();document.body.style.zoom=1;}else if(state&&!$('p4-deco')&&(LOOK.deco||[]).length&&on('p4_rmdecor')){try{look();deco();}catch(e){}} if(HUBS[view]){rp4();return;} _r4(); };
-const _e4=enterMain; enterMain=function(){ _e4.apply(this,arguments); try{look();deco();lookWatch();}catch(e){} };
-const _mg=mainGroups; mainGroups=function(){const g=_mg(),it=Object.keys(HUBS).filter(on).map(k=>({key:k,label:HUBS[k][0]}));return g.map(x=>x.key==='learn'?Object.assign({},x,{items:x.items.concat(it)}):x);};
+const _r4=render; render=function(){ if(state&&currentUser&&!lookSub){try{lookWatch();}catch(e){}} if(view==='login'||view==='register'){const e=$('p4-deco');if(e)e.remove();document.body.style.zoom=1;}else if(state&&!$('p4-deco')&&(LOOK.deco||[]).length&&on('p4_rmdecor')){try{look();deco();}catch(e){}} if(HUBS[view]){rp4();return;} _r4(); };
+const _e4=enterMain; enterMain=function(){ _e4.apply(this,arguments); try{lookWatch();}catch(e){} try{look();deco();}catch(e){} };
+const _mg=mainGroups; mainGroups=function(){const g=_mg(),it=Object.keys(HUBS).filter(on).map(k=>({key:k,label:HUBS[k][0]}));return g.map(x=>x.key==='learn'?Object.assign({},x,{items:x.items.concat(it)}):x.key==='ramadan'?Object.assign({},x,{items:x.items.concat(RMT.filter(y=>on('p4_'+y[2])).map(y=>({key:'ramadan:'+y[0],label:y[1]})))}):x);};
 BADGE_DEFS.push(
  {id:'p4_az7',icon:'🌅',name:'مواظب على الأذكار',desc:'أتمّ أذكار 7 أيام',check:s=>((s.p4&&s.p4.azDays)||[]).length>=7},
  {id:'p4_pr7',icon:'🕌',name:'محافظ على الصلاة',desc:'سجّل الصلوات الخمس 7 أيام',check:s=>((s.p4&&s.p4.pfull)||[]).length>=7},
@@ -7400,7 +7408,7 @@ function deco(){
   if(has('diamonds'))for(let i=0;i<12;i++)h+=`<span style="position:absolute;left:${R(0,96)}%;top:${R(0,92)}%;color:var(--gold-light);font-size:${R(10,20)}px;animation:p4tw ${R(2,4)}s infinite ${R(0,3)}s,p4sp ${R(6,12)}s linear infinite">◆</span>`;
   if(has('frame'))h+=`<div style="position:absolute;inset:6px;border:2px solid var(--gold);border-radius:18px;opacity:.55;animation:p4pl 4s ease-in-out infinite"></div>`;
   if(has('glow'))h+=`<div style="position:absolute;top:-20%;left:5%;right:5%;height:60%;background:radial-gradient(ellipse at top,rgba(var(--gold-rgb),.4),transparent 70%);animation:p4tw 6s ease-in-out infinite"></div>`;
-  const d=document.createElement('div');d.id='p4-deco';d.className=LOOK.anim===false?'noanim':'';d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;opacity:.6';d.innerHTML=h;
+  const d=document.createElement('div');d.id='p4-deco';d.className=LOOK.anim===false?'noanim':'';d.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:3;overflow:hidden;opacity:.55';d.innerHTML=h;
   if(L.includes('geo')){const g=document.createElement('div');g.style.cssText='position:absolute;inset:0;opacity:.12;background-size:90px;background-image:url("data:image/svg+xml,'+encodeURIComponent(GEO)+'")';d.insertBefore(g,d.firstChild);}
   document.body.appendChild(d);
 }
@@ -7410,13 +7418,15 @@ function rmHtml(){const pl=LOOK.pal||'def',dc=LOOK.deco||[];
  <div style="display:flex;gap:8px;margin-top:12px"><button class="btn" id="rm-an" style="margin:0;box-shadow:none;background:rgba(255,255,255,.08);color:var(--text-light)">${LOOK.anim===false?'▶️ تشغيل الحركة':'⏸️ إيقاف الحركة'}</button><button class="btn" id="rm-rs" style="margin:0;box-shadow:none;background:rgba(255,255,255,.08);color:var(--text-light)">↩️ رجوع للأصلي</button></div><div id="rm-st" style="margin-top:10px"></div>`;}
 function rmBind(){
  if(!isSuperAdmin())return;
- const go=async()=>{look();deco();let ok=true;try{await db.collection('settings').doc('site').set({p4Look:LOOK},{merge:true});}catch(e){ok=false;console.warn(e);}if(view==='control-panel')await renderControlPanel(true);const st=$('rm-st');if(st){st.className=ok?'success':'error';st.textContent=ok?'✅ اتحفظ وبيظهر عند الطلاب فوراً':'❌ تعذّر الحفظ عند الطلاب، راجع صلاحيات Firestore للمستند settings/site';}};
+ const go=async()=>{look();deco();let ok=true,msg='';const at=Date.now(),pay={p4Look:{pal:LOOK.pal||'def',deco:LOOK.deco||[],anim:LOOK.anim!==false},p4LookAt:at};try{const ok2=await Promise.all(['site','ramadan'].map(id=>db.collection('settings').doc(id).set(pay,{merge:true}).then(()=>true).catch(e=>{console.warn(id,e);return false;})));if(!ok2.some(Boolean))throw new Error('permission');const sv=await db.collection('settings').doc(ok2[0]?'site':'ramadan').get({source:'server'});const L=(sv.data()||{}).p4Look;if(!L||L.pal!==pay.p4Look.pal||(L.deco||[]).length!==pay.p4Look.deco.length)throw new Error('mismatch');msg=`✅ اتحفظ على السيرفر (لون: ${L.pal}، ${(L.deco||[]).length} شكل) والطلاب هيشوفوه فوراً`;}catch(e){ok=false;console.warn(e);msg='❌ تعذّر الحفظ على السيرفر: '+((e&&e.code)||(e&&e.message)||'');}if(view==='control-panel')await renderControlPanel(true);const st=$('rm-st');if(st){st.className=ok?'success':'error';st.textContent=msg;}};
  document.querySelectorAll('[data-pal]').forEach(b=>b.onclick=()=>{LOOK.pal=b.dataset.pal;go();});
  document.querySelectorAll('[data-dec]').forEach(b=>b.onclick=()=>{const k=b.dataset.dec,L=LOOK.deco||[];LOOK.deco=L.includes(k)?L.filter(x=>x!==k):L.concat(k);go();});
  const a=$('rm-an');if(a)a.onclick=()=>{LOOK.anim=LOOK.anim===false;go();};
  const z=$('rm-rs');if(z)z.onclick=()=>{LOOK={pal:'def',deco:[],anim:true};go();};
 }
-function lookWatch(){if(lookSub)return;try{lookSub=db.collection('settings').doc('site').onSnapshot(s=>{const d=s.exists?s.data():{};LOOK=Object.assign({pal:'def',deco:[],anim:true},d.p4Look||{});look();deco();},e=>console.warn('look listen error',e));}catch(e){}}
+const LK={};
+function lookApply(){let best=null;Object.keys(LK).forEach(k=>{const x=LK[k];if(x&&(!best||(x.at||0)>(best.at||0)))best=x;});LOOK=Object.assign({pal:'def',deco:[],anim:true},best||{});try{look();deco();}catch(e){console.warn(e);}}
+function lookWatch(){if(lookSub)return;lookSub=[];['site','ramadan'].forEach(id=>{const ref=db.collection('settings').doc(id),ap=s=>{const d=(s&&s.exists)?s.data():{};LK[id]=d.p4Look?Object.assign({},d.p4Look,{at:d.p4LookAt||0}):null;lookApply();};try{ref.get().then(ap).catch(()=>{});lookSub.push(ref.onSnapshot(ap,e=>console.warn('look listen error',id,e)));}catch(e){}});}
 
 
 // ---------- عدّاد رمضان والعيد + أدوات داخل تاب رمضان ----------
@@ -7428,7 +7438,7 @@ SCR.count={t:'⏳ عدّاد رمضان والعيد',h:()=>{const h0=hij(new Da
  else ram=dtxt((t&&t.status==='before'&&typeof t.daysLeft==='number')?t.daysLeft:until(9,1));
  const row=(i,l,x)=>C(`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span style="font-size:18px">${i} ${l}</span><span>${x}</span></div>`);
  return row('🌙','رمضان',ram)+row('🎉','عيد الفطر',dtxt(until(10,1)))+row('🐑','عيد الأضحى',dtxt(until(12,10)))+'<div style="font-size:12px;color:var(--text-dim);text-align:center">التواريخ بالتقويم الهجري وممكن تختلف يوم حسب رؤية الهلال.</div>';}};
-const RMT=[['rcount','⏳ العدّاد','count'],['rprayer','🕋 الصلاة','prayer'],['rfast','🌙 الصيام','fast'],['rkh','📅 جدول الختمة','khatma']];
+const RMT=[['rcount','⏳ العدّاد','count','⏳ عدّاد رمضان والعيد'],['rprayer','🕋 الصلاة','prayer','🕋 متتبع الصلاة'],['rfast','🌙 الصيام','fast','🌙 متتبع الصيام'],['rkh','📅 جدول الختمة','khatma','📅 جدول الختمة']];
 window.p4RmTabs=()=>RMT.filter(x=>on('p4_'+x[2])).map(x=>[x[0],x[1]]);
 window.p4RmHas=k=>RMT.some(x=>x[0]===k&&on('p4_'+x[2]));
 window.p4RmBody=k=>{const x=RMT.find(y=>y[0]===k);return x?SCR[x[2]].h():'';};
